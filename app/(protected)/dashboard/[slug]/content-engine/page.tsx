@@ -38,21 +38,21 @@ export default function ContentEnginePage() {
   const [isCreatingAutomation, setIsCreatingAutomation] = useState(false);
 
   const [activeTab, setActiveTab] = useState("console");
-  const [topic, setTopic] = useState("How to build local AI agents in terminal");
+  const [topic, setTopic] = useState("");
   
-  const [keywords, setKeywords] = useState(["Claude Code", "AI agents", "N8N automation", "vibe coding"]);
+  const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
   
-  const [competitors, setCompetitors] = useState(["@heybarsee", "@rowancheung", "@mreflow"]);
+  const [competitors, setCompetitors] = useState<string[]>([]);
   const [newCompetitor, setNewCompetitor] = useState("");
 
   const [weights, setWeights] = useState({ views: 40, engagement: 35, comments: 25 });
   const [filters, setFilters] = useState({ minViews: 10000, minEngagement: 2.0 });
 
-  const [voiceScripts, setVoiceScripts] = useState([
-    "Dosto, kya aap log abhi bhi manual coding kar rahe ho? Claude Code is literally changing the game! Yeh tool seedhe aapke terminal ke andar chalta hai. Maine isko bola 'ek e-commerce landing page bana do', aur 10 minutes mein isne backend node server aur frontend react app ready kar diya. Koi copy-paste nahi, koi error fixing ka jhanjhat nahi. Agar setup karna seekhna hai, toh comment karo 'CLAUDE' aur main links direct bhej dunga.",
-    "Log abhi bhi AI agency khol kar boring chatbots bech rahe hain. Main aapko batata hoon asli paisa kahan hai. N8N ke andar ek simple integration workflow banao jo aapke prospects ko direct scrape karta hai, unka email find karta hai, aur customized AI personalized email bhejta hai. Yeh pura system autonomous chalta hai. Agar iska blueprint chahiye toh niche comment mein 'WORKFLOW' likho, main automation blueprint ka direct link bhejta hoon.",
-    "Suno, vibe coding bohot cool hai par ek sabse badi galti mat karna! Jab aap terminal AI agents like Claude Code ko raw terminal permissions dete ho, toh prompt injection ki wajah se aapka machine hack ho sakta hai. Isliye hamesha sandbox container setup karo ya code review check enable rakho. Claude setup aur safety guides ke liye comment karo 'SECURE' aur breakdown direct lelo."
+  const [voiceScripts, setVoiceScripts] = useState<string[]>([
+    "",
+    "",
+    ""
   ]);
 
   const [logs, setLogs] = useState<{ message: string; type: string }[]>([
@@ -75,44 +75,7 @@ export default function ContentEnginePage() {
     }
   }, [logs]);
 
-  // Load initial mock displays if results are empty
-  useEffect(() => {
-    if (!results) {
-      setResults({
-        scrapedPosts: [
-          { platform: "instagram", handle: "@heybarsee", views: 154000, er: 6.18, isViral: true },
-          { platform: "youtube", handle: "@mreflow", views: 88000, er: 6.34, isViral: true },
-          { platform: "twitter", handle: "@rowancheung", views: 245000, er: 5.44, isViral: true },
-          { platform: "instagram", handle: "@ai_insights", views: 42000, er: 2.50, isViral: false }
-        ],
-        validatedPosts: [
-          { platform: "instagram", handle: "@heybarsee", views: 154000, er: 6.18, isViral: true, score: 9.2 },
-          { platform: "youtube", handle: "@mreflow", views: 88000, er: 6.34, isViral: true, score: 8.4 },
-          { platform: "twitter", handle: "@rowancheung", views: 245000, er: 5.44, isViral: true, score: 9.6 }
-        ],
-        topics: [
-          { name: "Claude Code & CLI Tools", count: 3, avgViews: 161333, avgER: 5.92 },
-          { name: "N8N & Workflow Automation", count: 2, avgViews: 101500, avgER: 5.84 },
-          { name: "Vibe Coding & Agent Safety", count: 2, avgViews: 113500, avgER: 5.75 }
-        ],
-        voiceProfile: {
-          vocabulary: ["Dosto", "literally", "crazy", "jhanjhat", "Suno"],
-          sentenceLength: "10-15 words (punchy & conversational)",
-          hinglishPattern: "65% Hindi / 35% Eng",
-          energy: "High energy, enthusiastic, authoritative"
-        },
-        script: `[BEAT 1]\nSuno yaar, agar aap log abhi bhi VS Code mein manual coding kar rahe ho, toh time waste kar rahe ho! Claude Code terminal tool aa chuka hai jo aapke liye automatic apps likhta hai aur direct test bhi karta hai.\n\n[BEAT 2]\nMaine isko ek real project par try kiya. Maine bola 'Create an automated database agent' aur isne query backend se lekar APIs tak sab kuch script kar diya, direct repository mein push kar diya.\n\n[BEAT 3]\nKoi manual error checking nahi, koi bugs fixed copy-paste nahi. Yeh directly sandbox check execute karta hai bina developers ke physical involvement ke.\n\n[CTA]\nIs complete pipeline setup ka step-by-step documentation chahiye? Toh comment section mein 'AGENTS' type karo, link seedhe inbox mein bhej dunga!`,
-        hooks: [
-          { id: "hook_1", pattern: "Aisi honi chahiye X (Aspirational)", text: "Aisi honi chahiye backend coding. Zero errors, pure speed!", confidence: 9.2, explanation: "Matches your top reel on Claude terminal layout." },
-          { id: "hook_2", pattern: "Pain Point Frustration", text: "Kab tak manually stack trace errors solve karte rahoge?", confidence: 8.9, explanation: "Direct pain-point targeting." },
-          { id: "hook_3", pattern: "Log nahi jaante (Exclusivity)", text: "99% developer nahi jaante terminal ki yeh secret skill!", confidence: 9.5, explanation: "Exclusivity trigger. High CTR pattern across YouTube and Reels alike." },
-          { id: "hook_4", pattern: "Time or money claim", text: "Maine 12 minutes mein full SaaS launch kiya, bina code kiye!", confidence: 8.5, explanation: "Highly visual number hook." },
-          { id: "hook_5", pattern: "Curiosity Gap", text: "Kya ho agar aapka AI agent aapse permission liye bina terminal chalaye?", confidence: 9.1, explanation: "Curiosity loop." }
-        ],
-        recommendedHook: { id: "hook_3", pattern: "Log nahi jaante (Exclusivity)", text: "99% developer nahi jaante terminal ki yeh secret skill!", confidence: 9.5, explanation: "Exclusivity trigger." }
-      });
-    }
-  }, [results]);
+  // Initial mock displays removed
 
   // Balance weights to sum to 100
   const handleWeightChange = (key: "views" | "engagement" | "comments", val: number) => {
@@ -375,27 +338,29 @@ export default function ContentEnginePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-[#1c1c1e] border border-[#2c2c2e] p-5 rounded-2xl">
                 <p className="text-[#9B9CA0] text-xs uppercase tracking-wider">Top View Signal</p>
-                <h3 className="text-2xl font-bold mt-1 text-white">245,000</h3>
-                <span className="text-[10px] text-green-500 font-bold">▲ Twitter/X Peak</span>
+                <h3 className="text-2xl font-bold mt-1 text-white">
+                  {results && results.scrapedPosts.length > 0 ? Math.max(...results.scrapedPosts.map((p: any) => p.views)).toLocaleString() : "0"}
+                </h3>
+                <span className="text-[10px] text-green-500 font-bold">{results ? "▲ Top Peak" : "-"}</span>
               </div>
               <div className="bg-[#1c1c1e] border border-[#2c2c2e] p-5 rounded-2xl">
                 <p className="text-[#9B9CA0] text-xs uppercase tracking-wider">Avg Engagement</p>
                 <h3 className="text-2xl font-bold mt-1 text-white">
-                  {results ? (results.scrapedPosts.reduce((acc: number, p: any) => acc + p.er, 0) / results.scrapedPosts.length).toFixed(2) + "%" : "5.82%"}
+                  {results && results.scrapedPosts.length > 0 ? (results.scrapedPosts.reduce((acc: number, p: any) => acc + p.er, 0) / results.scrapedPosts.length).toFixed(2) + "%" : "0.00%"}
                 </h3>
-                <span className="text-[10px] text-purple-400 font-bold">▲ Multi-Platform</span>
+                <span className="text-[10px] text-purple-400 font-bold">{results ? "▲ Multi-Platform" : "-"}</span>
               </div>
               <div className="bg-[#1c1c1e] border border-[#2c2c2e] p-5 rounded-2xl">
                 <p className="text-[#9B9CA0] text-xs uppercase tracking-wider">Posts Analyzed</p>
-                <h3 className="text-2xl font-bold mt-1 text-white">{results ? results.scrapedPosts.length : 8}</h3>
+                <h3 className="text-2xl font-bold mt-1 text-white">{results ? results.scrapedPosts.length : 0}</h3>
                 <span className="text-[10px] text-slate-500">Last 7 days window</span>
               </div>
               <div className="bg-[#1c1c1e] border border-[#2c2c2e] p-5 rounded-2xl">
                 <p className="text-[#9B9CA0] text-xs uppercase tracking-wider">Recommend Niche</p>
                 <h3 className="text-lg font-bold mt-2 text-indigo-400 truncate">
-                  {results && results.topics.length > 0 ? results.topics[0].name : "Claude Code & CLI"}
+                  {results && results.topics.length > 0 ? results.topics[0].name : "Awaiting Data"}
                 </h3>
-                <span className="text-[10px] text-indigo-500 font-bold">9.5 Trend Confidence</span>
+                <span className="text-[10px] text-indigo-500 font-bold">{results ? "Trend Confidence" : "-"}</span>
               </div>
             </div>
 
@@ -767,25 +732,25 @@ export default function ContentEnginePage() {
                   <div className="bg-white/5 border border-white/10 p-3.5 rounded-xl">
                     <span className="text-[10px] text-[#9B9CA0] uppercase">Hinglish Ratio</span>
                     <p className="text-xs font-bold text-[#768BDD] mt-0.5">
-                      {results ? results.voiceProfile.hinglishPattern : "65% Hindi / 35% Eng"}
+                      {results?.voiceProfile?.hinglishPattern || "-"}
                     </p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-3.5 rounded-xl">
                     <span className="text-[10px] text-[#9B9CA0] uppercase">Sentence Length</span>
                     <p className="text-xs font-bold text-[#768BDD] mt-0.5">
-                      {results ? results.voiceProfile.sentenceLength : "Punchy / Fast paced"}
+                      {results?.voiceProfile?.sentenceLength || "-"}
                     </p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-3.5 rounded-xl">
                     <span className="text-[10px] text-[#9B9CA0] uppercase">CTA trigger</span>
                     <p className="text-xs font-bold text-[#768BDD] mt-0.5 truncate">
-                      Comment Trigger
+                      {results ? "Comment Trigger" : "-"}
                     </p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-3.5 rounded-xl">
                     <span className="text-[10px] text-[#9B9CA0] uppercase">Energy style</span>
                     <p className="text-xs font-bold text-[#768BDD] mt-0.5">
-                      {results ? results.voiceProfile.energy : "High energy"}
+                      {results?.voiceProfile?.energy || "-"}
                     </p>
                   </div>
                 </div>
