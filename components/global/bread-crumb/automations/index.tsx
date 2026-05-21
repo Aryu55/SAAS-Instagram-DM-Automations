@@ -5,7 +5,11 @@ import { useEditAutomation } from "@/hooks/use-automation";
 import { useMutationDataState } from "@/hooks/use-mutation-data";
 import { useQueryAutomations } from "@/hooks/user-queries";
 import { ChevronRight, PencilIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import ActiveAutomationButton from "../../active-automation-button";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 type Props = {
   id: string;
@@ -13,6 +17,7 @@ type Props = {
 
 function AutomationBreadCrumb({ id }: Props) {
   const { data } = useQueryAutomations(id);
+  const { slug } = useParams();
 
   const { edit, enableEdit, disableEdit, inputRef, isPending } =
     useEditAutomation(id);
@@ -22,7 +27,12 @@ function AutomationBreadCrumb({ id }: Props) {
   return (
     <div className="rounded-full w-full p-5 bg-[#18181B1A] flex items-center">
       <div className="flex items-center gap-x-3">
-        <p className="text-[#9B9CA0] truncate">Automation</p>
+        <Link
+          href={`/dashboard/${slug}/automation`}
+          className="text-[#9B9CA0] hover:text-white transition-colors duration-200 truncate"
+        >
+          Automation
+        </Link>
         <ChevronRight className="flex-shrink-0" color="#9B9CA0" />
         <span className="flex gap-x-3 items-center">
           {edit ? (
@@ -33,22 +43,31 @@ function AutomationBreadCrumb({ id }: Props) {
               }
               className="bg-transparent h-auto outline-none text-base border-none p-0"
             />
-          ) : (
+          ) : data?.data?.name || latestVariable?.variables?.name ? (
             <p className="text-[#9B9CA0]">
               {latestVariable?.variables
                 ? latestVariable?.variables.name
                 : data?.data?.name}
             </p>
+          ) : (
+            <Skeleton className="h-5 w-32 bg-white/[0.06]" />
           )}
           {edit ? (
             <></>
           ) : (
-            <span
-              className="cursor-pointer hover:opacity-75 duration-100 transition flex-shrink-0 mr-4"
-              onClick={enableEdit}
-            >
-              <PencilIcon size={14} />
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className="cursor-pointer hover:opacity-75 duration-100 transition flex-shrink-0 mr-4"
+                  onClick={enableEdit}
+                >
+                  <PencilIcon size={14} />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-[#1a1a1a] border border-white/10 text-white text-xs">
+                Rename this automation
+              </TooltipContent>
+            </Tooltip>
           )}
         </span>
       </div>

@@ -15,11 +15,22 @@ import { z } from "zod";
 import { useMutationData } from "./use-mutation-data";
 import useZodForm from "./use-zod-form";
 
+import { useRouter, usePathname } from "next/navigation";
+
 export const useCreateAutomation = (id?: string) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const slug = pathname.split("/")[2];
+
   const { isPending, mutate } = useMutationData(
     ["create-automation"],
-    () => createAutomations(id),
-    "user-automation"
+    (template?: string) => createAutomations(id, template),
+    "user-automation",
+    () => {
+      if (id && slug) {
+        router.push(`/dashboard/${slug}/automation/${id}`);
+      }
+    }
   );
 
   return { isPending, mutate };

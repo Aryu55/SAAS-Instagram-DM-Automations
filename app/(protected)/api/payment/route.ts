@@ -1,9 +1,9 @@
 import { stripe } from "@/lib/stripe";
-import { currentUser } from "@clerk/nextjs/server";
+import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const user = await currentUser();
+  const user = await getSession();
   if (!user) return NextResponse.json({ status: 404 });
 
   const priceId = process.env.STRIPE_SUBSCRIPTION_PRICE_ID;

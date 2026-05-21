@@ -10,7 +10,9 @@ type Props = {
 };
 
 function PostNode({ id }: Props) {
-  const { data } = useQueryAutomations(id);
+  const { data, isPending } = useQueryAutomations(id);
+
+  if (isPending) return null;
 
   return (
     data?.data &&

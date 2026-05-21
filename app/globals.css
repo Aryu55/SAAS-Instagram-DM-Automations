@@ -47,30 +47,30 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
+    --background: 240 6% 6%;
+    --foreground: 0 0% 96%;
+    --card: 240 5% 8%;
+    --card-foreground: 0 0% 96%;
+    --popover: 240 5% 8%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 0 0% 96%;
     --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 58%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 96%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 240 4% 18%;
+    --input: 240 4% 18%;
     --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --chart-1: 225 65% 55%;
+    --chart-2: 165 55% 42%;
+    --chart-3: 35 75% 55%;
+    --chart-4: 275 55% 58%;
+    --chart-5: 345 65% 52%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -89,6 +89,122 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ===== Smooth Transition Utilities ===== */
+@layer utilities {
+  .transition-smooth {
+    @apply transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)];
+  }
+  .transition-smooth-slow {
+    @apply transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)];
+  }
+  .transition-smooth-fast {
+    @apply transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)];
+  }
+}
+
+/* ===== Glassmorphism Card ===== */
+.glass-card {
+  background: rgba(14, 14, 14, 0.6);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.glass-card-subtle {
+  background: rgba(20, 20, 22, 0.5);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== Animated Gradient Keyframes ===== */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes subtle-glow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+.animate-subtle-glow {
+  animation: subtle-glow 4s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out both;
+}
+
+.animate-fade-in-up-delay-1 {
+  animation: fade-in-up 0.5s ease-out 0.1s both;
+}
+
+.animate-fade-in-up-delay-2 {
+  animation: fade-in-up 0.5s ease-out 0.2s both;
+}
+
+.animate-fade-in-up-delay-3 {
+  animation: fade-in-up 0.5s ease-out 0.3s both;
+}
+
+/* ===== Premium Skeleton Shimmer ===== */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.06) 20%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.06) 80%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  border-radius: 0.5rem;
 }
 
 .backdrop--blur__safari {
@@ -122,11 +238,13 @@
   background: var(--scrollbar-thumb-hover);
 }
 
+/* ===== Radial Gradients — Refined ===== */
 .radial--gradient {
   background-image: radial-gradient(
     ellipse farthest-side,
-    rgba(51, 82, 204, 0.15) 20%,
-    #09090b 100%
+    rgba(51, 82, 204, 0.12) 0%,
+    rgba(51, 82, 204, 0.06) 40%,
+    #0e0e0e 100%
   );
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -135,8 +253,9 @@
 .radial--gradient--pink {
   background-image: radial-gradient(
     at center,
-    rgba(148, 52, 230, 0.1) 10%,
-    transparent 50%
+    rgba(148, 52, 230, 0.08) 0%,
+    rgba(148, 52, 230, 0.04) 25%,
+    transparent 55%
   );
   background-size: 70% 80%;
   background-repeat: no-repeat;
@@ -145,17 +264,19 @@
 .radial--gradient--automations {
   background-image: radial-gradient(
     at top left,
-    rgba(51, 82, 204, 0.05) 40%,
-    #1d1d1d 60%
+    rgba(51, 82, 204, 0.06) 20%,
+    rgba(51, 82, 204, 0.02) 50%,
+    #1a1a1a 70%
   );
-  background-size: 40% 100%;
+  background-size: 45% 100%;
   background-repeat: no-repeat;
 }
 
 .radial--double--gradient--cards--top {
   background-image: radial-gradient(
     at top left,
-    rgba(51, 82, 204, 0.3) 50%,
+    rgba(51, 82, 204, 0.2) 0%,
+    rgba(51, 82, 204, 0.08) 40%,
     transparent 70%
   );
   background-size: 100% 100%;
@@ -165,7 +286,8 @@
 .radial--double--gradient--cards--bottom {
   background-image: radial-gradient(
     at bottom right,
-    rgba(51, 82, 204, 0.1) 50%,
+    rgba(51, 82, 204, 0.08) 0%,
+    rgba(51, 82, 204, 0.03) 40%,
     transparent 70%
   );
   background-size: 100% 100%;

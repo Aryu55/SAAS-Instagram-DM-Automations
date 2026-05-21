@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useQueryAutomations } from "@/hooks/user-queries";
 import { PlaneBlue, SmartAi, Warning } from "@/icons";
@@ -10,7 +11,26 @@ type Props = {
 };
 
 function ThenNode({ id }: Props) {
-  const { data } = useQueryAutomations(id);
+  const { data, isPending } = useQueryAutomations(id);
+
+  if (isPending) {
+    return (
+      <div className="w-full lg:w-10/12 xl:w-6/12 p-5 rounded-xl flex flex-col bg-[#1D1D1D] gap-y-3 skeleton-shimmer">
+        <div className="flex gap-x-2 items-center">
+          <Skeleton className="h-5 w-5 rounded bg-white/[0.06]" />
+          <Skeleton className="h-5 w-16 bg-white/[0.06]" />
+        </div>
+        <div className="bg-background-80 p-3 rounded-xl flex flex-col gap-y-2">
+          <div className="flex gap-x-2 items-center">
+            <Skeleton className="h-6 w-6 rounded bg-white/[0.06]" />
+            <Skeleton className="h-5 w-44 bg-white/[0.06]" />
+          </div>
+          <Skeleton className="h-4 w-full bg-white/[0.04]" />
+          <Skeleton className="h-4 w-3/4 bg-white/[0.04]" />
+        </div>
+      </div>
+    );
+  }
   const commentTrigger = data?.data?.trigger?.find((t) => t.type === "COMMENT");
 
   return !data?.data?.listener ? (

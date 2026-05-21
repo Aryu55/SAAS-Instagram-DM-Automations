@@ -1,37 +1,44 @@
-import { Button } from "@/components/ui/button";
-import { ClerkLoading, SignedOut, SignInButton } from "@clerk/nextjs";
-import Loader from "../loader";
-import { User } from "lucide-react";
-import { SignedIn, UserButton } from "@clerk/clerk-react";
+"use client";
+
+import { User, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type Props = {};
 
 function ClerkAuthState({}: Props) {
+  const router = useRouter();
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if session cookie exists
+    setLoggedIn(document.cookie.includes("user_session"));
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/sign-in");
+    router.refresh();
+  };
+
+  if (!loggedIn) {
+    return (
+      <Link href="/sign-in" className="flex items-center gap-x-3 text-sm text-[#9B9CA0] hover:text-white transition-colors duration-200">
+        <User size={16} />
+        <span>Login</span>
+      </Link>
+    );
+  }
+
   return (
-    <>
-      <ClerkLoading>
-        <Loader state>
-          <></>
-        </Loader>
-      </ClerkLoading>
-      <SignedOut>
-        <SignInButton>
-          <Button className="rounded-xl bg-[#252525] text-white hover:bg-[#252525]">
-            <User />
-            Login
-          </Button>
-        </SignInButton>
-      </SignedOut>
-      <SignedIn>
-        <UserButton>
-          <UserButton.UserProfileLink
-            label="Dashboard"
-            url={`/dashboard`}
-            labelIcon={<User size={16} />}
-          />
-        </UserButton>
-      </SignedIn>
-    </>
+    <button
+      onClick={handleLogout}
+      className="flex items-center gap-x-3 text-sm text-[#9B9CA0] hover:text-white transition-colors duration-200"
+    >
+      <LogOut size={16} />
+      <span>Logout</span>
+    </button>
   );
 }
 

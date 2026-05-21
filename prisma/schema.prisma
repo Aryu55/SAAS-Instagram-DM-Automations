@@ -19,10 +19,12 @@ model User {
   email        String         @unique
   firstname    String?
   lastname     String?
+  password     String?
   createdAt    DateTime       @default(now())
   subscription Subscription?
   integrations Integrations[]
   automations  Automation[]
+  contacts     Contact[]
 }
 
 model Subscription {
@@ -30,7 +32,7 @@ model Subscription {
   User       User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String?           @unique @db.Uuid
   createdAt  DateTime          @default(now())
-  plan       SUBSCRIPTION_PLAN @default(FREE)
+  plan       SUBSCRIPTION_PLAN @default(PRO)
   updatedAt  DateTime          @default(now())
   customerId String?           @unique
 }
@@ -125,4 +127,15 @@ enum MEDIATYPE {
 enum LISTENERS {
   SMARTAI
   MESSAGE
+}
+
+model Contact {
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instagramId  String
+  username     String?
+  createdAt    DateTime    @default(now())
+  User         User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String?     @db.Uuid
+
+  @@unique([userId, instagramId])
 }

@@ -11,6 +11,7 @@ export const PAGE_BREAD_CRUMBS: string[] = [
   "automation",
   "integrations",
   "settings",
+  "content-engine",
 ];
 
 type Props = {

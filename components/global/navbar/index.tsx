@@ -11,8 +11,7 @@ import ClerkAuthState from "../clerk-auth-state";
 import CreateAutomation from "../create-automation";
 import Sheet from "../sheet";
 import Items from "../sidebar/items";
-import UpgradeCard from "../sidebar/upgrade";
-import SubscriptionPlan from "../subscription-plan";
+
 import Notification from "./notification";
 import Search from "./search";
 
@@ -44,20 +43,13 @@ function NavBar({ slug }: Props) {
                   />
                 </div>
                 <div className="px-3 flex flex-col gap-y-5">
-                  <div className="flex gap-x-2">
-                    <ClerkAuthState />
-                    <p className="text-[#9B9CA0]">Profile</p>
-                  </div>
+                  <ClerkAuthState />
                   <div className="flex gap-x-3">
                     <HelpDuoToneWhite />
                     <p className="text-[#9B9CA0]">Help</p>
                   </div>
                 </div>
-                <SubscriptionPlan type="FREE">
-                  <div className="flex-1 flex flex-col justify-end">
-                    <UpgradeCard />
-                  </div>
-                </SubscriptionPlan>
+
               </div>
             </Sheet>
           </span>

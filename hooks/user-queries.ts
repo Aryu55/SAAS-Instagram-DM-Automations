@@ -15,7 +15,7 @@ export const useQueryAutomation = () => {
 
 export const useQueryAutomations = (id: string) => {
   return useQuery({
-    queryKey: ["automation-info"],
+    queryKey: ["automation-info", id],
     queryFn: () => getAutomationInfo(id),
   });
 };
@@ -33,5 +33,6 @@ export const useQueryAutomationPosts = () => {
   return useQuery({
     queryKey: ["instagram-media"],
     queryFn: fetchPosts,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 };

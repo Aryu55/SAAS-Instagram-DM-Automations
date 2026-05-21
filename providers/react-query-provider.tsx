@@ -7,7 +7,14 @@ type Props = {
   children: React.ReactNode;
 };
 
-const client = new QueryClient();
+const client = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 30, // 30 seconds stale time
+    },
+  },
+});
 
 function ReactQueryProvider({ children }: Props) {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;

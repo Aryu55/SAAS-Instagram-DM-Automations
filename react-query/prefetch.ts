@@ -26,9 +26,9 @@ export const PrefetchUserAutomations = async (
   client: QueryClient,
   automationId: string
 ) => {
-  return await prefetch(
-    client,
-    () => getAutomationInfo(automationId),
-    "automation-info"
-  );
+  return await client.prefetchQuery({
+    queryKey: ["automation-info", automationId],
+    queryFn: () => getAutomationInfo(automationId),
+    staleTime: 60000,
+  });
 };

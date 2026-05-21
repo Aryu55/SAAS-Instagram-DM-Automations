@@ -1,6 +1,7 @@
 "use client";
 
 import Loader from "@/components/global/loader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AUTOMATION_TRIGGERS } from "@/constants/automation";
@@ -18,7 +19,26 @@ type Props = {
 
 function Trigger({ id }: Props) {
   const { isPending, onSaveTrigger, onSetTrigger, types } = useTrigger(id);
-  const { data } = useQueryAutomations(id);
+  const { data, isPending: isQueryPending } = useQueryAutomations(id);
+
+  if (isQueryPending) {
+    return (
+      <div className="flex flex-col gap-y-6 items-center w-full">
+        <div className="bg-background-80 p-3 rounded-xl w-full skeleton-shimmer">
+          <div className="flex gap-x-2 items-center">
+            <Skeleton className="h-8 w-8 rounded-lg bg-white/[0.06]" />
+            <Skeleton className="h-5 w-56 bg-white/[0.06]" />
+          </div>
+          <Skeleton className="h-4 w-full mt-2 bg-white/[0.04]" />
+          <div className="flex gap-2 mt-5">
+            <Skeleton className="h-7 w-16 rounded-full bg-white/[0.06]" />
+            <Skeleton className="h-7 w-20 rounded-full bg-white/[0.06]" />
+            <Skeleton className="h-7 w-14 rounded-full bg-white/[0.06]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   /*   const data = {
     data: {

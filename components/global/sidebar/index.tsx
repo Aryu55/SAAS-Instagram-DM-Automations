@@ -6,9 +6,8 @@ import { HelpDuoToneWhite } from "@/icons";
 import { LogoSmall } from "@/svgs/logo-small";
 import React from "react";
 import ClerkAuthState from "../clerk-auth-state";
-import SubscriptionPlan from "../subscription-plan";
 import Items from "./items";
-import UpgradeCard from "./upgrade";
+
 
 type Props = {
   slug: string;
@@ -18,37 +17,33 @@ function Sidebar({ slug }: Props) {
   const { page } = usePath();
 
   return (
-    <div className="w-[250px] border-[1px] radial fixed left-0 lg:inline-block border-[#545454] bg-gradient-to-b from-[#768BDD] via-[#171717] to-[#768BDD] hidden bottom-0 top-0 m-3 rounded-3xl overflow-hidden">
-      <div className="flex flex-col gap-y-5 w-full h-full p-3 bg-[#0e0e0e] bg-opacity-90 bg-clip-padding backdrop-filter backdrop--blur__safari backdrop-blur-3xl">
-        <div className="flex gap-x-2 items-center p-5 justify-center">
-          <LogoSmall />
+    <div className="w-[250px] border border-white/[0.08] fixed left-0 lg:inline-block bg-[#09090b]/80 backdrop-blur-2xl hidden bottom-0 top-0 m-3 rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+      <div className="flex flex-col h-full p-4 justify-between">
+        <div className="flex flex-col gap-y-6">
+          <div className="flex gap-x-2 items-center py-4 justify-center">
+            <LogoSmall />
+          </div>
+          <div className="flex flex-col gap-y-1.5">
+            <Items page={page} slug={slug} />
+          </div>
         </div>
-        <div className="flex flex-col py-3">
-          <Items page={page} slug={slug} />
-        </div>
-        <div className="px-16">
-          <Separator orientation="horizontal" className="bg-[#333336]" />
-        </div>
-        <div className="px-3 flex flex-col gap-y-5">
-          <div className="flex gap-x-2">
+
+        <div className="flex flex-col gap-y-5">
+          <div className="px-4">
+            <Separator orientation="horizontal" className="bg-white/[0.08]" />
+          </div>
+          <div className="px-3 flex flex-col gap-y-4">
             <ClerkAuthState />
-            <p className="text-[#9B9CA0]">Profile</p>
-          </div>
-          <div className="flex gap-x-3">
-            <HelpDuoToneWhite />
-            <p className="text-[#9B9CA0]">Help</p>
+            <div className="flex items-center gap-x-3 text-sm text-[#9B9CA0] hover:text-white cursor-pointer transition-colors duration-200">
+              <HelpDuoToneWhite />
+              <span>Help</span>
+            </div>
           </div>
         </div>
-        <SubscriptionPlan type="FREE">
-          <div className="flex-1 flex flex-col justify-end">
-            <UpgradeCard />
-          </div>
-        </SubscriptionPlan>
       </div>
     </div>
-
-    // 02.03
   );
 }
 
 export default Sidebar;
+

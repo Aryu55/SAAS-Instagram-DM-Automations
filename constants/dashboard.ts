@@ -11,19 +11,19 @@ export const DASHBOARD_CARDS: Props[] = [
   {
     id: v4(),
     label: "Set-up Auto Replies",
-    subLabel: "Deliver a product lineup through Instagram DM",
-    description: "Get products in front of your followers in as many places",
+    subLabel: "Deliver custom responses through Instagram DM",
+    description: "Create keyword-triggered messages to engage your followers instantly.",
   },
   {
     id: v4(),
     label: "Answer Questions with AI",
-    subLabel: "Identify and respond to queries with AI",
-    description: "The intention of the message will be automatically detected",
+    subLabel: "Identify and respond to queries with Smart AI",
+    description: "Let ChatGPT handle common customer service and product questions.",
   },
   {
     id: v4(),
-    label: "Answer Questions with AI",
-    subLabel: "Identify and respond to queries with AI",
-    description: "The intention of the message will be automatically detected",
+    label: "Connect Integrations",
+    subLabel: "Manage Facebook & Instagram connections",
+    description: "Check connection status, renew tokens, or link new accounts.",
   },
 ];

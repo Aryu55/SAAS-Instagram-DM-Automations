@@ -12,13 +12,14 @@ import {
   findAutomation,
   getAutomation,
   updateAutomation,
+  createContentEngineAutomationQuery,
 } from "./queries";
 
-export const createAutomations = async (id?: string) => {
+export const createAutomations = async (id?: string, template?: string) => {
   const user = await onCurrentUser();
 
   try {
-    const create = await createAutomation(user.id, id);
+    const create = await createAutomation(user.id, id, template);
 
     if (create) return { status: 200, data: "Automation created" };
     return { status: 404, data: "Failed to create automation" };
@@ -138,8 +139,15 @@ export const getProfilePosts = async () => {
 
   try {
     const profile = await findUser(user.id);
+    if (!profile || profile.integrations.length === 0) return { status: 404 };
+
     const posts = await fetch(
-      `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${profile?.integrations[0].token}`
+      `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp,thumbnail_url&limit=10&access_token=${profile.integrations[0].token}`,
+      {
+        next: {
+          revalidate: 900, // Cache response for 15 minutes (900 seconds)
+        },
+      }
     );
 
     const parsed = await posts.json();
@@ -189,5 +197,31 @@ export const activateAutomation = async (id: string, status: boolean) => {
     return { status: 404, data: "Failed to activate automation" };
   } catch (error) {
     return { status: 500, data: "Failed to activate automation" };
+  }
+};
+
+export const createAutomationFromContentEngine = async (
+  topic: string,
+  keyword: string,
+  promptText: string,
+  replyText?: string
+) => {
+  const user = await onCurrentUser();
+
+  try {
+    const create = await createContentEngineAutomationQuery(
+      user.id,
+      topic,
+      keyword,
+      promptText,
+      replyText
+    );
+
+    if (create) {
+      return { status: 200, data: "Automation created successfully!" };
+    }
+    return { status: 404, data: "Failed to create automation." };
+  } catch (error: any) {
+    return { status: 500, data: error.message };
   }
 };

@@ -29,6 +29,7 @@ export const getKeywordAutomation = async (
       listener: true,
       User: {
         select: {
+          id: true,
           subscription: {
             select: {
               plan: true,
@@ -41,6 +42,49 @@ export const getKeywordAutomation = async (
           },
         },
       },
+    },
+  });
+};
+
+export const upsertContact = async (
+  userId: string,
+  instagramId: string,
+  username?: string,
+  token?: string
+) => {
+  let resolvedUsername = username;
+  if (!resolvedUsername && token) {
+    try {
+      const response = await fetch(
+        `https://graph.instagram.com/${instagramId}?fields=username,name&access_token=${token}`
+      );
+      if (response.ok) {
+        const profile = await response.json();
+        resolvedUsername = profile.username;
+      }
+    } catch (e) {
+      console.error("Error fetching Instagram profile username:", e);
+    }
+  }
+
+  if (!resolvedUsername) {
+    resolvedUsername = `User_${instagramId.slice(-6)}`;
+  }
+
+  return await client.contact.upsert({
+    where: {
+      userId_instagramId: {
+        userId,
+        instagramId,
+      },
+    },
+    update: {
+      username: resolvedUsername,
+    },
+    create: {
+      userId,
+      instagramId,
+      username: resolvedUsername,
     },
   });
 };

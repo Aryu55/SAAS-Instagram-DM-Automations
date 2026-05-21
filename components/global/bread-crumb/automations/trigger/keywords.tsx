@@ -1,8 +1,15 @@
+"use client";
+
 import { Input } from "@/components/ui/input";
 import { useKeywords } from "@/hooks/use-automation";
 import { useMutationDataState } from "@/hooks/use-mutation-data";
 import { useQueryAutomations } from "@/hooks/user-queries";
 import { X } from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 type Props = {
   id: string;
@@ -12,7 +19,8 @@ function Keywords({ id }: Props) {
   const { deleteMutation, keywords, onKeyPress, onValueChange } =
     useKeywords(id);
 
-  const { latestVariable } = useMutationDataState(["add-keywords"]);
+  const { latestVariable: addKeywordVar } = useMutationDataState(["add-keywords"]);
+  const { latestVariable: deleteKeywordVar } = useMutationDataState(["delete-keywords"]);
   const { data } = useQueryAutomations(id);
 
   return (
@@ -24,25 +32,44 @@ function Keywords({ id }: Props) {
         {data?.data?.keywords &&
           data.data.keywords.length > 0 &&
           data.data.keywords.map(
-            (keyword) =>
-              keyword.id !== latestVariable.variables.id && (
+            (keyword) => {
+              const isDeleted =
+                deleteKeywordVar &&
+                deleteKeywordVar.status === "pending" &&
+                deleteKeywordVar.variables?.id === keyword.id;
+              if (isDeleted) return null;
+
+              return (
                 <div
                   key={keyword.id}
                   className="bg-background-90 flex items-center gap-x-2 capitalize text-text-secondary py-1 px-4 rounded-full"
                 >
                   <p>{keyword.word}</p>
-                  <X
-                    size={20}
-                    onClick={() => deleteMutation({ id: keyword.id })}
-                  />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex cursor-pointer">
+                        <X
+                          size={20}
+                          className="hover:text-white transition duration-100"
+                          onClick={() => deleteMutation({ id: keyword.id })}
+                        />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-[#1a1a1a] border border-white/10 text-white text-xs">
+                      Remove keyword
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
-              )
+              );
+            }
           )}
-        {latestVariable && latestVariable.status === "pending" && (
-          <div className="bg-background-90 flex items-center gap-x-2 capitalize text-text-secondary py-1 px-4 rounded-full">
-            {latestVariable.variables.keyword}
-          </div>
-        )}
+        {addKeywordVar &&
+          addKeywordVar.status === "pending" &&
+          addKeywordVar.variables?.keywords && (
+            <div className="bg-background-90 flex items-center gap-x-2 capitalize text-text-secondary py-1 px-4 rounded-full opacity-50">
+              {addKeywordVar.variables.keywords}
+            </div>
+          )}
         <Input
           placeholder="Add Keyword..."
           /* style={{
@@ -59,3 +86,4 @@ function Keywords({ id }: Props) {
 }
 
 export default Keywords;
+

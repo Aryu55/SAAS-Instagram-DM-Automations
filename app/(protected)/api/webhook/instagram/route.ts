@@ -6,9 +6,10 @@ import {
   getKeywordPost,
   matchKeyword,
   trackResponse,
+  upsertContact,
 } from "@/actions/webhook/queries";
 import { sendDm, sendPrivateMessage } from "@/lib/fetch";
-import { openai } from "@/lib/openai";
+import { openai, getModelName } from "@/lib/openai";
 import { client } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -41,6 +42,14 @@ export async function POST(req: NextRequest) {
         );
 
         if (automation && automation.trigger) {
+          if (automation.User?.id) {
+            await upsertContact(
+              automation.User.id,
+              body.entry[0].messaging[0].sender.id,
+              undefined,
+              automation.User.integrations[0]?.token
+            );
+          }
           if (
             automation.listener &&
             automation.listener.listener === "MESSAGE"
@@ -72,7 +81,7 @@ export async function POST(req: NextRequest) {
             automation.User?.subscription?.plan === "PRO"
           ) {
             const smart_ai_message = await openai.chat.completions.create({
-              model: "gpt-4o-mini",
+              model: getModelName(),
               messages: [
                 {
                   role: "assistant",
@@ -137,6 +146,13 @@ export async function POST(req: NextRequest) {
         );
 
         if (automation && automation_post && automation.trigger) {
+          if (automation.User?.id) {
+            await upsertContact(
+              automation.User.id,
+              body.entry[0].changes[0].value.from.id,
+              body.entry[0].changes[0].value.from.username
+            );
+          }
           if (automation.listener) {
             if (automation.listener.listener === "MESSAGE") {
               const direct_message = await sendPrivateMessage(
@@ -166,7 +182,7 @@ export async function POST(req: NextRequest) {
               automation.User?.subscription?.plan === "PRO"
             ) {
               const smart_ai_message = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
+                model: getModelName(),
                 messages: [
                   {
                     role: "assistant",
@@ -227,12 +243,21 @@ export async function POST(req: NextRequest) {
       if (customer_history.history.length > 0) {
         const automation = await findAutomation(customer_history.automationId!);
 
+        if (automation && automation.User?.id) {
+          await upsertContact(
+            automation.User.id,
+            body.entry[0].messaging[0].sender.id,
+            undefined,
+            automation.User.integrations[0]?.token
+          );
+        }
+
         if (
           automation?.User?.subscription?.plan === "PRO" &&
           automation.listener?.listener === "SMARTAI"
         ) {
           const smart_ai_message = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: getModelName(),
             messages: [
               {
                 role: "assistant",

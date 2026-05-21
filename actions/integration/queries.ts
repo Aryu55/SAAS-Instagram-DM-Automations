@@ -37,6 +37,32 @@ export const createIntegration = async (
   expire: Date,
   insts_id: string
 ) => {
+  const user = await client.user.findUnique({
+    where: { clerkId },
+    include: {
+      integrations: {
+        where: { name: "INSTAGRAM" }
+      }
+    }
+  });
+
+  const existing = user?.integrations[0];
+
+  if (existing) {
+    await client.integrations.update({
+      where: { id: existing.id },
+      data: {
+        token,
+        expiresAt: expire,
+        instagramId: insts_id,
+      },
+    });
+    return {
+      firstname: user?.firstname,
+      lastname: user?.lastname,
+    };
+  }
+
   return await client.user.update({
     where: {
       clerkId,

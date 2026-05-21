@@ -2,13 +2,13 @@
 
 import { refreshToken } from "@/lib/fetch";
 import { stripe } from "@/lib/stripe";
-import { currentUser } from "@clerk/nextjs/server";
+import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { updateIntegration } from "../integration/queries";
 import { createUser, findUser, updateSubscription } from "./queries";
 
 export const onCurrentUser = async () => {
-  const user = await currentUser();
+  const user = await getSession();
   if (!user) return redirect("/sign-in");
 
   return user;

@@ -59,7 +59,7 @@ export const sendPrivateMessage = async (
   );
 };
 
-export const generateToken = async (code: string) => {
+export const generateToken = async (code: string, origin?: string) => {
   const insta_form = new FormData();
   insta_form.append("client_id", process.env.INSTAGRAM_CLIENT_ID as string);
 
@@ -68,11 +68,14 @@ export const generateToken = async (code: string) => {
     process.env.INSTAGRAM_CLIENT_SECRET as string
   );
   insta_form.append("grant_type", "authorization_code");
-  insta_form.append(
-    "redirect_uri",
-    `${process.env.NEXT_PUBLIC_HOST_URL}/callback/instagram`
-  );
+  
+  const redirectUri = origin 
+    ? `${origin}/callback/instagram` 
+    : `${process.env.NEXT_PUBLIC_HOST_URL}/callback/instagram`;
+    
+  insta_form.append("redirect_uri", redirectUri);
   insta_form.append("code", code);
+
 
   const shortTokenRes = await fetch(process.env.INSTAGRAM_TOKEN_URL as string, {
     method: "POST",

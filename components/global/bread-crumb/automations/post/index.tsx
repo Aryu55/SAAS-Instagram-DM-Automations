@@ -1,4 +1,5 @@
 import Loader from "@/components/global/loader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useAutomationPosts } from "@/hooks/use-automation";
 import { useQueryAutomationPosts } from "@/hooks/user-queries";
@@ -13,9 +14,21 @@ type Props = {
 };
 
 function PostButton({ id }: Props) {
-  const { data } = useQueryAutomationPosts();
+  const { data, isPending: isQueryPending } = useQueryAutomationPosts();
 
   const { isPending, mutate, onSelectPost, posts } = useAutomationPosts(id);
+
+  if (isQueryPending) {
+    return (
+      <div className="flex flex-col gap-y-3 w-full skeleton-shimmer">
+        <div className="flex flex-wrap w-full gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="w-[112px] aspect-square rounded-lg bg-white/[0.06]" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <TriggerButton label="Attach a Post">
@@ -30,7 +43,10 @@ function PostButton({ id }: Props) {
                   onSelectPost({
                     postid: post.id,
                     caption: post.caption,
-                    media: post.media_url,
+                    media:
+                      post.media_type === "VIDEO" && post.thumbnail_url
+                        ? post.thumbnail_url
+                        : post.media_url,
                     mediaType: post.media_type,
                   })
                 }
@@ -45,7 +61,11 @@ function PostButton({ id }: Props) {
                 <Image
                   fill
                   sizes="100vw"
-                  src={post.media_url}
+                  src={
+                    post.media_type === "VIDEO" && post.thumbnail_url
+                      ? post.thumbnail_url
+                      : post.media_url
+                  }
                   alt="post image"
                   className={cn(
                     "hover:opacity-75 transition duration-100",
