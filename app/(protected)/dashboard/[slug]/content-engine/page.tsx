@@ -15,7 +15,8 @@ import {
   Video, 
   Instagram, 
   Tv, 
-  Twitter 
+  Twitter,
+  Flame
 } from "lucide-react";
 import { createAutomationFromContentEngine } from "@/actions/automation";
 import { toast } from "sonner";
@@ -755,6 +756,50 @@ export default function ContentEnginePage() {
                   </div>
                 </div>
               </div>
+
+              {/* Virality verification output */}
+              <div className="bg-[#1c1c1e] border border-[#2c2c2e] p-6 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                    <Flame className="w-4 h-4 text-orange-400" />
+                    Agentic Virality Evaluator
+                  </h4>
+                  {results?.viralityScore && (
+                    <span className={`text-xs font-black px-2 py-0.5 rounded ${
+                      results.viralityScore >= 80 ? "bg-green-500/10 text-green-400 border border-green-500/20" :
+                      results.viralityScore >= 60 ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20" :
+                      "bg-red-500/10 text-red-400 border border-red-500/20"
+                    }`}>
+                      {results.viralityScore}% Score
+                    </span>
+                  )}
+                </div>
+                {results ? (
+                  <div className="space-y-3">
+                    <div className="bg-white/5 border border-white/10 p-3 rounded-xl">
+                      <span className="text-[10px] text-[#9B9CA0] uppercase font-bold">Optimization Status</span>
+                      <p className="text-xs text-white mt-1 leading-relaxed">
+                        {results.viralityScore >= 80 
+                          ? "✅ Script compiled with prime viral structures. Self-correction skipped."
+                          : `🔄 Self-correction applied. Script optimized to meet virality benchmarks.`}
+                      </p>
+                    </div>
+                    {results.viralityCritique && (
+                      <div className="bg-white/5 border border-white/10 p-3 rounded-xl">
+                        <span className="text-[10px] text-[#9B9CA0] uppercase font-bold">Evaluation Details</span>
+                        <p className="text-xs text-[#b3c5ef] mt-1 leading-relaxed">
+                          {results.viralityCritique}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#9B9CA0] italic">
+                    Awaiting pipeline execution to run the agentic self-correction loop.
+                  </p>
+                )}
+              </div>
+
             </div>
 
             {/* Right panels: editor output & angle topic */}

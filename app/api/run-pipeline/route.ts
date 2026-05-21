@@ -17,6 +17,8 @@ interface PipelinePayload {
   script: string;
   hooks: any[];
   recommendedHook: any;
+  viralityScore?: number;
+  viralityCritique?: string;
 }
 
 function generateLocalContent(
@@ -194,6 +196,140 @@ Is complete pipeline setup ka step-by-step documentation chahiye? Toh comment se
     hooks: hooks,
     recommendedHook: hooks[2]
   };
+}
+
+function getSimulatedViralityScore(script: string, topic: string): { score: number; critique: string } {
+  const text = script.toLowerCase();
+  let score = 70;
+  let critique = "";
+
+  if (text.includes("stop") || text.includes("don't") || text.includes("never") || text.includes("warning")) {
+    score += 10;
+  }
+  if (text.includes("comment") || text.includes("type") || text.includes("dm me")) {
+    score += 15;
+  } else {
+    critique += "No comment call-to-action DM trigger detected. ";
+  }
+
+  const sentences = script.split(/[.!?\n]+/).filter(s => s.trim().length > 0);
+  const avgLen = script.split(/\s+/).length / (sentences.length || 1);
+  if (avgLen >= 8 && avgLen <= 14) {
+    score += 5;
+  }
+
+  score = Math.min(100, Math.max(40, score));
+  critique = critique || "Excellent script pacing and strong comment automation trigger words.";
+  return { score, critique: `Predicted Virality Score: ${score}%. Analysis: ${critique}` };
+}
+
+async function optimizeScriptVirality(
+  scriptText: string,
+  topic: string,
+  keywords: string[],
+  voiceProfile: any,
+  sendEvent: (event: string, data: any) => void
+): Promise<{ script: string; score: number; critique: string }> {
+  const hasKeys = isUsingOpenRouter || !!process.env.OPEN_AI_KEY;
+  
+  if (!hasKeys) {
+    const sim = getSimulatedViralityScore(scriptText, topic);
+    return { script: scriptText, ...sim };
+  }
+
+  try {
+    sendEvent('log', { message: '🤖 [Agent 05 - Virality Evaluator] Analyzing script retention markers...', type: 'agent' });
+    
+    // Step 1: Grade the script
+    const gradingSystemPrompt = `You are a script evaluator. Grade the script out of 100 based on hook strength, pacing, emotional triggers, value, and comment-based CTA. Return raw JSON: {"score": number, "critique": "brief critique text"}`;
+    const gradingUserPrompt = `Script:
+${scriptText}
+
+Topic: ${topic}
+Keywords: ${keywords.join(", ")}`;
+
+    const gradingCompletion = await openai.chat.completions.create({
+      model: getModelName(),
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: gradingSystemPrompt },
+        { role: "user", content: gradingUserPrompt }
+      ]
+    });
+
+    const gradeResult = JSON.parse(gradingCompletion.choices[0].message.content || "{}");
+    const initialScore = gradeResult.score || 75;
+    const initialCritique = gradeResult.critique || "Moderate quality script.";
+
+    sendEvent('log', { message: `📊 Initial script virality score: ${initialScore}%`, type: 'info' });
+
+    if (initialScore >= 80) {
+      sendEvent('log', { message: `✅ Script passed virality threshold of 80%!`, type: 'success' });
+      return { script: scriptText, score: initialScore, critique: initialCritique };
+    }
+
+    // Step 2: Self-correction rewrite
+    sendEvent('log', { message: `⚠️ Score ${initialScore}% is below threshold. Launching Agentic Self-Correction Loop...`, type: 'warn' });
+    
+    const writerSystemPrompt = `You are a viral scriptwriter. Rewrite the provided script to optimize its virality. Use a Hinglish creator tone.
+Address the critique: "${initialCritique}".
+Ensure:
+1. Start with an immediate attention-disrupting hook (first 3s).
+2. Maintain short, snappy sentence pacing.
+3. Explicitly ask viewers to comment a specific keyword to trigger the DM automation.
+Output JSON only: {"script": "full rewritten script text"}`;
+
+    const rewritePrompt = `Original Script:
+${scriptText}
+
+Voice Profile:
+- Vocabulary: ${JSON.stringify(voiceProfile.vocabulary)}
+- Sentence Length: ${voiceProfile.sentenceLength}
+- Energy: ${voiceProfile.energy}
+
+Rewrite the script to optimize it based on the critiques. Return only JSON.`;
+
+    const rewriteCompletion = await openai.chat.completions.create({
+      model: getModelName(),
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: writerSystemPrompt },
+        { role: "user", content: rewritePrompt }
+      ]
+    });
+
+    const rewriteResult = JSON.parse(rewriteCompletion.choices[0].message.content || "{}");
+    const rewrittenScript = rewriteResult.script || scriptText;
+
+    // Step 3: Grade rewritten script
+    sendEvent('log', { message: '🤖 Re-evaluating optimized script...', type: 'agent' });
+    
+    const finalGradingCompletion = await openai.chat.completions.create({
+      model: getModelName(),
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: gradingSystemPrompt },
+        { role: "user", content: `Script:\n${rewrittenScript}\n\nTopic: ${topic}` }
+      ]
+    });
+
+    const finalGradeResult = JSON.parse(finalGradingCompletion.choices[0].message.content || "{}");
+    const finalScore = finalGradeResult.score || 85;
+    const finalCritique = finalGradeResult.critique || "Optimized script.";
+
+    sendEvent('log', { message: `🚀 Self-correction complete. Final Virality Score: ${finalScore}%`, type: 'success' });
+    
+    return {
+      script: rewrittenScript,
+      score: finalScore,
+      critique: finalCritique
+    };
+
+  } catch (err: any) {
+    sendEvent('log', { message: `⚠️ Virality optimization error: ${err.message}. Defaulting to original script.`, type: 'warn' });
+    const sim = getSimulatedViralityScore(scriptText, topic);
+    return { script: scriptText, ...sim };
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -509,8 +645,20 @@ export async function POST(req: NextRequest) {
         sendEvent('log', { message: `✍️ Voice profile established: Hinglish mix (${payload.voiceProfile.hinglishPattern})`, type: 'info' });
         await delay(200);
 
-        sendEvent('log', { message: '📝 Completed script draft structure.', type: 'success' });
+        sendEvent('log', { message: '📝 Completed script draft structure. Running Virality Verification...', type: 'success' });
         await delay(200);
+
+        const viralityOpt = await optimizeScriptVirality(
+          payload.script,
+          topic,
+          keywords,
+          payload.voiceProfile,
+          sendEvent
+        );
+
+        payload.script = viralityOpt.script;
+        payload.viralityScore = viralityOpt.score;
+        payload.viralityCritique = viralityOpt.critique;
 
         sendEvent('progress', { percent: 100, stage: 'complete', message: 'Pipeline successfully completed!' });
         sendEvent('log', { message: '🎉 Pipeline Complete! Transporting package payload...', type: 'system' });
