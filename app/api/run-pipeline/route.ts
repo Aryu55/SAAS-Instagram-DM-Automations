@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { openai, getModelName, isUsingOpenRouter } from "@/lib/openai";
 import { scrapeInstagramProfile, scrapeYouTubeShorts } from "@/lib/scrapers";
+import { getMatchingTemplates } from "@/lib/viral-templates";
 
 export const dynamic = 'force-dynamic';
 
@@ -240,13 +241,46 @@ async function optimizeScriptVirality(
   try {
     sendEvent('log', { message: '🤖 [Agent 05 - Virality Evaluator] Analyzing script retention markers...', type: 'agent' });
     
+    // Resolve niche mapping to get matching viral reference templates
+    const resolveNiche = (topicStr: string, kws: string[]): string => {
+      const combined = `${topicStr} ${kws.join(" ")}`.toLowerCase();
+      if (combined.includes("code") || combined.includes("tech") || combined.includes("developer") || combined.includes("software") || combined.includes("ai") || combined.includes("terminal") || combined.includes("api") || combined.includes("automation")) {
+        return "tech";
+      }
+      if (combined.includes("lead") || combined.includes("business") || combined.includes("marketing") || combined.includes("sales") || combined.includes("growth") || combined.includes("traffic") || combined.includes("client")) {
+        return "business";
+      }
+      if (combined.includes("tax") || combined.includes("finance") || combined.includes("money") || combined.includes("saving") || combined.includes("invest") || combined.includes("wealth") || combined.includes("rupee") || combined.includes("dollar")) {
+        return "finance";
+      }
+      if (combined.includes("productivity") || combined.includes("habit") || combined.includes("focus") || combined.includes("time") || combined.includes("planner")) {
+        return "productivity";
+      }
+      if (combined.includes("edit") || combined.includes("video") || combined.includes("design") || combined.includes("creative") || combined.includes("frame")) {
+        return "creative";
+      }
+      return "general";
+    };
+
+    const targetNiche = resolveNiche(topic, keywords);
+    const matchingTemplates = getMatchingTemplates(targetNiche, 2);
+
     // Step 1: Grade the script
-    const gradingSystemPrompt = `You are a script evaluator. Grade the script out of 100 based on hook strength, pacing, emotional triggers, value, and comment-based CTA. Return raw JSON: {"score": number, "critique": "brief critique text"}`;
+    const gradingSystemPrompt = `You are a script evaluator. Grade the script out of 100 based on hook strength, pacing, emotional triggers, value, and comment-based CTA. Compare the script against the provided proven viral templates. Return raw JSON: {"score": number, "critique": "brief critique text"}`;
     const gradingUserPrompt = `Script:
 ${scriptText}
 
 Topic: ${topic}
-Keywords: ${keywords.join(", ")}`;
+Keywords: ${keywords.join(", ")}
+
+### PROVEN VIRAL REFERENCE TEMPLATES TO BENCHMARK AGAINST:
+${matchingTemplates.map((t, idx) => `
+Template ${idx + 1}:
+- Hook Pattern: "${t.hook}"
+- Structured Script:
+${t.structure}
+- Why it works: ${t.keyTakeaway}
+`).join("\n")}`;
 
     const gradingCompletion = await openai.chat.completions.create({
       model: getModelName(),
@@ -273,6 +307,7 @@ Keywords: ${keywords.join(", ")}`;
     
     const writerSystemPrompt = `You are a viral scriptwriter. Rewrite the provided script to optimize its virality. Use a Hinglish creator tone.
 Address the critique: "${initialCritique}".
+Model the script's hook, pacing, and CTA structure after the provided proven viral templates.
 Ensure:
 1. Start with an immediate attention-disrupting hook (first 3s).
 2. Maintain short, snappy sentence pacing.
@@ -287,7 +322,16 @@ Voice Profile:
 - Sentence Length: ${voiceProfile.sentenceLength}
 - Energy: ${voiceProfile.energy}
 
-Rewrite the script to optimize it based on the critiques. Return only JSON.`;
+### PROVEN VIRAL REFERENCE TEMPLATES TO MODEL AFTER:
+${matchingTemplates.map((t, idx) => `
+Template ${idx + 1}:
+- Hook: "${t.hook}"
+- Structure:
+${t.structure}
+- Key Takeaway: ${t.keyTakeaway}
+`).join("\n")}
+
+Rewrite the script to optimize it based on the critiques and reference templates. Return only JSON.`;
 
     const rewriteCompletion = await openai.chat.completions.create({
       model: getModelName(),
@@ -309,7 +353,7 @@ Rewrite the script to optimize it based on the critiques. Return only JSON.`;
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: gradingSystemPrompt },
-        { role: "user", content: `Script:\n${rewrittenScript}\n\nTopic: ${topic}` }
+        { role: "user", content: `Script:\n${rewrittenScript}\n\nTopic: ${topic}\n\n### PROVEN VIRAL REFERENCE TEMPLATES:\n${matchingTemplates.map((t, idx) => `Template ${idx + 1}: ${t.hook}\n${t.structure}`).join("\n")}` }
       ]
     });
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai, getModelName, isUsingOpenRouter } from "@/lib/openai";
+import { getMatchingTemplates } from "@/lib/viral-templates";
 
 export const dynamic = 'force-dynamic';
 
@@ -246,14 +247,25 @@ Format your analysis strictly as a JSON object matching this schema:
   "versionB": null // If scriptB is analyzed, populate in the same shape as versionA, else null.
 }`;
 
+    const matchingTemplates = getMatchingTemplates(niche, 2);
+
     const userPrompt = `Analyze the following script(s) for the "${niche}" niche, target platform "${platform}", and target language "${language}":
 
-### SCRIPT A:
+### PROVEN VIRAL REFERENCE TEMPLATES TO BENCHMARK AGAINST:
+${matchingTemplates.map((t, idx) => `
+Template ${idx + 1}:
+- Hook Pattern: "${t.hook}"
+- Structured Script:
+${t.structure}
+- Why it is viral: ${t.keyTakeaway}
+`).join("\n")}
+
+### USER SCRIPT A TO EVALUATE:
 ${scriptA}
 
-${scriptB ? `### SCRIPT B:\n${scriptB}\n` : ""}
+${scriptB ? `### USER SCRIPT B TO EVALUATE:\n${scriptB}\n` : ""}
 
-Evaluate them carefully, compute realistic simulated retention curves based on script pace and length, and suggest practical line refinements. Remember to return raw JSON matching the schema.`;
+Evaluate them carefully, compare their structure and pacing against the proven reference templates provided above, compute realistic simulated retention curves based on script pace and length, and suggest practical line refinements. Remember to return raw JSON matching the schema.`;
 
     try {
       const completion = await openai.chat.completions.create({
