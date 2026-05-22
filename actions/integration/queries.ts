@@ -82,3 +82,16 @@ export const createIntegration = async (
     },
   });
 };
+
+export const deleteIntegration = async (clerkId: string) => {
+  return await client.user.update({
+    where: { clerkId },
+    data: {
+      integrations: {
+        deleteMany: {
+          name: "INSTAGRAM",
+        },
+      },
+    },
+  });
+};

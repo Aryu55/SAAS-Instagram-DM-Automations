@@ -4,7 +4,7 @@ import { generateToken } from "@/lib/fetch";
 import axios from "axios";
 import { redirect } from "next/navigation";
 import { onCurrentUser } from "../user";
-import { createIntegration, getIntegrations } from "./queries";
+import { createIntegration, getIntegrations, deleteIntegration } from "./queries";
 
 import { headers } from "next/headers";
 
@@ -160,6 +160,18 @@ export const onIntegrateManual = async (token: string) => {
     return { status: 200, data: create };
   } catch (error: any) {
     console.error("Manual integration database error:", error.message);
+    return { status: 500, error: error.message };
+  }
+};
+
+export const onDisconnectIntegration = async () => {
+  const user = await onCurrentUser();
+  try {
+    const deleted = await deleteIntegration(user.id);
+    if (deleted) return { status: 200, data: "Successfully disconnected Instagram account!" };
+    return { status: 404, data: "No integration found to disconnect." };
+  } catch (error: any) {
+    console.error("Disconnect integration error:", error.message);
     return { status: 500, error: error.message };
   }
 };

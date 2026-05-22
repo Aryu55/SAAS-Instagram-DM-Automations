@@ -1,6 +1,6 @@
 "use client";
 
-import { onOathInstagram, onIntegrateManual } from "@/actions/integration";
+import { onOathInstagram, onIntegrateManual, onDisconnectIntegration } from "@/actions/integration";
 import { onUserInfo } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -19,7 +19,25 @@ function IntegrationCard({ title, description, icon, strategy }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const [tokenInput, setTokenInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const queryClient = useQueryClient();
+
+  const handleDisconnect = async () => {
+    setIsDisconnecting(true);
+    try {
+      const res = await onDisconnectIntegration();
+      if (res.status === 200) {
+        toast.success("Successfully disconnected Instagram account!");
+        queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+      } else {
+        toast.error(res.data || "Failed to disconnect integration");
+      }
+    } catch (err: any) {
+      toast.error("An error occurred during disconnection");
+    } finally {
+      setIsDisconnecting(false);
+    }
+  };
 
   const onInstOAuth = async () => {
     try {
@@ -87,12 +105,18 @@ function IntegrationCard({ title, description, icon, strategy }: Props) {
           </Button>
         )}
         {integrated && (
-          <Button
-            disabled
-            className="rounded-xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 font-medium cursor-not-allowed"
-          >
-            Active
-          </Button>
+          <div className="flex items-center gap-x-3">
+            <span className="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold text-xs">
+              Active
+            </span>
+            <Button
+              onClick={handleDisconnect}
+              disabled={isDisconnecting}
+              className="rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 font-semibold text-xs px-4 py-2 transition duration-200"
+            >
+              Disconnect
+            </Button>
+          </div>
         )}
       </div>
 
