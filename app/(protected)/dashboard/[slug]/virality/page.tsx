@@ -283,11 +283,12 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
                   onChange={(e) => setNiche(e.target.value)}
                   className="bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition duration-200"
                 >
-                  <option value="tech" className="bg-[#1D1D1D]">Tech & Coding</option>
-                  <option value="business" className="bg-[#1D1D1D]">Business / SaaS</option>
-                  <option value="fitness" className="bg-[#1D1D1D]">Fitness / Health</option>
-                  <option value="education" className="bg-[#1D1D1D]">Education / Finance</option>
-                  <option value="lifestyle" className="bg-[#1D1D1D]">Lifestyle / Vlog</option>
+                  <option value="tech" className="bg-[#1D1D1D]">Tech & Automation</option>
+                  <option value="business" className="bg-[#1D1D1D]">Business & Marketing</option>
+                  <option value="finance" className="bg-[#1D1D1D]">Finance & Wealth</option>
+                  <option value="productivity" className="bg-[#1D1D1D]">Productivity & Dopamine Detox</option>
+                  <option value="creative" className="bg-[#1D1D1D]">Creative & Copywriting</option>
+                  <option value="general" className="bg-[#1D1D1D]">Self Help & Addiction Recovery</option>
                 </select>
               </div>
 

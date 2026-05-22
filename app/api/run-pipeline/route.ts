@@ -263,7 +263,7 @@ async function optimizeScriptVirality(
     };
 
     const targetNiche = resolveNiche(topic, keywords);
-    const matchingTemplates = getMatchingTemplates(targetNiche, 2);
+    const matchingTemplates = getMatchingTemplates(targetNiche, 2, scriptText);
 
     // Step 1: Grade the script
     const gradingSystemPrompt = `You are a script evaluator. Grade the script out of 100 based on hook strength, pacing, emotional triggers, value, and comment-based CTA. Compare the script against the provided proven viral templates. Return raw JSON: {"score": number, "critique": "brief critique text"}`;

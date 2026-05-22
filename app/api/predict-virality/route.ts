@@ -247,7 +247,7 @@ Format your analysis strictly as a JSON object matching this schema:
   "versionB": null // If scriptB is analyzed, populate in the same shape as versionA, else null.
 }`;
 
-    const matchingTemplates = getMatchingTemplates(niche, 2);
+    const matchingTemplates = getMatchingTemplates(niche, 2, scriptA);
 
     const userPrompt = `Analyze the following script(s) for the "${niche}" niche, target platform "${platform}", and target language "${language}":
 
