@@ -60,35 +60,49 @@ export const sendPrivateMessage = async (
 };
 
 export const generateToken = async (code: string, origin?: string) => {
-  const insta_form = new FormData();
-  insta_form.append("client_id", process.env.INSTAGRAM_CLIENT_ID as string);
-
-  insta_form.append(
-    "client_secret",
-    process.env.INSTAGRAM_CLIENT_SECRET as string
-  );
-  insta_form.append("grant_type", "authorization_code");
-  
   const redirectUri = origin 
     ? `${origin}/callback/instagram` 
     : `${process.env.NEXT_PUBLIC_HOST_URL}/callback/instagram`;
-    
-  insta_form.append("redirect_uri", redirectUri);
-  insta_form.append("code", code);
 
-
-  const shortTokenRes = await fetch(process.env.INSTAGRAM_TOKEN_URL as string, {
-    method: "POST",
-    body: insta_form,
+  // Use Facebook Graph API token exchange (not the deprecated Instagram Basic Display API)
+  const params = new URLSearchParams({
+    client_id: process.env.INSTAGRAM_CLIENT_ID as string,
+    client_secret: process.env.INSTAGRAM_CLIENT_SECRET as string,
+    grant_type: "authorization_code",
+    redirect_uri: redirectUri,
+    code: code,
   });
 
-  const token = await shortTokenRes.json();
-  if (token.permissions.length > 0) {
-    console.log("🚀 ~ generateToken ~ token:", token);
-    const long_token = await axios.get(
-      `${process.env.INSTAGRAM_BASE_URL}/access_token?grant_type=ig_exchange_token&client_secret=${process.env.INSTAGRAM_CLIENT_SECRET}&access_token=${token.access_token}`
+  try {
+    // Exchange the authorization code for a short-lived token via Facebook Graph API
+    const shortTokenRes = await fetch(
+      `https://graph.facebook.com/v19.0/oauth/access_token?${params.toString()}`,
+      { method: "GET" }
     );
 
-    return long_token.data;
+    const tokenData = await shortTokenRes.json();
+
+    if (tokenData.error) {
+      console.error("Token exchange error:", tokenData.error);
+      return null;
+    }
+
+    if (tokenData.access_token) {
+      console.log("🚀 ~ generateToken ~ short-lived token obtained");
+      
+      // Exchange short-lived token for a long-lived token (60 days)
+      const longTokenRes = await axios.get(
+        `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.INSTAGRAM_CLIENT_ID}&client_secret=${process.env.INSTAGRAM_CLIENT_SECRET}&fb_exchange_token=${tokenData.access_token}`
+      );
+
+      console.log("🚀 ~ generateToken ~ long-lived token obtained");
+      return longTokenRes.data;
+    }
+
+    console.error("No access_token in response:", tokenData);
+    return null;
+  } catch (error: any) {
+    console.error("generateToken error:", error.message);
+    return null;
   }
 };

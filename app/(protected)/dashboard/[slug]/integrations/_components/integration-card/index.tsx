@@ -104,9 +104,9 @@ function IntegrationCard({ title, description, icon, strategy }: Props) {
             {/* Method A: Automatic OAuth */}
             <div className="p-5 rounded-xl border border-white/[0.06] bg-white/[0.01] hover:bg-white/[0.02] flex flex-col justify-between gap-y-4 transition-colors">
               <div>
-                <h5 className="text-sm font-medium text-white">Method A: OAuth login (Automatic)</h5>
+                <h5 className="text-sm font-medium text-white">Method A: Facebook Login (Automatic)</h5>
                 <p className="text-xs text-text-secondary mt-1 leading-relaxed">
-                  Log in directly using your Facebook/Instagram developer account credentials.
+                  Connect via Facebook Login. Your Instagram must be a Business/Creator account linked to a Facebook Page.
                 </p>
               </div>
               <Button
