@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { onUserInfo } from "@/actions/user";
+import Link from "next/link";
 import {
   BarChart3,
   Video,
@@ -132,9 +133,9 @@ const DEFAULT_NICHE_POSTS: Post[] = [
   }
 ];
 
-export default function AnalyticsPage() {
-  const [isDemo, setIsDemo] = useState(true);
-  const [posts, setPosts] = useState<Post[]>(DEFAULT_NICHE_POSTS);
+export default function AnalyticsPage({ params: { slug } }: { params: { slug: string } }) {
+  const [isDemo, setIsDemo] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [transcribing, setTranscribing] = useState<Record<string, boolean>>({});
   const [loadingAI, setLoadingAI] = useState(false);
@@ -160,49 +161,46 @@ export default function AnalyticsPage() {
       const res = await fetch("/api/analytics/posts");
       if (res.status === 200) {
         const data = await res.json();
-        if (data.posts && data.posts.length > 0) {
+        if (data.posts) {
           setPosts(data.posts);
           setIsDemo(false);
-          toast.success("Successfully loaded live Instagram posts!");
-        } else {
-          toast.error("No posts found. Falling back to Demo Mode.");
-          setPosts(DEFAULT_NICHE_POSTS);
-          setIsDemo(true);
+          if (data.posts.length > 0) {
+            toast.success("Successfully loaded live Instagram posts!");
+          }
         }
       } else {
         toast.error("Could not fetch live posts. Ensure token is valid.");
-        setPosts(DEFAULT_NICHE_POSTS);
-        setIsDemo(true);
+        setPosts([]);
+        setIsDemo(false);
       }
     } catch (err: any) {
       toast.error("Error loading live posts.");
-      setPosts(DEFAULT_NICHE_POSTS);
-      setIsDemo(true);
+      setPosts([]);
+      setIsDemo(false);
     } finally {
       setLoadingPosts(false);
     }
   };
 
   useEffect(() => {
+    if (loadingProfile) return;
     if (!hasInstagramIntegration) {
-      setIsDemo(true);
-      setPosts(DEFAULT_NICHE_POSTS);
+      setIsDemo(false);
+      setPosts([]);
     } else {
       fetchLivePosts();
     }
-  }, [hasInstagramIntegration]);
+  }, [hasInstagramIntegration, loadingProfile]);
 
   const handleToggleMode = (checked: boolean) => {
     if (!checked) {
+      setIsDemo(false);
+      setPosts([]);
+      toast.info("Switched to Live Mode.");
+    } else {
       setIsDemo(true);
       setPosts(DEFAULT_NICHE_POSTS);
       toast.info("Switched to Demo Creator Mode.");
-    } else {
-      if (!hasInstagramIntegration) {
-        toast.error("No Instagram Integration found. Go to Integrations tab to connect.");
-        return;
-      }
-      fetchLivePosts();
     }
   };
 
@@ -244,6 +242,10 @@ export default function AnalyticsPage() {
 
   // Run AI Recommendation blueprints
   const handleGenerateRecommendations = async () => {
+    if (posts.length === 0) {
+      toast.error("No posts found to analyze. Please connect your Instagram or enable Demo Mode.");
+      return;
+    }
     setLoadingAI(true);
     const steps = [
       "Analyzing content metrics and engagement levels...",
@@ -342,7 +344,7 @@ export default function AnalyticsPage() {
           <button
             onClick={() => handleToggleMode(!isDemo)}
             className={`w-10 h-6 flex items-center rounded-full p-1 transition-all duration-300 ${
-              !isDemo ? "bg-blue-500 justify-end" : "bg-white/[0.08] justify-start"
+              isDemo ? "bg-blue-500 justify-end" : "bg-white/[0.08] justify-start"
             }`}
           >
             <span className="w-4 h-4 bg-white rounded-full shadow-md" />
@@ -350,20 +352,58 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Integration Warning Banner if in Demo mode */}
+      {/* Integration Warning Banners */}
+      {!hasInstagramIntegration && !isDemo && (
+        <div className="glass-card border border-blue-500/20 bg-blue-500/5 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex gap-x-3 items-center">
+            <AlertCircle className="w-5 h-5 text-blue-400 shrink-0" />
+            <div className="text-xs text-blue-200/90 leading-normal">
+              <strong>Instagram account not connected.</strong> Connect your account in the{" "}
+              <Link href={`/dashboard/${slug}/integrations`} className="underline font-semibold text-blue-400 hover:text-blue-300">
+                Integrations
+              </Link>{" "}
+              tab to view your live post metrics, or enable Demo Mode to try it out.
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setIsDemo(true);
+              setPosts(DEFAULT_NICHE_POSTS);
+              toast.info("Enabled Demo Creator Mode.");
+            }}
+            className="px-4 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-xs font-semibold text-blue-400 transition"
+          >
+            Enable Demo Mode
+          </button>
+        </div>
+      )}
+
+      {hasInstagramIntegration && !isDemo && posts.length === 0 && !loadingPosts && (
+        <div className="glass-card border border-blue-500/20 bg-blue-500/5 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex gap-x-3 items-center">
+            <AlertCircle className="w-5 h-5 text-blue-400 shrink-0" />
+            <div className="text-xs text-blue-200/90 leading-normal">
+              <strong>No posts found.</strong> Your Instagram integration is active, but we didn&apos;t find any posts on your profile. Upload reels or posts on Instagram, or enable Demo Mode to preview.
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setIsDemo(true);
+              setPosts(DEFAULT_NICHE_POSTS);
+              toast.info("Enabled Demo Creator Mode.");
+            }}
+            className="px-4 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-xs font-semibold text-blue-400 transition"
+          >
+            Enable Demo Mode
+          </button>
+        </div>
+      )}
+
       {isDemo && (
         <div className="glass-card border border-amber-500/20 bg-amber-500/5 rounded-2xl p-4 flex gap-x-3 items-center">
           <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
-          <div className="text-xs text-amber-200/90 leading-normal">
-            {!hasInstagramIntegration ? (
-              <span>
-                <strong>No connected Instagram integration found.</strong> We have loaded an interactive <strong>Dopamine Detox & Addiction Recovery</strong> niche creator profile so you can test all features. Connect your account in <span className="underline font-semibold">Integrations</span> to fetch live posts.
-              </span>
-            ) : (
-              <span>
-                <strong>Browsing Demo mode.</strong> Toggle the switch above to connect to your live Instagram integration profile.
-              </span>
-            )}
+          <div className="text-xs text-amber-200/90 leading-normal flex-1">
+            <strong>Viewing Demo Creator Mode.</strong> We have loaded interactive Dopamine Detox & Addiction Recovery mock posts. Toggle the mode switch in the header to exit.
           </div>
         </div>
       )}
