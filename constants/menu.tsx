@@ -4,7 +4,7 @@ import {
   RocketDuoToneWhite,
   SettingsDuoToneWhite,
 } from "@/icons";
-import { Video, Users, Flame } from "lucide-react";
+import { Video, Users, Flame, BarChart3 } from "lucide-react";
 import { v4 as uuid } from "uuid";
 
 type Props = {
@@ -44,6 +44,11 @@ export const SIDEBAR_MENU: SIDEBAR_MENU_TYPE[] = [
   },
   {
     id: uuid(),
+    label: "analytics",
+    icon: <BarChart3 className="w-5 h-5 text-white" />,
+  },
+  {
+    id: uuid(),
     label: "integrations",
     icon: <RocketDuoToneWhite />,
   },
@@ -53,4 +58,5 @@ export const SIDEBAR_MENU: SIDEBAR_MENU_TYPE[] = [
     icon: <SettingsDuoToneWhite />,
   },
 ];
+
 

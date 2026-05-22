@@ -16,6 +16,7 @@ const SIDEBAR_TOOLTIPS: Record<string, string> = {
   automation: "Create & manage DM automations",
   "content-engine": "AI-powered content creation",
   virality: "Predict script virality & simulate retention",
+  analytics: "Instagram post analytics & AI recommendation blueprints",
   integrations: "Connect Instagram & other services",
   settings: "Account & app settings",
 };
