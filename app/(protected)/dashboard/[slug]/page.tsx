@@ -37,6 +37,20 @@ function Page({ params: { slug } }: Props) {
   const contacts = contactsData?.status === 200 ? (contactsData.data as any[]) : [];
   const totalContacts = contacts.length;
 
+  React.useEffect(() => {
+    console.log("🚀 [Janus UI Engine] Main dashboard loaded for space slug:", slug);
+  }, [slug]);
+
+  React.useEffect(() => {
+    if (contactsData) {
+      console.log("📈 [Janus UI Engine] Loaded automation contacts list. Total contacts count:", contacts.length);
+    }
+  }, [contactsData, contacts.length]);
+
+  React.useEffect(() => {
+    console.log("ℹ️ [Janus UI Engine] Main graph filter changed to activeTab:", activeTab, "and timeRange:", timeRange);
+  }, [activeTab, timeRange]);
+
   // Map real contacts to realistic timeline events
   const timelineEvents = contacts.map((c, idx) => {
     const types = ["Smart AI Reply", "Keyword Match", "Session Connected"];
