@@ -141,24 +141,34 @@ export const getProfilePosts = async () => {
     const profile = await findUser(user.id);
     if (!profile || profile.integrations.length === 0) return { status: 404 };
 
+    const baseUrl = process.env.INSTAGRAM_BASE_URL || "https://graph.instagram.com";
     const posts = await fetch(
-      `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp,thumbnail_url&limit=10&access_token=${profile.integrations[0].token}`,
+      `${baseUrl}/me/media?fields=id,caption,media_url,media_type,timestamp,thumbnail_url&limit=10&access_token=${profile.integrations[0].token}`,
       {
         next: {
-          revalidate: 900, // Cache response for 15 minutes (900 seconds)
+          revalidate: 0, // Disable fetch cache so media updates immediately
         },
       }
     );
 
+    if (!posts.ok) {
+      const errorData = await posts.json().catch(() => ({}));
+      console.error("Instagram API error fetching media:", errorData);
+      return { 
+        status: posts.status, 
+        error: errorData.error?.message || "Failed to fetch media from Instagram" 
+      };
+    }
+
     const parsed = await posts.json();
 
     if (parsed) return { status: 200, data: parsed };
-    console.log("🚀 ~ getProfilePosts ~ error");
-    return { status: 404 };
+    console.log("🚀 ~ getProfilePosts ~ error: no parsed data");
+    return { status: 404, error: "No media data returned" };
   } catch (error: any) {
     console.log("🚀 ~ getProfilePosts ~ error:", error.message);
 
-    return { status: 500 };
+    return { status: 500, error: error.message };
   }
 };
 

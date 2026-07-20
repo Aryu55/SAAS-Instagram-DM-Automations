@@ -17,27 +17,32 @@ export default function Page() {
   };
 
   return (
-    <div className="flex flex-col gap-y-8 p-6 max-w-2xl">
+    <div className="flex flex-col gap-y-8 p-6 max-w-2xl text-[var(--text-primary)]">
       {/* Account Info */}
-      <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Account</h2>
+      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--card-bg)] p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+          Account
+        </h2>
         <div className="flex items-center gap-x-3">
-          <span className="text-sm text-[#9B9CA0]">Current Plan</span>
-          <span className="rounded-full bg-gradient-to-r from-[#6d60a3] to-[#9434E6] px-3 py-0.5 text-xs font-medium text-white">
+          <span className="text-sm text-[var(--text-secondary)]">Current Plan</span>
+          <span className="rounded-full bg-[var(--accent-whisper)] border border-[var(--accent-veil)] px-3 py-0.5 text-xs font-bold text-[var(--accent-magenta)] uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
             PRO
           </span>
         </div>
-        <p className="mt-3 text-sm text-[#9B9CA0]">
+        <p className="mt-3 text-sm text-[var(--text-secondary)]">
           You have full access to all features.
         </p>
       </div>
 
       {/* Logout */}
-      <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Session</h2>
+      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--card-bg)] p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+          Session
+        </h2>
         <button
           onClick={handleLogout}
-          className="rounded-lg bg-red-600 hover:bg-red-700 transition-colors px-5 py-2 text-sm font-medium text-white"
+          className="rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--accent-magenta)] hover:text-white transition-smooth px-5 py-2.5 text-xs font-bold uppercase tracking-wider shadow-sm"
+          style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
         >
           Log out
         </button>

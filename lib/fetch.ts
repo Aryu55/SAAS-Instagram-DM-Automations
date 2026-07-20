@@ -1,8 +1,9 @@
 import axios from "axios";
 
 export const refreshToken = async (token: string) => {
+  const baseUrl = process.env.INSTAGRAM_BASE_URL || "https://graph.instagram.com";
   const refresh_token = await axios.get(
-    `${process.env.INSTAGRAM_BASE_URL}/refresh_access_token?grant_type=ig_refresh_token&access_token=${token}`
+    `${baseUrl}/refresh_access_token?grant_type=ig_refresh_token&access_token=${token}`
   );
   return refresh_token.data;
 };
@@ -14,8 +15,9 @@ export const sendDm = async (
   token: string
 ) => {
   console.log("sending Message");
+  const baseUrl = process.env.INSTAGRAM_BASE_URL || "https://graph.instagram.com";
   return await axios.post(
-    `${process.env.INSTAGRAM_BASE_URL}/v21.0/${userId}/messages`,
+    `${baseUrl}/v21.0/${userId}/messages`,
     {
       recipient: {
         id: receiverId,
@@ -40,8 +42,9 @@ export const sendPrivateMessage = async (
   token: string
 ) => {
   console.log("sending Message");
+  const baseUrl = process.env.INSTAGRAM_BASE_URL || "https://graph.instagram.com";
   return await axios.post(
-    `${process.env.INSTAGRAM_BASE_URL}/${userId}/messages`,
+    `${baseUrl}/${userId}/messages`,
     {
       recipient: {
         comment_id: receiverId,

@@ -1,7 +1,6 @@
 "use server";
 
 import { client } from "@/lib/prisma";
-import { cache } from "react";
 
 export const createAutomation = async (clerkId: string, id?: string, template?: string) => {
   let automationData: any = {};
@@ -144,7 +143,7 @@ export const createAutomation = async (clerkId: string, id?: string, template?: 
   });
 };
 
-export const getAutomation = cache(async (clerkId: string) => {
+export const getAutomation = async (clerkId: string) => {
   return await client.user.findUnique({
     where: {
       clerkId,
@@ -161,9 +160,9 @@ export const getAutomation = cache(async (clerkId: string) => {
       },
     },
   });
-});
+};
 
-export const findAutomation = cache(async (id: string) => {
+export const findAutomation = async (id: string) => {
   return await client.automation.findUnique({
     where: {
       id,
@@ -182,7 +181,7 @@ export const findAutomation = cache(async (id: string) => {
       },
     },
   });
-});
+};
 
 export const updateAutomation = async (
   automationId: string,

@@ -24,41 +24,25 @@ function Trigger({ id }: Props) {
   if (isQueryPending) {
     return (
       <div className="flex flex-col gap-y-6 items-center w-full">
-        <div className="bg-background-80 p-3 rounded-xl w-full skeleton-shimmer">
+        <div className="bg-[var(--card-bg)] p-4 rounded-none border border-[var(--border-color)] w-full skeleton-shimmer">
           <div className="flex gap-x-2 items-center">
-            <Skeleton className="h-8 w-8 rounded-lg bg-white/[0.06]" />
-            <Skeleton className="h-5 w-56 bg-white/[0.06]" />
+            <Skeleton className="h-8 w-8 rounded-none bg-[var(--border-color)]" />
+            <Skeleton className="h-5 w-56 bg-[var(--border-color)]" />
           </div>
-          <Skeleton className="h-4 w-full mt-2 bg-white/[0.04]" />
+          <Skeleton className="h-4 w-full mt-2 bg-[var(--border-color)]" />
           <div className="flex gap-2 mt-5">
-            <Skeleton className="h-7 w-16 rounded-full bg-white/[0.06]" />
-            <Skeleton className="h-7 w-20 rounded-full bg-white/[0.06]" />
-            <Skeleton className="h-7 w-14 rounded-full bg-white/[0.06]" />
+            <Skeleton className="h-7 w-16 rounded-none bg-[var(--border-color)]" />
+            <Skeleton className="h-7 w-20 rounded-none bg-[var(--border-color)]" />
+            <Skeleton className="h-7 w-14 rounded-none bg-[var(--border-color)]" />
           </div>
         </div>
       </div>
     );
   }
 
-  /*   const data = {
-    data: {
-      trigger: [
-        {
-          type: "COMMENTS",
-        },
-      ],
-      keywords: [
-        { id: "1", word: "hello", automationId: "M001" },
-        { id: "2", word: "welcome", automationId: null },
-        { id: "3", word: "thank you", automationId: "M003" },
-      ],
-      listener: null,
-    },
-  }; */
-
   if (data?.data && data?.data?.trigger?.length > 0) {
     return (
-      <div className="flex flex-col gap-y-6 items-center">
+      <div className="flex flex-col gap-y-6 items-center w-full">
         <ActiveTrigger
           type={data.data.trigger[0].type}
           keywords={data.data.keywords}
@@ -66,13 +50,13 @@ function Trigger({ id }: Props) {
 
         {data.data.trigger.length > 1 && (
           <>
-            <div className="relative w-6/12">
-              <p className="absolute transform bg-background-90 px-2 -translate-y-1/2 top-1/2 -translate-x-1/2 left-1/2">
+            <div className="relative w-6/12 flex justify-center">
+              <p className="absolute transform bg-[var(--page-bg)] px-2 -translate-y-1/2 top-1/2 text-xs font-bold text-[var(--text-tertiary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                 or
               </p>
               <Separator
                 orientation="horizontal"
-                className="border-muted border-[1px]"
+                className="border-[var(--border-color)] border-[1px] w-full"
               />
             </div>
             <ActiveTrigger
@@ -89,30 +73,46 @@ function Trigger({ id }: Props) {
 
   return (
     <TriggerButton label="Add Trigger">
-      <div className="flex flex-col gap-y-2">
-        {AUTOMATION_TRIGGERS.map((trigger) => (
-          <div
-            key={trigger.id}
-            onClick={() => onSetTrigger(trigger.type)}
-            className={cn(
-              "hover:opacity-80 text-white rounded-xl flex cursor-pointer flex-col p-3 gap-y-2",
-              !types?.find((t) => t === trigger.type)
-                ? "bg-background-80"
-                : "bg-gradient-to-br from-[#3352CC] font-medium to-[#1C2D70]"
-            )}
-          >
-            <div className="flex gap-x-2 items-center">
-              {trigger.icon}
-              <p className="font-bold">{trigger.label}</p>
+      <div className="flex flex-col gap-y-4 text-[var(--text-primary)] w-full">
+        {AUTOMATION_TRIGGERS.map((trigger) => {
+          const isSelected = !!types?.find((t) => t === trigger.type);
+          return (
+            <div
+              key={trigger.id}
+              onClick={() => onSetTrigger(trigger.type)}
+              className={cn(
+                "rounded-none flex cursor-pointer flex-col p-5 gap-y-1.5 transition-smooth border",
+                !isSelected
+                  ? "bg-[var(--card-bg)] border-[var(--border-color)] text-[var(--text-primary)] hover:border-[var(--text-secondary)]"
+                  : "bg-[var(--accent-whisper)] border-[var(--accent-magenta)] text-[var(--text-primary)] font-medium shadow-sm"
+              )}
+            >
+              <div className="flex gap-x-2.5 items-center">
+                <span className={cn(
+                  "p-1.5 rounded-none shrink-0 border",
+                  !isSelected 
+                    ? "bg-[var(--page-bg)] border-[var(--border-color)] text-[var(--text-secondary)]" 
+                    : "bg-[var(--accent-magenta)] border-[var(--accent-magenta)] text-white"
+                )}>
+                  {trigger.icon}
+                </span>
+                <p className="font-bold text-sm tracking-tight" style={{ fontFamily: "var(--font-cormorant), serif" }}>{trigger.label}</p>
+              </div>
+              <p className={cn(
+                "text-xs leading-relaxed",
+                !isSelected ? "text-[var(--text-secondary)]" : "text-[var(--text-secondary)]"
+              )}>
+                {trigger.description}
+              </p>
             </div>
-            <p className="text-sm font-light">{trigger.description}</p>
-          </div>
-        ))}
+          );
+        })}
         <Keywords id={id} />
         <Button
           onClick={onSaveTrigger}
           disabled={types?.length === 0}
-          className="bg-gradient-to-br from-[#3352CC] font-medium text-white to-[#1C2D70]"
+          className="bg-[var(--primary)] hover:bg-[var(--accent-magenta)] hover:text-white text-[var(--primary-foreground)] rounded-none font-bold py-5 tracking-wider uppercase text-[10px] transition-smooth active:scale-[0.98] disabled:opacity-50 shadow-sm border border-[var(--border-color)]"
+          style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
         >
           <Loader state={isPending}>Create Trigger</Loader>
         </Button>

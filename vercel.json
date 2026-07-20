@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/factory/cron",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/factory/weekly",
+      "schedule": "0 9 * * 1"
+    }
+  ]
+}

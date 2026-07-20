@@ -19,11 +19,13 @@ type Props = {
 
 async function Layout({ children, params }: Props) {
   return (
-    <div className="p-3">
+    <div className="flex min-h-screen w-full bg-background radial--gradient">
       <Sidebar slug={params.slug} />
-      <div className="lg:ml-[250px] lg:pl-10 lg:py-5 flex flex-col overflow-auto">
+      <div className="flex-1 lg:ml-[250px] p-6 lg:p-8 flex flex-col overflow-x-hidden min-h-screen">
         <NavBar slug={params.slug} />
-        {children}
+        <main className="flex-grow mt-6">
+          {children}
+        </main>
       </div>
     </div>
   );

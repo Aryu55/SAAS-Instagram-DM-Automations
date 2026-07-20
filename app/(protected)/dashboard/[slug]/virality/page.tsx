@@ -216,47 +216,45 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
   };
 
   return (
-    <div className="flex flex-col gap-y-8 p-6 lg:p-8 bg-[#121212] min-h-screen text-white">
+    <div className="flex flex-col gap-y-8 p-4 lg:p-6 text-[var(--text-primary)] pr-2 lg:pr-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-y-2">
-        <div className="flex items-center gap-x-3">
-          <div className="bg-gradient-to-tr from-pink-500 to-rose-500 p-2.5 rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.3)]">
-            <Flame className="h-6 w-6 text-white animate-pulse" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-[#E2E8F0] to-[#94A3B8] bg-clip-text text-transparent">
-              Virality Predictor Model
-            </h1>
-            <p className="text-sm text-[#9B9CA0]">
-              Grade your short-form scripts, simulate audience retention, and apply AI self-correction algorithms.
-            </p>
-          </div>
-        </div>
+      <div className="flex flex-col gap-y-2 border-b border-[var(--border-color)] pb-6 mt-2 animate-fade-in-up">
+        <span className="inline-flex items-center gap-x-1.5 px-3 py-1 bg-[var(--accent-whisper)] border border-[var(--accent-veil)] text-[var(--accent-magenta)] text-[9px] font-bold tracking-wider uppercase rounded-full w-fit" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+          Prediction Engine
+        </span>
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] leading-none tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+          Virality Predictor Model
+        </h1>
+        <p className="text-[var(--text-secondary)] text-sm max-w-[65ch] leading-relaxed">
+          Grade your short-form scripts, simulate audience retention, and apply AI self-correction algorithms.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
         {/* Left Column: Script Editor Panel */}
         <div className="xl:col-span-6 flex flex-col gap-y-6">
-          <div className="bg-[#1D1D1D] rounded-2xl border border-white/[0.08] p-5 flex flex-col gap-y-6 shadow-xl relative overflow-hidden backdrop-blur-md">
-            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none" />
+          <div className="border border-[var(--border-color)] bg-[var(--card-bg)] p-5 flex flex-col gap-y-6 shadow-sm relative overflow-hidden rounded-xl">
+            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[var(--accent-whisper)] rounded-full blur-[120px] pointer-events-none" />
             
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold flex items-center gap-x-2">
-                <FileCode className="h-5 w-5 text-indigo-400" />
+              <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-x-2">
+                <FileCode className="h-5 w-5 text-[var(--accent-magenta)]" />
                 Script Setup Panel
               </h2>
-              <div className="flex items-center gap-x-2 bg-white/[0.03] p-1 rounded-xl border border-white/[0.05]">
+              <div className="flex items-center gap-x-2 bg-[var(--page-bg)]/50 p-1 rounded-lg border border-[var(--border-color)]">
                 <button
                   onClick={() => setIsComparing(false)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition duration-200 ${!isComparing ? "bg-indigo-600 text-white shadow-md" : "text-[#9B9CA0] hover:text-white"}`}
+                  className={`text-[10px] px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider transition-smooth ${!isComparing ? "bg-[var(--accent-magenta)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--accent-magenta)]"}`}
+                  style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                 >
                   Single Script
                 </button>
                 <button
                   onClick={() => setIsComparing(true)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition duration-200 ${isComparing ? "bg-indigo-600 text-white shadow-md" : "text-[#9B9CA0] hover:text-white"}`}
+                  className={`text-[10px] px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider transition-smooth ${isComparing ? "bg-[var(--accent-magenta)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--accent-magenta)]"}`}
+                  style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                 >
-                  Compare Drafts (A vs B)
+                  Compare Drafts
                 </button>
               </div>
             </div>
@@ -264,44 +262,44 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
             {/* Inputs Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex flex-col gap-y-1.5">
-                <label className="text-xs font-semibold text-[#9B9CA0]">Target Platform</label>
+                <label className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-secondary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Target Platform</label>
                 <select
                   value={platform}
                   onChange={(e) => setPlatform(e.target.value)}
-                  className="bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition duration-200"
+                  className="bg-[var(--page-bg)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-magenta)]/30 transition duration-150"
                 >
-                  <option value="instagram" className="bg-[#1D1D1D]">Instagram Reels</option>
-                  <option value="youtube" className="bg-[#1D1D1D]">YouTube Shorts</option>
-                  <option value="tiktok" className="bg-[#1D1D1D]">TikTok Video</option>
+                  <option value="instagram" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Instagram Reels</option>
+                  <option value="youtube" className="bg-[var(--card-bg)] text-[var(--text-primary)]">YouTube Shorts</option>
+                  <option value="tiktok" className="bg-[var(--card-bg)] text-[var(--text-primary)]">TikTok Video</option>
                 </select>
               </div>
 
               <div className="flex flex-col gap-y-1.5">
-                <label className="text-xs font-semibold text-[#9B9CA0]">Audience Niche</label>
+                <label className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-secondary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Audience Niche</label>
                 <select
                   value={niche}
                   onChange={(e) => setNiche(e.target.value)}
-                  className="bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition duration-200"
+                  className="bg-[var(--page-bg)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-magenta)]/30 transition duration-150"
                 >
-                  <option value="tech" className="bg-[#1D1D1D]">Tech & Automation</option>
-                  <option value="business" className="bg-[#1D1D1D]">Business & Marketing</option>
-                  <option value="finance" className="bg-[#1D1D1D]">Finance & Wealth</option>
-                  <option value="productivity" className="bg-[#1D1D1D]">Productivity & Dopamine Detox</option>
-                  <option value="creative" className="bg-[#1D1D1D]">Creative & Copywriting</option>
-                  <option value="general" className="bg-[#1D1D1D]">Self Help & Addiction Recovery</option>
+                  <option value="tech" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Tech & Automation</option>
+                  <option value="business" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Business & Marketing</option>
+                  <option value="finance" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Finance & Wealth</option>
+                  <option value="productivity" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Productivity & Detox</option>
+                  <option value="creative" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Creative & Copy</option>
+                  <option value="general" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Self Help / Recovery</option>
                 </select>
               </div>
 
               <div className="flex flex-col gap-y-1.5">
-                <label className="text-xs font-semibold text-[#9B9CA0]">Primary Language</label>
+                <label className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-secondary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Primary Language</label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition duration-200"
+                  className="bg-[var(--page-bg)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-magenta)]/30 transition duration-150"
                 >
-                  <option value="hinglish" className="bg-[#1D1D1D]">Hinglish (Hindi+Eng)</option>
-                  <option value="english" className="bg-[#1D1D1D]">Pure English</option>
-                  <option value="hindi" className="bg-[#1D1D1D]">Pure Hindi</option>
+                  <option value="hinglish" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Hinglish (Hindi+Eng)</option>
+                  <option value="english" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Pure English</option>
+                  <option value="hindi" className="bg-[var(--card-bg)] text-[var(--text-primary)]">Pure Hindi</option>
                 </select>
               </div>
             </div>
@@ -309,31 +307,31 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
             {/* Editor Blocks */}
             <div className="flex flex-col gap-y-4">
               <div className="flex flex-col gap-y-2">
-                <div className="flex items-center justify-between text-xs text-[#9B9CA0]">
-                  <span className="font-semibold text-indigo-400">Script Version A (Primary)</span>
-                  <span>{scriptA.split(/\s+/).filter(Boolean).length} words</span>
+                <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
+                  <span className="font-bold text-[var(--accent-magenta)] uppercase tracking-wider text-[9px]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Script Version A (Primary)</span>
+                  <span className="font-bold text-[10px] tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>{scriptA.split(/\s+/).filter(Boolean).length} words</span>
                 </div>
                 <textarea
                   value={scriptA}
                   onChange={(e) => setScriptA(e.target.value)}
                   placeholder="Paste your primary short form script content here..."
                   rows={8}
-                  className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-4 text-sm text-white font-mono leading-relaxed focus:outline-none focus:border-indigo-500/50 focus:bg-white/[0.03] transition duration-200 resize-y"
+                  className="bg-[var(--page-bg)]/30 border border-[var(--border-color)] rounded-lg p-4 text-xs text-[var(--text-primary)] font-mono leading-relaxed focus:outline-none focus:border-[var(--accent-magenta)]/30 focus:bg-[var(--page-bg)]/50 transition duration-150 resize-y"
                 />
               </div>
 
               {isComparing && (
                 <div className="flex flex-col gap-y-2 animate-in fade-in-50 duration-200">
-                  <div className="flex items-center justify-between text-xs text-[#9B9CA0]">
-                    <span className="font-semibold text-pink-400">Script Version B (Comparison)</span>
-                    <span>{scriptB.split(/\s+/).filter(Boolean).length} words</span>
+                  <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
+                    <span className="font-bold text-[var(--accent-magenta)] uppercase tracking-wider text-[9px]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Script Version B (Comparison)</span>
+                    <span className="font-bold text-[10px] tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>{scriptB.split(/\s+/).filter(Boolean).length} words</span>
                   </div>
                   <textarea
                     value={scriptB}
                     onChange={(e) => setScriptB(e.target.value)}
                     placeholder="Paste secondary comparison script draft here..."
                     rows={8}
-                    className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-4 text-sm text-white font-mono leading-relaxed focus:outline-none focus:border-pink-500/50 focus:bg-white/[0.03] transition duration-200 resize-y"
+                    className="bg-[var(--page-bg)]/30 border border-[var(--border-color)] rounded-lg p-4 text-xs text-[var(--text-primary)] font-mono leading-relaxed focus:outline-none focus:border-[var(--accent-magenta)]/30 focus:bg-[var(--page-bg)]/50 transition duration-150 resize-y"
                   />
                 </div>
               )}
@@ -342,11 +340,12 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
             <button
               onClick={handleEvaluate}
               disabled={loading || !scriptA.trim()}
-              className="w-full bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white rounded-xl py-3.5 font-bold transition duration-200 shadow-lg shadow-indigo-600/10 flex items-center justify-center gap-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[var(--text-primary)] text-[var(--page-bg)] hover:bg-[var(--accent-magenta)] hover:text-white border border-[var(--border-color)] rounded-lg py-3.5 font-bold uppercase tracking-wider transition-smooth shadow-sm flex items-center justify-center gap-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-5 w-5 text-current" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
@@ -354,7 +353,7 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
                 </>
               ) : (
                 <>
-                  <Zap className="h-5 w-5 fill-current" />
+                  <Zap className="h-4 w-4 fill-current" />
                   Analyze Script Virality
                 </>
               )}
@@ -365,54 +364,54 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
         {/* Right Column: Analytics Results Panel */}
         <div className="xl:col-span-6 flex flex-col gap-y-6">
           {!results ? (
-            <div className="bg-[#1D1D1D] rounded-2xl border border-white/[0.08] p-10 flex flex-col items-center justify-center text-center shadow-xl min-h-[550px] relative overflow-hidden">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-pink-600/5 rounded-full blur-[140px] pointer-events-none" />
+            <div className="border border-[var(--border-color)] bg-[var(--card-bg)] p-10 flex flex-col items-center justify-center text-center shadow-sm min-h-[550px] relative overflow-hidden rounded-xl">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-[var(--accent-whisper)] rounded-full blur-[140px] pointer-events-none" />
               
-              <div className="bg-white/[0.02] border border-white/[0.05] p-5 rounded-full mb-6">
-                <Flame className="h-12 w-12 text-[#9B9CA0] animate-pulse" />
+              <div className="bg-[var(--page-bg)] border border-[var(--border-color)] p-5 rounded-xl mb-6">
+                <Flame className="h-12 w-12 text-[var(--text-secondary)] animate-pulse" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Predictions Queue Empty</h3>
-              <p className="text-sm text-[#9B9CA0] max-w-sm mb-8">
+              <h3 className="text-2xl font-bold mb-2 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>Predictions Queue Empty</h3>
+              <p className="text-xs text-[var(--text-secondary)] max-w-sm mb-8 font-medium leading-relaxed">
                 Paste your short-form screenplay draft and hit analyze to project script retention flow and receive optimized feedback coordinates.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full text-left">
-                <div className="bg-white/[0.02] border border-white/[0.04] p-4 rounded-xl">
-                  <Sparkles className="h-5 w-5 text-indigo-400 mb-2" />
-                  <h4 className="text-xs font-bold text-white mb-1">Radar Dimensions</h4>
-                  <p className="text-[11px] text-[#9B9CA0]">Calculates quality markers across hook, pacing, emotion, and automation CTAs.</p>
+                <div className="bg-[var(--page-bg)]/50 border border-[var(--border-color)] p-4 rounded-xl">
+                  <Sparkles className="h-5 w-5 text-[var(--accent-magenta)] mb-2" />
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] mb-1">Radar Dimensions</h4>
+                  <p className="text-[10px] text-[var(--text-secondary)] font-medium leading-relaxed">Calculates quality markers across hook, pacing, emotion, and automation CTAs.</p>
                 </div>
-                <div className="bg-white/[0.02] border border-white/[0.04] p-4 rounded-xl">
-                  <TrendingUp className="h-5 w-5 text-pink-400 mb-2" />
-                  <h4 className="text-xs font-bold text-white mb-1">Retention Curves</h4>
-                  <p className="text-[11px] text-[#9B9CA0]">Simulates audience decay coordinates across timelines to spot drop-off points.</p>
+                <div className="bg-[var(--page-bg)]/50 border border-[var(--border-color)] p-4 rounded-xl">
+                  <TrendingUp className="h-5 w-5 text-[var(--accent-magenta)] mb-2" />
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] mb-1">Retention Curves</h4>
+                  <p className="text-[10px] text-[var(--text-secondary)] font-medium leading-relaxed">Simulates audience decay coordinates across timelines to spot drop-off points.</p>
                 </div>
-                <div className="bg-white/[0.02] border border-white/[0.04] p-4 rounded-xl">
-                  <Lightbulb className="h-5 w-5 text-yellow-400 mb-2" />
-                  <h4 className="text-xs font-bold text-white mb-1">AI Self-Correction</h4>
-                  <p className="text-[11px] text-[#9B9CA0]">Provides line-by-line script replacements with first-principles reasoning.</p>
+                <div className="bg-[var(--page-bg)]/50 border border-[var(--border-color)] p-4 rounded-xl">
+                  <Lightbulb className="h-5 w-5 text-[var(--accent-magenta)] mb-2" />
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] mb-1">AI Self-Correction</h4>
+                  <p className="text-[10px] text-[var(--text-secondary)] font-medium leading-relaxed">Provides line-by-line script replacements with first-principles reasoning.</p>
                 </div>
               </div>
             </div>
           ) : (
             <div className="flex flex-col gap-y-6">
               {/* KPI Score and Visualizers */}
-              <div className="bg-[#1D1D1D] rounded-2xl border border-white/[0.08] p-5 flex flex-col gap-y-6 shadow-xl relative overflow-hidden backdrop-blur-md">
-                <div className="absolute top-0 left-0 w-[200px] h-[200px] bg-green-500/5 rounded-full blur-[100px] pointer-events-none" />
+              <div className="border border-[var(--border-color)] bg-[var(--card-bg)] p-5 flex flex-col gap-y-6 shadow-sm relative overflow-hidden rounded-xl">
+                <div className="absolute top-0 left-0 w-[200px] h-[200px] bg-[var(--accent-whisper)] rounded-full blur-[100px] pointer-events-none" />
                 
-                <h3 className="text-lg font-semibold flex items-center gap-x-2">
-                  <TrendingUp className="h-5 w-5 text-indigo-400" />
+                <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-x-2">
+                  <TrendingUp className="h-5 w-5 text-[var(--accent-magenta)]" />
                   Virality Analytics Metrics
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Version A Score */}
                   <div className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center relative overflow-hidden ${getScoreColor(results.versionA.score)}`}>
-                    <span className="text-[11px] font-bold tracking-widest uppercase opacity-70 mb-2">Version A Score</span>
-                    <span className="text-5xl font-black">{results.versionA.score}%</span>
+                    <span className="text-[10px] font-bold tracking-wider uppercase opacity-75 mb-2" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Version A Score</span>
+                    <span className="text-5xl font-black" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>{results.versionA.score}%</span>
                     
-                    <div className="flex items-center gap-x-1.5 mt-3 text-xs bg-white/[0.03] border border-white/[0.05] px-2.5 py-1 rounded-full text-white">
-                      <ShieldCheck className="h-3.5 w-3.5 text-green-400" />
+                    <div className="flex items-center gap-x-1.5 mt-3 text-[10px] uppercase font-bold tracking-wider bg-[var(--page-bg)] border border-[var(--border-color)] px-3 py-1 rounded-full text-[var(--text-primary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
                       {results.versionA.score >= 80 ? "Viral Candidate" : results.versionA.score >= 60 ? "Moderate Standard" : "High Dropoff Risk"}
                     </div>
                   </div>
@@ -420,49 +419,48 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
                   {/* Version B Score (or fallback box) */}
                   {results.versionB ? (
                     <div className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center relative overflow-hidden ${getScoreColor(results.versionB.score)}`}>
-                      <span className="text-[11px] font-bold tracking-widest uppercase opacity-70 mb-2">Version B Score</span>
-                      <span className="text-5xl font-black">{results.versionB.score}%</span>
-                      
-                      <div className="flex items-center gap-x-1.5 mt-3 text-xs bg-white/[0.03] border border-white/[0.05] px-2.5 py-1 rounded-full text-white">
-                        <ShieldCheck className="h-3.5 w-3.5 text-green-400" />
+                      <span className="text-[10px] font-bold tracking-wider uppercase opacity-75 mb-2" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Version B Score</span>
+                      <span className="text-5xl font-black" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>{results.versionB.score}%</span>
+                      <div className="flex items-center gap-x-1.5 mt-3 text-[10px] uppercase font-bold tracking-wider bg-[var(--page-bg)] border border-[var(--border-color)] px-3 py-1 rounded-full text-[var(--text-primary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
                         {results.versionB.score >= 80 ? "Viral Candidate" : results.versionB.score >= 60 ? "Moderate Standard" : "High Dropoff Risk"}
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 rounded-xl border border-white/[0.06] bg-white/[0.01] flex flex-col items-center justify-center text-center text-[#9B9CA0]">
-                      <Info className="h-5 w-5 mb-2 text-[#545454]" />
-                      <span className="text-xs font-semibold">No Comparison Active</span>
-                      <span className="text-[10px] mt-1">Enable compare drafts mode to benchmark scripts side-by-side.</span>
+                    <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--page-bg)]/30 flex flex-col items-center justify-center text-center text-[var(--text-secondary)]">
+                      <Info className="h-5 w-5 mb-2 text-[var(--text-tertiary)]" />
+                      <span className="text-xs font-semibold text-[var(--text-primary)]">No Comparison Active</span>
+                      <span className="text-[9px] mt-1 uppercase font-bold tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Enable compare drafts mode to benchmark scripts side-by-side.</span>
                     </div>
                   )}
                 </div>
 
                 {/* Radar Chart */}
                 <div className="flex flex-col gap-y-2 mt-2">
-                  <h4 className="text-xs font-bold text-[#9B9CA0] uppercase tracking-wider">Metrics Vector Assessment</h4>
-                  <div className="w-full flex justify-center py-4 bg-white/[0.01] border border-white/[0.04] rounded-xl">
+                  <h4 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Metrics Vector Assessment</h4>
+                  <div className="w-full flex justify-center py-4 bg-[var(--page-bg)]/30 border border-[var(--border-color)] rounded-xl">
                     <ResponsiveContainer width="100%" height={240}>
                       <RadarChart cx="50%" cy="50%" outerRadius="80%" data={getRadarData()}>
-                        <PolarGrid stroke="rgba(255,255,255,0.08)" />
-                        <PolarAngleAxis dataKey="subject" tick={{ fill: "#9B9CA0", fontSize: 10 }} />
-                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "#545454", fontSize: 8 }} />
+                        <PolarGrid stroke="var(--border-color)" />
+                        <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--text-secondary)", fontSize: 10, fontWeight: 500 }} />
+                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "var(--text-tertiary)", fontSize: 8 }} />
                         <Radar
                           name="Version A"
                           dataKey="A"
-                          stroke="#6366f1"
-                          fill="#6366f1"
+                          stroke="var(--accent-magenta)"
+                          fill="var(--accent-magenta)"
                           fillOpacity={0.35}
                         />
                         {results.versionB && (
                           <Radar
                             name="Version B"
                             dataKey="B"
-                            stroke="#ec4899"
-                            fill="#ec4899"
-                            fillOpacity={0.35}
+                            stroke="var(--text-primary)"
+                            fill="var(--text-primary)"
+                            fillOpacity={0.25}
                           />
                         )}
-                        <Legend wrapperStyle={{ fontSize: 10, fill: "#fff" }} />
+                        <Legend wrapperStyle={{ fontSize: 10, fill: "var(--text-primary)" }} />
                       </RadarChart>
                     </ResponsiveContainer>
                   </div>
@@ -470,29 +468,29 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
 
                 {/* Retention Chart */}
                 <div className="flex flex-col gap-y-2">
-                  <h4 className="text-xs font-bold text-[#9B9CA0] uppercase tracking-wider">Simulated Retention Projection</h4>
-                  <div className="w-full py-4 bg-white/[0.01] border border-white/[0.04] rounded-xl pr-6">
+                  <h4 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Simulated Retention Projection</h4>
+                  <div className="w-full py-4 bg-[var(--page-bg)]/30 border border-[var(--border-color)] rounded-xl pr-6">
                     <ResponsiveContainer width="100%" height={200}>
                       <AreaChart data={getRetentionData()}>
                         <defs>
                           <linearGradient id="colorA" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                            <stop offset="5%" stopColor="var(--accent-magenta)" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="var(--accent-magenta)" stopOpacity={0} />
                           </linearGradient>
                           {results.versionB && (
                             <linearGradient id="colorB" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3} />
-                              <stop offset="95%" stopColor="#ec4899" stopOpacity={0} />
+                              <stop offset="5%" stopColor="var(--text-primary)" stopOpacity={0.2} />
+                              <stop offset="95%" stopColor="var(--text-primary)" stopOpacity={0} />
                             </linearGradient>
                           )}
                         </defs>
-                        <XAxis dataKey="time" stroke="#545454" tick={{ fill: "#9B9CA0", fontSize: 10 }} />
-                        <YAxis unit="%" stroke="#545454" tick={{ fill: "#9B9CA0", fontSize: 10 }} domain={[0, 100]} />
-                        <RechartsTooltip contentStyle={{ backgroundColor: "#1D1D1D", borderColor: "rgba(255,255,255,0.08)", color: "#fff" }} />
+                        <XAxis dataKey="time" stroke="var(--border-color)" tick={{ fill: "var(--text-secondary)", fontSize: 10 }} />
+                        <YAxis unit="%" stroke="var(--border-color)" tick={{ fill: "var(--text-secondary)", fontSize: 10 }} domain={[0, 100]} />
+                        <RechartsTooltip contentStyle={{ backgroundColor: "var(--card-bg)", borderColor: "var(--border-color)", color: "var(--text-primary)", borderRadius: "8px", fontSize: 11 }} />
                         <Area
                           type="monotone"
                           dataKey="Version A"
-                          stroke="#6366f1"
+                          stroke="var(--accent-magenta)"
                           strokeWidth={2}
                           fillOpacity={1}
                           fill="url(#colorA)"
@@ -501,13 +499,13 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
                           <Area
                             type="monotone"
                             dataKey="Version B"
-                            stroke="#ec4899"
+                            stroke="var(--text-primary)"
                             strokeWidth={2}
                             fillOpacity={1}
                             fill="url(#colorB)"
                           />
                         )}
-                        <Legend wrapperStyle={{ fontSize: 10, fill: "#fff" }} />
+                        <Legend wrapperStyle={{ fontSize: 10, fill: "var(--text-primary)" }} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -515,34 +513,38 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
               </div>
 
               {/* Critiques and Suggestions */}
-              <div className="bg-[#1D1D1D] rounded-2xl border border-white/[0.08] p-5 flex flex-col gap-y-4 shadow-xl backdrop-blur-md">
+              <div className="border border-[var(--border-color)] bg-[var(--card-bg)] p-5 flex flex-col gap-y-4 shadow-sm relative rounded-xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-x-2">
                     <button
                       onClick={() => setActiveTab("suggestions")}
-                      className={`text-sm font-semibold pb-1.5 border-b-2 transition duration-200 ${activeTab === "suggestions" ? "text-indigo-400 border-indigo-500" : "text-[#9B9CA0] border-transparent hover:text-white"}`}
+                      className={`text-xs uppercase tracking-wider font-bold pb-1.5 border-b-2 transition duration-200 ${activeTab === "suggestions" ? "text-[var(--accent-magenta)] border-[var(--accent-magenta)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--accent-magenta)]"}`}
+                      style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                     >
                       AI Optimization Tips
                     </button>
                     <button
                       onClick={() => setActiveTab("critique")}
-                      className={`text-sm font-semibold pb-1.5 border-b-2 transition duration-200 ${activeTab === "critique" ? "text-indigo-400 border-indigo-500" : "text-[#9B9CA0] border-transparent hover:text-white"}`}
+                      className={`text-xs uppercase tracking-wider font-bold pb-1.5 border-b-2 transition duration-200 ${activeTab === "critique" ? "text-[var(--accent-magenta)] border-[var(--accent-magenta)]" : "text-[var(--text-secondary)] border-transparent hover:text-[var(--accent-magenta)]"}`}
+                      style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                     >
                       Vector Feedback Critique
                     </button>
                   </div>
 
                   {results.versionB && (
-                    <div className="flex items-center gap-x-1.5 bg-white/[0.03] border border-white/[0.05] p-0.5 rounded-lg text-xs">
+                    <div className="flex items-center gap-x-1.5 bg-[var(--page-bg)] border border-[var(--border-color)] p-0.5 rounded-lg text-xs">
                       <button
                         onClick={() => setActiveCompareVersion("versionA")}
-                        className={`px-2 py-1 rounded ${activeCompareVersion === "versionA" ? "bg-indigo-600 text-white font-medium" : "text-[#9B9CA0]"}`}
+                        className={`px-2 py-1 rounded-lg font-bold uppercase tracking-wider text-[9px] ${activeCompareVersion === "versionA" ? "bg-[var(--accent-magenta)] text-white" : "text-[var(--text-secondary)]"}`}
+                        style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                       >
                         Ver A
                       </button>
                       <button
                         onClick={() => setActiveCompareVersion("versionB")}
-                        className={`px-2 py-1 rounded ${activeCompareVersion === "versionB" ? "bg-pink-600 text-white font-medium" : "text-[#9B9CA0]"}`}
+                        className={`px-2 py-1 rounded-lg font-bold uppercase tracking-wider text-[9px] ${activeCompareVersion === "versionB" ? "bg-[var(--text-primary)] text-white" : "text-[var(--text-secondary)]"}`}
+                        style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                       >
                         Ver B
                       </button>
@@ -557,21 +559,22 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
                       const versionObj = activeCompareVersion === "versionA" ? results.versionA : results.versionB;
                       if (!versionObj || versionObj.suggestions.length === 0) {
                         return (
-                          <div className="flex items-center gap-x-2 text-xs text-green-400 bg-green-500/5 border border-green-500/10 p-3.5 rounded-xl">
+                          <div className="flex items-center gap-x-2 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-lg font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                             <Check className="h-4 w-4" />
-                            No optimizations needed. Script matches prime structural markers.
+                            No optimizations needed.
                           </div>
                         );
                       }
                       return versionObj.suggestions.map((s, idx) => (
-                        <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 flex flex-col gap-y-3 relative">
+                        <div key={idx} className="bg-[var(--page-bg)]/30 border border-[var(--border-color)] rounded-xl p-4 flex flex-col gap-y-3 relative">
                           <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 bg-indigo-500/5 border border-indigo-500/10 px-2 py-0.5 rounded">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--accent-magenta)] bg-[var(--accent-whisper)] border border-[var(--accent-veil)] px-2 py-0.5 rounded-full" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                               Refinement #{idx + 1}
                             </span>
                             <button
                               onClick={() => handleApplySuggestion(s.original, s.replacement, activeCompareVersion)}
-                              className="text-[10px] bg-white/[0.05] border border-white/[0.08] hover:bg-indigo-600 hover:border-indigo-500 hover:text-white px-2.5 py-1 rounded-md font-semibold transition duration-150 flex items-center gap-x-1"
+                              className="text-[9px] bg-[var(--card-bg)] border border-[var(--border-color)] hover:bg-[var(--accent-magenta)] hover:border-[var(--accent-magenta)] hover:text-white px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider transition duration-150 flex items-center gap-x-1"
+                              style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                             >
                               <Plus className="h-3 w-3" />
                               Apply to Editor
@@ -580,22 +583,22 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
                             <div className="flex flex-col gap-y-1">
-                              <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wider">Original</span>
-                              <div className="bg-red-500/5 border border-red-500/10 p-2.5 rounded-lg text-white/90 line-through leading-relaxed">
+                              <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Original</span>
+                              <div className="bg-red-500/5 border border-red-500/10 p-2.5 rounded-lg text-[var(--text-secondary)] line-through leading-relaxed">
                                 {s.original}
                               </div>
                             </div>
                             <div className="flex flex-col gap-y-1">
-                              <span className="text-[10px] font-semibold text-green-400 uppercase tracking-wider">Optimized Replacement</span>
-                              <div className="bg-green-500/5 border border-green-500/10 p-2.5 rounded-lg text-white leading-relaxed">
+                              <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Optimized Replacement</span>
+                              <div className="bg-emerald-500/5 border border-emerald-500/10 p-2.5 rounded-lg text-[var(--text-primary)] leading-relaxed">
                                 {s.replacement}
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex gap-x-2 items-start mt-1 text-[11px] text-[#9B9CA0]">
-                            <Lightbulb className="h-4.5 w-4.5 text-yellow-400 shrink-0 mt-0.5" />
-                            <span><strong className="text-white">Reasoning:</strong> {s.reason}</span>
+                          <div className="flex gap-x-2 items-start mt-1 text-[11px] text-[var(--text-secondary)] font-medium">
+                            <Lightbulb className="h-4.5 w-4.5 text-yellow-500 shrink-0 mt-0.5" />
+                            <span><strong className="text-[var(--text-primary)]">Reasoning:</strong> {s.reason}</span>
                           </div>
                         </div>
                       ));
@@ -611,33 +614,33 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
                       if (!versionObj) return null;
                       return (
                         <div className="grid grid-cols-1 gap-3.5 text-xs leading-relaxed">
-                          <div className="bg-white/[0.02] border border-white/[0.04] p-3.5 rounded-xl flex items-start gap-x-3">
-                            <div className="bg-indigo-500/5 border border-indigo-500/15 p-2 rounded-lg text-indigo-400 shrink-0">
+                          <div className="bg-[var(--page-bg)]/30 border border-[var(--border-color)] p-3.5 rounded-xl flex items-start gap-x-3">
+                            <div className="bg-[var(--accent-whisper)] border border-[var(--accent-veil)] p-2 rounded-lg text-[var(--accent-magenta)] shrink-0">
                               <Sparkles className="h-4.5 w-4.5" />
                             </div>
                             <div className="flex flex-col gap-y-1">
-                              <span className="font-bold text-white uppercase text-[10px] tracking-wider">Hook Vector Feedback</span>
-                              <p className="text-[#9B9CA0]">{versionObj.critique.hook}</p>
+                              <span className="font-bold text-[var(--text-primary)] uppercase text-[10px] tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Hook Vector Feedback</span>
+                              <p className="text-[var(--text-secondary)] font-medium">{versionObj.critique.hook}</p>
                             </div>
                           </div>
 
-                          <div className="bg-white/[0.02] border border-white/[0.04] p-3.5 rounded-xl flex items-start gap-x-3">
-                            <div className="bg-pink-500/5 border border-pink-500/15 p-2 rounded-lg text-pink-400 shrink-0">
+                          <div className="bg-[var(--page-bg)]/30 border border-[var(--border-color)] p-3.5 rounded-xl flex items-start gap-x-3">
+                            <div className="bg-[var(--accent-whisper)] border border-[var(--accent-veil)] p-2 rounded-lg text-[var(--text-primary)] shrink-0">
                               <TrendingUp className="h-4.5 w-4.5" />
                             </div>
                             <div className="flex flex-col gap-y-1">
-                              <span className="font-bold text-white uppercase text-[10px] tracking-wider">Pacing & Body Flow</span>
-                              <p className="text-[#9B9CA0]">{versionObj.critique.body}</p>
+                              <span className="font-bold text-[var(--text-primary)] uppercase text-[10px] tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Pacing & Body Flow</span>
+                              <p className="text-[var(--text-secondary)] font-medium">{versionObj.critique.body}</p>
                             </div>
                           </div>
 
-                          <div className="bg-white/[0.02] border border-white/[0.04] p-3.5 rounded-xl flex items-start gap-x-3">
-                            <div className="bg-yellow-500/5 border border-yellow-500/15 p-2 rounded-lg text-yellow-400 shrink-0">
+                          <div className="bg-[var(--page-bg)]/30 border border-[var(--border-color)] p-3.5 rounded-xl flex items-start gap-x-3">
+                            <div className="bg-[var(--accent-whisper)] border border-[var(--accent-veil)] p-2 rounded-lg text-[var(--text-secondary)] shrink-0">
                               <Flame className="h-4.5 w-4.5" />
                             </div>
                             <div className="flex flex-col gap-y-1">
-                              <span className="font-bold text-white uppercase text-[10px] tracking-wider">Engagement CTA Check</span>
-                              <p className="text-[#9B9CA0]">{versionObj.critique.cta}</p>
+                              <span className="font-bold text-[var(--text-primary)] uppercase text-[10px] tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Engagement CTA Check</span>
+                              <p className="text-[var(--text-secondary)] font-medium">{versionObj.critique.cta}</p>
                             </div>
                           </div>
                         </div>
@@ -647,19 +650,20 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
                 )}
 
                 {/* Footer Copy Tool */}
-                <div className="flex justify-end gap-x-3 border-t border-white/[0.06] pt-4 mt-2">
+                <div className="flex justify-end gap-x-3 border-t border-[var(--border-color)] pt-4 mt-2">
                   <button
                     onClick={() => handleCopy(activeCompareVersion === "versionA" ? scriptA : scriptB)}
-                    className="bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-x-1.5 transition duration-150"
+                    className="bg-[var(--card-bg)] border border-[var(--border-color)] hover:bg-[var(--accent-magenta)] hover:border-[var(--accent-magenta)] hover:text-white px-4 py-2 rounded-lg text-[10px] uppercase font-bold tracking-wider flex items-center gap-x-1.5 transition duration-150"
+                    style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                   >
                     {copied ? (
                       <>
-                        <Check className="h-3.5 w-3.5 text-green-400" />
+                        <Check className="h-3.5 w-3.5 text-emerald-500" />
                         Copied Script
                       </>
                     ) : (
                       <>
-                        <Copy className="h-3.5 w-3.5 text-[#9B9CA0]" />
+                        <Copy className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                         Copy Script
                       </>
                     )}

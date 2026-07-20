@@ -7,6 +7,7 @@ import { onCurrentUser } from "../user";
 import { createIntegration, getIntegrations, deleteIntegration } from "./queries";
 
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export const onOathInstagram = async (strategy: "INSTAGRAM" | "CRM") => {
   if (strategy === "INSTAGRAM") {
@@ -105,6 +106,7 @@ export const onIntegrate = async (code: string) => {
         new Date(expire_date),
         instagramId
       );
+      revalidatePath("/", "layout");
       return { status: 200, data: create };
     }
     return { status: 401 };
@@ -157,6 +159,7 @@ export const onIntegrateManual = async (token: string) => {
       insts_id
     );
 
+    revalidatePath("/", "layout");
     return { status: 200, data: create };
   } catch (error: any) {
     console.error("Manual integration database error:", error.message);
@@ -168,7 +171,10 @@ export const onDisconnectIntegration = async () => {
   const user = await onCurrentUser();
   try {
     const deleted = await deleteIntegration(user.id);
-    if (deleted) return { status: 200, data: "Successfully disconnected Instagram account!" };
+    if (deleted) {
+      revalidatePath("/", "layout");
+      return { status: 200, data: "Successfully disconnected Instagram account!" };
+    }
     return { status: 404, data: "No integration found to disconnect." };
   } catch (error: any) {
     console.error("Disconnect integration error:", error.message);

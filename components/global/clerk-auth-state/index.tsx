@@ -24,7 +24,7 @@ function ClerkAuthState({}: Props) {
 
   if (!loggedIn) {
     return (
-      <Link href="/sign-in" className="flex items-center gap-x-3 text-sm text-[#9B9CA0] hover:text-white transition-colors duration-200">
+      <Link href="/sign-in" className="flex items-center gap-x-3 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] transition-smooth">
         <User size={16} />
         <span>Login</span>
       </Link>
@@ -34,7 +34,7 @@ function ClerkAuthState({}: Props) {
   return (
     <button
       onClick={handleLogout}
-      className="flex items-center gap-x-3 text-sm text-[#9B9CA0] hover:text-white transition-colors duration-200"
+      className="flex items-center gap-x-3 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] transition-smooth"
     >
       <LogOut size={16} />
       <span>Logout</span>

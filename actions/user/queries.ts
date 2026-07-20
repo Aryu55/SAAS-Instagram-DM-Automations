@@ -1,9 +1,8 @@
 "use server";
 
 import { client } from "@/lib/prisma";
-import { cache } from "react";
 
-export const findUser = cache(async (clerkId: string) => {
+export const findUser = async (clerkId: string) => {
   return await client.user.findUnique({
     where: {
       clerkId,
@@ -20,7 +19,7 @@ export const findUser = cache(async (clerkId: string) => {
       },
     },
   });
-});
+};
 
 export const createUser = async (
   clerkId: string,

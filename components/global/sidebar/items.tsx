@@ -44,22 +44,22 @@ function Items({ page, slug: propSlug }: Props) {
           <Link
             href={item.label === "home" ? `/dashboard/${slug}` : `/dashboard/${slug}/${item.label}`}
             className={cn(
-              "capitalize flex items-center gap-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 border border-transparent",
+              "capitalize flex items-center gap-x-3 rounded-lg px-4 py-3 text-sm font-medium transition-smooth",
               isActive
-                ? "bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-blue-500/20 text-white shadow-[0_0_15px_rgba(59,130,246,0.1)]"
-                : "text-[#9B9CA0] hover:text-white hover:bg-white/[0.03] hover:border-white/[0.04]"
+                ? "bg-[var(--accent-magenta)]/10 text-[var(--text-primary)] shadow-sm border border-[var(--accent-magenta)]/20"
+                : "text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] hover:bg-[var(--card-bg)]/50"
             )}
           >
             <span className={cn(
-              "transition-colors duration-300",
-              isActive ? "text-blue-400" : "text-[#9B9CA0] group-hover:text-white"
+              "transition-colors duration-200",
+              isActive ? "text-[var(--accent-magenta)]" : "text-[var(--text-secondary)] group-hover:text-[var(--accent-magenta)]"
             )}>
               {item.icon}
             </span>
-            <span>{item.label}</span>
+            <span className="font-semibold">{item.label}</span>
           </Link>
         </TooltipTrigger>
-        <TooltipContent side="right" className="bg-[#1a1a1a] border border-white/10 text-white text-xs">
+        <TooltipContent side="right" className="bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-lg shadow-xl px-3 py-1.5">
           {SIDEBAR_TOOLTIPS[item.label] ?? item.label}
         </TooltipContent>
       </Tooltip>

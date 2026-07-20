@@ -8,19 +8,23 @@ type Props = {
 
 function MainBreadCrumbs({ page, slug }: Props) {
   return (
-    <div className="flex flex-col items-start">
-      {page === "Home" && (
-        <div className="flex justify-center w-full">
-          <div className="radial--gradient w-4/12 py-5 lg:py-10 flex flex-col items-center">
-            <p className="text-text-secondary text-lg">Welcome back</p>
-            <h2 className="capitalize text-4xl font-medium">{slug}!</h2>
-          </div>
+    <div className="flex flex-col items-start mt-2 mb-4 animate-fade-in-up">
+      {page === "Home" ? (
+        <div className="flex flex-col items-start gap-y-1">
+          <p className="text-[var(--muted-foreground)] text-[10px] uppercase tracking-wider font-bold" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+            Welcome back, {slug}
+          </p>
         </div>
+      ) : (
+        <span className="inline-flex gap-x-2.5 items-center">
+          <span className="text-[var(--accent-magenta)] flex-shrink-0">
+            {PAGE_ICONS[page.toUpperCase()]}
+          </span>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+            {page}
+          </h2>
+        </span>
       )}
-      <span className="radial--gradient inline-flex py-5 lg:py-10 pr-16 gap-x-2 items-center">
-        {PAGE_ICONS[page.toUpperCase()]}
-        <h2 className="font-semibold text-3xl capitalize">{page}</h2>
-      </span>
     </div>
   );
 }

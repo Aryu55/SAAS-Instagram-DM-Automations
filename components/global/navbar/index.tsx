@@ -28,8 +28,8 @@ function NavBar({ slug }: Props) {
       <div className="flex flex-col">
         <div className="flex gap-x-3 lg:gap-x-5 justify-end">
           <span className="lg:hidden flex items-center flex-1 gap-x-2">
-            <Sheet trigger={<Menu />} className="lg:hidden" side="left">
-              <div className="flex flex-col gap-y-5 w-full h-full p-3 bg-[#0e0e0e] bg-opacity-90 bg-clip-padding backdrop-filter backdrop--blur__safari backdrop-blur-3xl">
+            <Sheet trigger={<Menu className="text-[var(--text-primary)] w-5 h-5 cursor-pointer" />} className="lg:hidden" side="left">
+              <div className="flex flex-col gap-y-5 w-full h-full p-6 bg-[var(--card-bg)] border-r border-[var(--border-color)]">
                 <div className="flex gap-x-2 items-center p-5 justify-center">
                   <LogoSmall />
                 </div>
@@ -39,14 +39,14 @@ function NavBar({ slug }: Props) {
                 <div className="px-16">
                   <Separator
                     orientation="horizontal"
-                    className="bg-[#333336]"
+                    className="bg-[var(--border-color)]"
                   />
                 </div>
                 <div className="px-3 flex flex-col gap-y-5">
                   <ClerkAuthState />
-                  <div className="flex gap-x-3">
+                  <div className="flex gap-x-3 text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] cursor-pointer transition-colors duration-150">
                     <HelpDuoToneWhite />
-                    <p className="text-[#9B9CA0]">Help</p>
+                    <p className="font-semibold text-sm">Help</p>
                   </div>
                 </div>
 

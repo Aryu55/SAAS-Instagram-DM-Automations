@@ -146,59 +146,59 @@ function CreateAutomation({}: Props) {
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
-              <Button className="lg:px-10 py-6 bg-gradient-to-br hover:opacity-80 text-white rounded-full from-[#3352CC] font-medium to-[#1C2D70] flex items-center gap-x-2">
+              <Button className="lg:px-8 py-5 bg-[var(--card-bg)] border border-[var(--border-color)] hover:bg-[var(--accent-magenta)] hover:text-white hover:border-[var(--accent-magenta)]/20 text-[var(--text-primary)] font-bold text-[10px] uppercase tracking-wider rounded-lg flex items-center gap-x-2 transition-smooth">
                 <AutomationDuoToneWhite />
                 <p className="lg:inline hidden">Create Automation</p>
               </Button>
             </DialogTrigger>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="bg-[#1a1a1a] border border-white/10 text-white text-xs">
+          <TooltipContent side="bottom" className="bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-lg shadow-xl px-2.5 py-1.5">
             Create a new automation from scratch or template
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <DialogContent className="max-w-4xl w-[95vw] bg-[#0c0c0e] border border-white/[0.08] backdrop-blur-xl rounded-3xl overflow-hidden p-0 gap-0 text-white shadow-2xl shadow-black/80">
+      <DialogContent className="max-w-4xl w-[95vw] bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl overflow-hidden p-0 gap-0 text-[var(--text-primary)] shadow-2xl shadow-black/80">
         {/* Top Header Section */}
-        <div className="p-6 border-b border-white/[0.08] flex flex-col md:flex-row md:items-center justify-between gap-y-4">
+        <div className="p-6 border-b border-[var(--border-color)] flex flex-col md:flex-row md:items-center justify-between gap-y-4">
           <div>
-            <DialogTitle className="text-2xl font-extrabold bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              Templates
+            <DialogTitle className="text-3xl font-bold text-[var(--text-primary)]" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+              Templates Catalog
             </DialogTitle>
-            <DialogDescription className="text-gray-400 text-sm mt-1">
+            <DialogDescription className="text-[var(--text-secondary)] text-xs mt-1">
               Select a pre-built template or start from a blank canvas.
             </DialogDescription>
           </div>
           <Button
             onClick={() => handleCreate()}
             disabled={isPending}
-            className="flex items-center gap-x-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-white font-semibold px-5 py-4 rounded-xl transition duration-200"
+            className="flex items-center gap-x-2 bg-[var(--page-bg)] hover:bg-[var(--accent-magenta)] hover:text-white border border-[var(--border-color)] text-[var(--text-primary)] font-bold text-[10px] uppercase tracking-wider px-5 py-3 rounded-lg transition duration-200"
           >
             {isPending && selectedTemplate === "scratch" ? (
-              <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+              <Loader2 className="w-4.5 h-4.5 animate-spin text-[var(--accent-magenta)]" />
             ) : (
-              <Compass className="w-4 h-4 text-blue-400" />
+              <Compass className="w-4 h-4 text-[var(--accent-magenta)]" />
             )}
             Start From Scratch
           </Button>
         </div>
 
         {/* Search bar for mobile / view-wide search */}
-        <div className="p-4 border-b border-white/[0.04] bg-[#030303]/30 block md:hidden">
-          <div className="flex items-center bg-[#18181b]/50 border border-white/[0.08] rounded-xl px-3 py-2 w-full focus-within:border-blue-500/40 transition duration-150">
-            <Search className="w-4 h-4 text-gray-400 mr-2" />
+        <div className="p-4 border-b border-[var(--border-color)] bg-black/20 block md:hidden">
+          <div className="flex items-center bg-[var(--page-bg)]/50 border border-[var(--border-color)] rounded-lg px-3 py-2 w-full focus-within:border-[var(--accent-magenta)]/30 transition duration-150">
+            <Search className="w-4 h-4 text-[var(--text-secondary)] mr-2" />
             <input
               placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none outline-none focus:ring-0 w-full text-white placeholder-gray-400 text-sm"
+              className="bg-transparent border-none outline-none focus:ring-0 w-full text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] text-sm"
             />
           </div>
         </div>
 
         {/* Main Body */}
-        <div className="flex h-[60vh] max-h-[550px]">
+        <div className="flex h-[60vh] max-h-[500px]">
           {/* Left Sidebar Menu */}
-          <div className="w-60 border-r border-white/[0.08] bg-[#030303]/40 p-4 overflow-y-auto space-y-6 flex-shrink-0 hidden md:block">
+          <div className="w-60 border-r border-[var(--border-color)] bg-black/10 p-4 overflow-y-auto space-y-6 flex-shrink-0 hidden md:block">
             {/* All Templates */}
             <div>
               {groups.all.map((c) => (
@@ -206,10 +206,10 @@ function CreateAutomation({}: Props) {
                   key={c.id}
                   onClick={() => setActiveCategory(c.id)}
                   className={cn(
-                    "w-full text-left px-3 py-2 rounded-xl text-sm font-semibold transition duration-150 flex items-center gap-x-2",
+                    "w-full text-left px-3 py-2 rounded-lg text-sm font-semibold transition duration-150 flex items-center gap-x-2 border border-transparent",
                     activeCategory === c.id
-                      ? "bg-blue-600/10 border border-blue-500/20 text-blue-400"
-                      : "text-gray-400 hover:text-white border border-transparent"
+                      ? "bg-[var(--accent-magenta)]/10 border border-[var(--accent-magenta)]/20 text-[var(--accent-magenta)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   )}
                 >
                   <Compass className="w-4 h-4" />
@@ -220,16 +220,16 @@ function CreateAutomation({}: Props) {
 
             {/* By Goal */}
             <div className="space-y-1">
-              <p className="text-[10px] uppercase font-bold tracking-wider text-gray-500 px-3">By goal</p>
+              <p className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-secondary)] px-3" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>By goal</p>
               {groups.goal.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => setActiveCategory(c.id)}
                   className={cn(
-                    "w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition duration-150 flex items-center gap-x-2 border border-transparent",
+                    "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition duration-150 flex items-center gap-x-2 border border-transparent",
                     activeCategory === c.id
-                      ? "bg-blue-600/10 border-blue-500/20 text-blue-400 font-semibold"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[var(--accent-magenta)]/10 border border-[var(--accent-magenta)]/20 text-[var(--accent-magenta)] font-semibold"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   )}
                 >
                   {c.id === "grow" && <Users className="w-4 h-4 text-rose-400/80" />}
@@ -242,16 +242,16 @@ function CreateAutomation({}: Props) {
 
             {/* By Trigger */}
             <div className="space-y-1">
-              <p className="text-[10px] uppercase font-bold tracking-wider text-gray-500 px-3">By trigger</p>
+              <p className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-secondary)] px-3" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>By trigger</p>
               {groups.trigger.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => setActiveCategory(c.id)}
                   className={cn(
-                    "w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition duration-150 flex items-center gap-x-2 border border-transparent",
+                    "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition duration-150 flex items-center gap-x-2 border border-transparent",
                     activeCategory === c.id
-                      ? "bg-blue-600/10 border-blue-500/20 text-blue-400 font-semibold"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[var(--accent-magenta)]/10 border border-[var(--accent-magenta)]/20 text-[var(--accent-magenta)] font-semibold"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   )}
                 >
                   <Zap className="w-4 h-4 text-indigo-400/80" />
@@ -262,20 +262,20 @@ function CreateAutomation({}: Props) {
           </div>
 
           {/* Right Content Pane */}
-          <div className="flex-1 p-6 overflow-y-auto bg-[#070708]/30 flex flex-col gap-y-4">
+          <div className="flex-1 p-6 overflow-y-auto bg-black/5 flex flex-col gap-y-4">
             {/* Desktop Search Bar */}
-            <div className="hidden md:flex items-center bg-[#18181b]/50 border border-white/[0.08] rounded-xl px-3 py-2.5 w-full focus-within:border-blue-500/40 transition duration-150 shadow-inner">
-              <Search className="w-5 h-5 text-gray-400 mr-2" />
+            <div className="hidden md:flex items-center bg-[var(--page-bg)]/50 border border-[var(--border-color)] rounded-lg px-3 py-2.5 w-full focus-within:border-[var(--accent-magenta)]/30 transition duration-150">
+              <Search className="w-4 h-4 text-[var(--text-secondary)] mr-2" />
               <input
                 placeholder="Search templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent border-none outline-none focus:ring-0 w-full text-white placeholder-gray-400 text-sm"
+                className="bg-transparent border-none outline-none focus:ring-0 w-full text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] text-xs"
               />
             </div>
 
             {/* Category horizontal scroll bar on mobile */}
-            <div className="flex md:hidden items-center gap-x-2 overflow-x-auto pb-2 scrollbar-none border-b border-white/[0.04]">
+            <div className="flex md:hidden items-center gap-x-2 overflow-x-auto pb-2 scrollbar-none border-b border-[var(--border-color)]">
               {categories.map((c) => (
                 <button
                   key={c.id}
@@ -283,8 +283,8 @@ function CreateAutomation({}: Props) {
                   className={cn(
                     "text-xs px-3 py-1.5 rounded-full whitespace-nowrap border transition duration-150",
                     activeCategory === c.id
-                      ? "bg-blue-600/20 border-blue-500/40 text-blue-400 font-semibold"
-                      : "bg-white/[0.02] border-white/[0.05] text-gray-400 hover:text-white"
+                      ? "bg-[var(--accent-magenta)]/20 border border-[var(--accent-magenta)]/40 text-[var(--accent-magenta)] font-semibold"
+                      : "bg-white/[0.02] border-white/[0.05] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   )}
                 >
                   {c.label}
@@ -302,39 +302,40 @@ function CreateAutomation({}: Props) {
                       key={tpl.id}
                       onClick={() => !isPending && handleCreate(tpl.id)}
                       className={cn(
-                        "group relative border border-white/[0.08] hover:border-blue-500/30 rounded-2xl p-5 bg-[#09090b]/40 hover:bg-white/[0.02] transition-all duration-300 flex flex-col justify-between gap-y-4 cursor-pointer shadow-lg hover:shadow-blue-500/[0.02]",
+                        "group relative border border-[var(--border-color)] hover:border-[var(--accent-magenta)]/30 rounded-xl p-5 bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)]/90 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-y-4 cursor-pointer shadow-md",
                         isPending ? "opacity-50 pointer-events-none" : ""
                       )}
                     >
                       {/* Card Content */}
                       <div className="flex items-start gap-x-4">
-                        <div className="p-3 bg-white/[0.03] border border-white/[0.08] rounded-xl group-hover:bg-blue-500/5 group-hover:border-blue-500/20 transition-all duration-300">
+                        <div className="p-3 bg-[var(--page-bg)] border border-[var(--border-color)] rounded-lg group-hover:bg-[var(--accent-magenta)]/5 group-hover:border-[var(--accent-magenta)]/20 transition-all duration-200">
                           {tpl.icon}
                         </div>
                         <div className="space-y-1">
-                          <h3 className="font-bold text-base text-white group-hover:text-blue-400 transition-colors duration-200">
+                          <h3 className="font-bold text-sm text-[var(--text-primary)] group-hover:text-[var(--accent-magenta)] transition-colors duration-150">
                             {tpl.name}
                           </h3>
-                          <p className="text-gray-400 text-xs leading-relaxed">
+                          <p className="text-[var(--text-secondary)] text-xs leading-relaxed">
                             {tpl.description}
                           </p>
                         </div>
                       </div>
 
                       {/* Footer Badge / Quick action text */}
-                      <div className="flex items-center justify-between border-t border-white/[0.04] pt-3 mt-1">
-                        <span className="text-[10px] text-gray-500 font-medium tracking-wide">
+                      <div className="flex items-center justify-between border-t border-[var(--border-color)] pt-3 mt-1">
+                        <span className="text-[9px] text-[var(--text-secondary)] font-bold tracking-wider uppercase" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                           {tpl.triggerType} TRIGGER
                         </span>
                         <span
                           className={cn(
-                            "text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider",
+                            "text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider",
                             tpl.badgeType === "new"
-                              ? "bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse"
+                              ? "bg-[var(--accent-magenta)]/15 border border-[var(--accent-magenta)]/20 text-[var(--accent-magenta)]"
                               : tpl.badgeType === "popular"
                               ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-white/[0.04] text-gray-400 border border-white/[0.05]"
+                              : "bg-[var(--page-bg)] text-[var(--text-secondary)] border border-[var(--border-color)]"
                           )}
+                          style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                         >
                           {tpl.badge}
                         </span>
@@ -342,8 +343,8 @@ function CreateAutomation({}: Props) {
 
                       {/* Spinner Loader overlay for clicked template */}
                       {isCardPending && (
-                        <div className="absolute inset-0 bg-[#0c0c0e]/80 flex items-center justify-center rounded-2xl z-10">
-                          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl z-10">
+                          <Loader2 className="w-8 h-8 animate-spin text-[var(--accent-magenta)]" />
                         </div>
                       )}
                     </div>
@@ -352,9 +353,9 @@ function CreateAutomation({}: Props) {
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center py-20">
-                <Compass className="w-12 h-12 text-gray-600 mb-3" />
-                <p className="text-lg font-semibold text-gray-300">No Templates Match</p>
-                <p className="text-gray-500 text-sm max-w-xs mt-1">
+                <Compass className="w-12 h-12 text-[var(--text-tertiary)] mb-3" />
+                <p className="text-lg font-semibold text-[var(--text-primary)]">No Templates Match</p>
+                <p className="text-[var(--text-secondary)] text-xs max-w-xs mt-1">
                   Try adjusting your search keywords or active category.
                 </p>
               </div>

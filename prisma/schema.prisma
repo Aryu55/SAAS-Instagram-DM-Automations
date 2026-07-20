@@ -140,3 +140,119 @@ model Contact {
 
   @@unique([userId, instagramId])
 }
+
+model Business {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug            String   @unique            // "hisaab", "pause", "safespot"
+  name            String
+  tagline         String?
+  description     String                       // what the product actually does
+  targetAudience  String
+  painPoints      String[]
+  contentPillars  String[]
+  voiceTone       String
+  language        String   @default("hinglish") // "hinglish" | "en" | "hi"
+  hinglishRatio   String?  @default("65% Hindi, 35% English")
+  cta             String
+  hashtags        String?
+  complianceNotes String?
+  ttsProvider     String   @default("auto")     // auto | aura | bark
+  ttsVoiceId      String?                          // Bark speaker preset, e.g. "v2/hi_speaker_2"
+  postizChannels  String[]                      // Postiz integration ids to publish to
+  postsPerDay     Int      @default(1)
+  active          Boolean  @default(false)
+  winningPatterns String?                       // updated weekly by feedback loop
+  createdAt       DateTime @default(now())
+  jobs            ContentJob[]
+  ideas           ContentIdea[]
+  logs            DocumentaryLog[]
+  scraped         ScrapedPost[]
+}
+
+model ContentIdea {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId    String   @db.Uuid
+  topic         String
+  angle         String
+  hookStyle     String
+  contentPillar String
+  source        String   @default("llm")   // llm | scraper | manual
+  used          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model ContentJob {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId   String    @db.Uuid
+  ideaId       String?   @db.Uuid
+  status       JOB_STATUS @default(IDEA)
+  script       Json?      // {hook, body[], cta, scriptText, brollPrompts[], hookVariants[]}
+  caption      String?
+  audioKey     String?    // R2 keys
+  videoKey     String?
+  renderLog    String?
+  postizPostId String?
+  scheduledAt  DateTime?
+  publishedAt  DateTime?
+  rejectReason String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  metrics      PostMetric[]
+}
+
+enum JOB_STATUS {
+  IDEA
+  SCRIPTED
+  RENDERING
+  REVIEW
+  APPROVED
+  SCHEDULED
+  PUBLISHED
+  REJECTED
+  FAILED
+}
+
+model PostMetric {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job       ContentJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId     String     @db.Uuid
+  platform  String
+  views     Int @default(0)
+  likes     Int @default(0)
+  comments  Int @default(0)
+  shares    Int @default(0)
+  saves     Int @default(0)
+  followers Int @default(0)
+  fetchedAt DateTime @default(now())
+}
+
+model ScrapedPost {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String   @db.Uuid
+  platform   String
+  handle     String
+  url        String
+  caption    String?
+  transcript String?
+  views      Int @default(0)
+  likes      Int @default(0)
+  comments   Int @default(0)
+  er         Float @default(0)
+  score      Float @default(0)
+  cluster    String?
+  postDate   DateTime?
+  createdAt  DateTime @default(now())
+}
+
+model DocumentaryLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String   @db.Uuid
+  event      String   // "onboarded", "first_video_published", "crossed_10k_views", freeform
+  detail     Json?
+  createdAt  DateTime @default(now())
+}
+

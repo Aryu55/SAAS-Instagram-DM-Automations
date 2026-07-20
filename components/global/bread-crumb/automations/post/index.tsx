@@ -32,7 +32,7 @@ function PostButton({ id }: Props) {
 
   return (
     <TriggerButton label="Attach a Post">
-      {data?.status === 200 ? (
+      {data?.status === 200 && data?.data?.data && Array.isArray(data.data.data) ? (
         <div className="flex flex-col gap-y-3 w-full">
           <div className="flex flex-wrap w-full gap-3 items-center">
             {data.data.data.map((post: InstagramPostProps) => (
@@ -84,7 +84,11 @@ function PostButton({ id }: Props) {
           </Button>
         </div>
       ) : (
-        <p className="text-text-secondary text-center">No Posts Found</p>
+        <div className="flex flex-col items-center justify-center p-4">
+          <p className="text-text-secondary text-center text-sm">
+            {data?.error || "No Posts Found"}
+          </p>
+        </div>
       )}
     </TriggerButton>
   );

@@ -326,40 +326,43 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
   return (
     <div className="flex flex-col gap-y-8 animate-fade-in-up pb-10 pr-2 lg:pr-6">
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-y-4 mt-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-y-4 border-b border-[var(--border-color)] pb-6 mt-2">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-x-2">
-            Instagram Analytics <span className="text-[10px] uppercase font-bold bg-blue-500/15 border border-blue-500/30 text-blue-400 px-2 py-0.5 rounded-md">New Feature</span>
-          </h1>
-          <p className="text-text-secondary text-sm">
+          <span className="inline-flex items-center gap-x-1.5 px-3 py-1 bg-[var(--accent-whisper)] border border-[var(--accent-veil)] text-[var(--accent-magenta)] text-[9px] font-bold tracking-wider uppercase rounded-full w-fit mb-2.5" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+            Performance Metrics
+          </span>
+          <h2 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] leading-none tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+            Instagram Analytics
+          </h2>
+          <p className="text-[var(--text-secondary)] text-sm max-w-[65ch] mt-2 leading-relaxed">
             Analyze your posts, auto-transcribe videos, and generate AI-driven recommendation scripts.
           </p>
         </div>
 
         {/* Demo Mode Toggle Switch */}
-        <div className="flex items-center gap-x-3 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-2">
-          <span className="text-xs font-semibold text-gray-400">
+        <div className="flex items-center gap-x-3 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg px-4 py-2" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+          <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-secondary)]">
             {isDemo ? "Demo Mode Active" : "Live Integration"}
           </span>
           <button
             onClick={() => handleToggleMode(!isDemo)}
-            className={`w-10 h-6 flex items-center rounded-full p-1 transition-all duration-300 ${
-              isDemo ? "bg-blue-500 justify-end" : "bg-white/[0.08] justify-start"
+            className={`w-10 h-5 flex items-center rounded-full p-0.5 transition-all duration-300 ${
+              isDemo ? "bg-[var(--accent-magenta)] justify-end" : "bg-[var(--page-bg)] border border-[var(--border-color)] justify-start"
             }`}
           >
-            <span className="w-4 h-4 bg-white rounded-full shadow-md" />
+            <span className="w-3.5 h-3.5 bg-[var(--text-primary)] rounded-full shadow-sm" />
           </button>
         </div>
       </div>
 
       {/* Integration Warning Banners */}
       {!hasInstagramIntegration && !isDemo && (
-        <div className="glass-card border border-blue-500/20 bg-blue-500/5 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="bg-[var(--accent-whisper)] border border-[var(--accent-veil)] rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex gap-x-3 items-center">
-            <AlertCircle className="w-5 h-5 text-blue-400 shrink-0" />
-            <div className="text-xs text-blue-200/90 leading-normal">
+            <AlertCircle className="w-5 h-5 text-[var(--accent-magenta)] shrink-0" />
+            <div className="text-xs text-[var(--text-secondary)] leading-normal">
               <strong>Instagram account not connected.</strong> Connect your account in the{" "}
-              <Link href={`/dashboard/${slug}/integrations`} className="underline font-semibold text-blue-400 hover:text-blue-300">
+              <Link href={`/dashboard/${slug}/integrations`} className="underline font-semibold text-[var(--accent-magenta)] hover:text-[var(--accent-magenta)]/80">
                 Integrations
               </Link>{" "}
               tab to view your live post metrics, or enable Demo Mode to try it out.
@@ -371,7 +374,8 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
               setPosts(DEFAULT_NICHE_POSTS);
               toast.info("Enabled Demo Creator Mode.");
             }}
-            className="px-4 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-xs font-semibold text-blue-400 transition"
+            className="px-4 py-2 rounded-lg bg-[var(--text-primary)] hover:bg-[var(--accent-magenta)] hover:text-white border border-[var(--border-color)] text-[10px] font-bold uppercase tracking-wider text-[var(--page-bg)] transition-smooth"
+            style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
           >
             Enable Demo Mode
           </button>
@@ -379,10 +383,10 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
       )}
 
       {hasInstagramIntegration && !isDemo && posts.length === 0 && !loadingPosts && (
-        <div className="glass-card border border-blue-500/20 bg-blue-500/5 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="bg-[var(--accent-whisper)] border border-[var(--accent-veil)] rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex gap-x-3 items-center">
-            <AlertCircle className="w-5 h-5 text-blue-400 shrink-0" />
-            <div className="text-xs text-blue-200/90 leading-normal">
+            <AlertCircle className="w-5 h-5 text-[var(--accent-magenta)] shrink-0" />
+            <div className="text-xs text-[var(--text-secondary)] leading-normal">
               <strong>No posts found.</strong> Your Instagram integration is active, but we didn&apos;t find any posts on your profile. Upload reels or posts on Instagram, or enable Demo Mode to preview.
             </div>
           </div>
@@ -392,7 +396,8 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
               setPosts(DEFAULT_NICHE_POSTS);
               toast.info("Enabled Demo Creator Mode.");
             }}
-            className="px-4 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-xs font-semibold text-blue-400 transition"
+            className="px-4 py-2 rounded-lg bg-[var(--text-primary)] hover:bg-[var(--accent-magenta)] hover:text-white border border-[var(--border-color)] text-[10px] font-bold uppercase tracking-wider text-[var(--page-bg)] transition-smooth"
+            style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
           >
             Enable Demo Mode
           </button>
@@ -400,9 +405,9 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
       )}
 
       {isDemo && (
-        <div className="glass-card border border-amber-500/20 bg-amber-500/5 rounded-2xl p-4 flex gap-x-3 items-center">
-          <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
-          <div className="text-xs text-amber-200/90 leading-normal flex-1">
+        <div className="bg-[var(--accent-whisper)] border border-[var(--accent-veil)] rounded-xl p-4 flex gap-x-3 items-center">
+          <AlertCircle className="w-5 h-5 text-[var(--accent-magenta)] shrink-0" />
+          <div className="text-xs text-[var(--text-primary)] leading-normal flex-1">
             <strong>Viewing Demo Creator Mode.</strong> We have loaded interactive Dopamine Detox & Addiction Recovery mock posts. Toggle the mode switch in the header to exit.
           </div>
         </div>
@@ -410,47 +415,47 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
 
       {/* Top Level KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <div className="glass-card border border-white/[0.08] rounded-2xl p-5 hover:border-white/[0.12] transition duration-200 flex flex-col gap-y-1 justify-between">
-          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Analyzed Posts</span>
+        <div className="glass-card p-5 flex flex-col gap-y-1 justify-between">
+          <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Total Analyzed Posts</span>
           <div className="flex items-baseline gap-x-2 mt-2">
-            <span className="text-2xl font-black text-white">{posts.length}</span>
-            <span className="text-[10px] text-gray-500 font-semibold">posts</span>
+            <span className="text-2xl font-black text-[var(--text-primary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>{posts.length}</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>posts</span>
           </div>
-          <div className="flex items-center gap-x-1.5 text-[10px] text-blue-400 mt-2 font-medium">
-            <Video className="w-3.5 h-3.5" /> Reels & Carousels
+          <div className="flex items-center gap-x-1.5 text-[10px] text-[var(--accent-magenta)] mt-2 font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+            <Video className="w-3.5 h-3.5 text-current" /> Reels & Carousels
           </div>
         </div>
 
-        <div className="glass-card border border-white/[0.08] rounded-2xl p-5 hover:border-white/[0.12] transition duration-200 flex flex-col gap-y-1 justify-between">
-          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Average Likes</span>
+        <div className="glass-card p-5 flex flex-col gap-y-1 justify-between">
+          <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Average Likes</span>
           <div className="flex items-baseline gap-x-2 mt-2">
-            <span className="text-2xl font-black text-white">{avgLikes.toLocaleString()}</span>
-            <span className="text-[10px] text-gray-500 font-semibold">likes/post</span>
+            <span className="text-2xl font-black text-[var(--text-primary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>{avgLikes.toLocaleString()}</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>likes/post</span>
           </div>
-          <div className="flex items-center gap-x-1 text-[10px] text-emerald-400 mt-2 font-medium">
-            <TrendingUp className="w-3.5 h-3.5" /> Healthy reach
+          <div className="flex items-center gap-x-1 text-[10px] text-emerald-600 dark:text-emerald-400 mt-2 font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+            <TrendingUp className="w-3.5 h-3.5 text-current" /> Healthy reach
           </div>
         </div>
 
-        <div className="glass-card border border-white/[0.08] rounded-2xl p-5 hover:border-white/[0.12] transition duration-200 flex flex-col gap-y-1 justify-between">
-          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Average Comments</span>
+        <div className="glass-card p-5 flex flex-col gap-y-1 justify-between">
+          <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Average Comments</span>
           <div className="flex items-baseline gap-x-2 mt-2">
-            <span className="text-2xl font-black text-white">{avgComments.toLocaleString()}</span>
-            <span className="text-[10px] text-gray-500 font-semibold">comments/post</span>
+            <span className="text-2xl font-black text-[var(--text-primary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>{avgComments.toLocaleString()}</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>comments/post</span>
           </div>
-          <div className="flex items-center gap-x-1.5 text-[10px] text-purple-400 mt-2 font-medium">
-            <MessageSquare className="w-3.5 h-3.5" /> Active engagement
+          <div className="flex items-center gap-x-1.5 text-[10px] text-[var(--accent-magenta)] mt-2 font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+            <MessageSquare className="w-3.5 h-3.5 text-current" /> Active engagement
           </div>
         </div>
 
-        <div className="glass-card border border-white/[0.08] rounded-2xl p-5 hover:border-white/[0.12] transition duration-200 flex flex-col gap-y-1 justify-between">
-          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Avg Engagement Rate</span>
+        <div className="glass-card p-5 flex flex-col gap-y-1 justify-between">
+          <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Avg Engagement Rate</span>
           <div className="flex items-baseline gap-x-2 mt-2">
-            <span className="text-2xl font-black text-white">{avgEngagementRate}%</span>
-            <span className="text-[10px] text-gray-500 font-semibold">of audience</span>
+            <span className="text-2xl font-black text-[var(--text-primary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>{avgEngagementRate}%</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>of audience</span>
           </div>
-          <div className="flex items-center gap-x-1.5 text-[10px] text-teal-400 mt-2 font-medium">
-            <Award className="w-3.5 h-3.5" /> Viral density
+          <div className="flex items-center gap-x-1.5 text-[10px] text-[var(--text-secondary)] mt-2 font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+            <Award className="w-3.5 h-3.5 text-current" /> Viral density
           </div>
         </div>
       </div>
@@ -458,38 +463,38 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
       {/* Main Core section: Chart + AI Strategy Report */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* Engagement Trend Chart */}
-        <div className="xl:col-span-6 glass-card p-6 rounded-2xl border border-white/[0.08] shadow-2xl flex flex-col justify-between overflow-hidden">
+        <div className="xl:col-span-6 glass-card p-6 flex flex-col justify-between overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-x-2">
-                <Activity className="w-5 h-5 text-blue-400" /> Engagement Trends
+              <h2 className="text-lg font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-x-2">
+                <Activity className="w-5 h-5 text-[var(--accent-magenta)]" /> Engagement Trends
               </h2>
-              <p className="text-[#9B9CA0] text-xs">Total interaction score (Likes + Comments) per post</p>
+              <p className="text-[var(--text-secondary)] text-xs">Total interaction score (Likes + Comments) per post</p>
             </div>
-            {loadingPosts && <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />}
+            {loadingPosts && <RefreshCw className="w-4 h-4 text-[var(--accent-magenta)] animate-spin" />}
           </div>
 
-          <div className="h-[250px] w-full bg-[#121214]/30 border border-white/[0.04] p-4 rounded-xl">
+          <div className="h-[250px] w-full bg-[var(--page-bg)]/30 border border-[var(--border-color)] p-4 rounded-xl">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="engagementColor" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--accent-magenta)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--accent-magenta)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="rgba(255, 255, 255, 0.03)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} />
+                <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" vertical={false} opacity={0.3} />
+                <XAxis dataKey="name" stroke="var(--text-tertiary)" fontSize={10} tickLine={false} axisLine={false} style={{ fontFamily: "var(--font-space-grotesk), monospace" }} />
+                <YAxis stroke="var(--text-tertiary)" fontSize={10} tickLine={false} axisLine={false} style={{ fontFamily: "var(--font-space-grotesk), monospace" }} />
                 <ChartTooltip
                   content={({ active, payload }: any) => {
                     if (active && payload && payload.length) {
                       return (
-                        <div className="bg-[#18181b] border border-white/[0.08] p-3 rounded-lg shadow-2xl text-xs">
-                          <p className="text-gray-400 font-semibold mb-1">{payload[0].payload.name}</p>
-                          <p className="text-white">Likes: {payload[0].payload.likes.toLocaleString()}</p>
-                          <p className="text-white">Comments: {payload[0].payload.comments.toLocaleString()}</p>
-                          <p className="text-blue-400 font-bold mt-1">
+                        <div className="bg-[var(--card-bg)] border border-[var(--border-color)] p-3 rounded-lg shadow-2xl text-xs text-[var(--text-primary)]" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+                          <p className="text-[var(--text-secondary)] font-bold mb-1">{payload[0].payload.name}</p>
+                          <p>Likes: {payload[0].payload.likes.toLocaleString()}</p>
+                          <p>Comments: {payload[0].payload.comments.toLocaleString()}</p>
+                          <p className="text-[var(--accent-magenta)] font-bold mt-1">
                             Total Score: {payload[0].payload.engagement.toLocaleString()}
                           </p>
                         </div>
@@ -501,7 +506,7 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
                 <Area
                   type="monotone"
                   dataKey="engagement"
-                  stroke="#3b82f6"
+                  stroke="var(--accent-magenta)"
                   strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#engagementColor)"
@@ -512,19 +517,20 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
         </div>
 
         {/* AI Recommendations Hub */}
-        <div className="xl:col-span-6 glass-card p-6 rounded-2xl border border-white/[0.08] shadow-2xl flex flex-col justify-between relative overflow-hidden">
+        <div className="xl:col-span-6 glass-card p-6 flex flex-col justify-between relative overflow-hidden">
           <div className="flex items-center justify-between mb-4 z-10">
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-x-2">
-                <Sparkles className="w-5 h-5 text-purple-400" /> AI Strategy Report
+              <h2 className="text-lg font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-x-2">
+                <Sparkles className="w-5 h-5 text-[var(--accent-magenta)]" /> AI Strategy Report
               </h2>
-              <p className="text-[#9B9CA0] text-xs">AI recommendations and pre-drafted creation blueprints</p>
+              <p className="text-[var(--text-secondary)] text-xs">AI recommendations and pre-drafted creation blueprints</p>
             </div>
             {aiReport && (
               <button
                 onClick={handleGenerateRecommendations}
                 disabled={loadingAI}
-                className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1 font-semibold"
+                className="text-[10px] text-[var(--accent-magenta)] hover:text-[var(--accent-magenta)]/80 flex items-center gap-1 font-bold uppercase tracking-wider"
+                style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
               >
                 <RefreshCw className={`w-3 h-3 ${loadingAI ? "animate-spin" : ""}`} /> Recalculate
               </button>
@@ -534,16 +540,17 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
           {/* Trigger Recommendations Card if not loaded */}
           {!aiReport && !loadingAI && (
             <div className="flex flex-col items-center justify-center text-center py-10 px-4 flex-1">
-              <div className="p-4 bg-purple-500/10 rounded-full border border-purple-500/20 text-purple-400 mb-4 animate-pulse">
+              <div className="p-4 bg-[var(--accent-whisper)] rounded-xl border border-[var(--accent-veil)] text-[var(--accent-magenta)] mb-4 animate-pulse">
                 <BrainCircuit className="w-8 h-8" />
               </div>
-              <h3 className="text-sm font-bold text-white">Generate Content Strategy Report</h3>
-              <p className="text-xs text-gray-500 max-w-[340px] mt-1.5 leading-normal">
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Generate Content Strategy Report</h3>
+              <p className="text-xs text-[var(--text-secondary)] max-w-[340px] mt-1.5 leading-normal">
                 Analyze hook structures and metric indices across all posts to outline your step-by-step roadmap and write next viral script drafts.
               </p>
               <button
                 onClick={handleGenerateRecommendations}
-                className="mt-5 px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white shadow-lg shadow-purple-500/20 hover:scale-[1.02] transition duration-200"
+                className="mt-5 px-6 py-2.5 rounded-lg bg-[var(--text-primary)] hover:bg-[var(--accent-magenta)] hover:text-white text-[10px] font-bold uppercase tracking-wider text-[var(--page-bg)] border border-[var(--border-color)] transition-smooth"
+                style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
               >
                 Run AI Reasoning Analysis
               </button>
@@ -553,9 +560,9 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
           {/* Loading Recommendations */}
           {loadingAI && (
             <div className="flex flex-col items-center justify-center text-center py-14 px-4 flex-1">
-              <RefreshCw className="w-8 h-8 text-purple-400 animate-spin mb-4" />
-              <h3 className="text-sm font-bold text-white">Synthesizing Recommendations</h3>
-              <p className="text-xs text-purple-300 max-w-[320px] mt-2 font-medium animate-pulse">
+              <RefreshCw className="w-8 h-8 text-[var(--accent-magenta)] animate-spin mb-4" />
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Synthesizing Recommendations</h3>
+              <p className="text-xs text-[var(--accent-magenta)] max-w-[320px] mt-2 font-bold uppercase tracking-wider animate-pulse" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                 {loadingSteps}
               </p>
             </div>
@@ -565,20 +572,20 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
           {aiReport && !loadingAI && (
             <div className="flex flex-col flex-1 gap-y-4">
               {/* Tab Selector */}
-              <div className="flex border-b border-white/[0.06] mb-2 gap-x-6">
+              <div className="flex border-b border-[var(--border-color)] mb-2 gap-x-6" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                 {(["reasoning", "roadmap", "scripts"] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setAiTab(tab)}
-                    className={`pb-2 text-xs font-semibold relative capitalize transition-colors duration-200 ${
-                      aiTab === tab ? "text-white" : "text-[#71717a] hover:text-gray-300"
+                    className={`pb-2 text-xs font-bold relative uppercase tracking-wider transition-colors duration-200 ${
+                      aiTab === tab ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     }`}
                   >
                     {tab === "reasoning" && "AI Reasoning"}
                     {tab === "roadmap" && "What should I do?"}
                     {tab === "scripts" && "Draft Scripts"}
                     {aiTab === tab && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 rounded-full" />
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-magenta)] rounded-full" />
                     )}
                   </button>
                 ))}
@@ -587,20 +594,20 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
               {/* Tab Content 1: AI Reasoning */}
               {aiTab === "reasoning" && (
                 <div className="flex flex-col gap-y-3 flex-1 overflow-y-auto max-h-[220px] pr-2 scrollbar-thin">
-                  <div className="text-xs text-gray-300 leading-relaxed bg-white/[0.02] border border-white/[0.04] p-3 rounded-xl">
-                    <p className="font-semibold text-white mb-1.5 flex items-center gap-1.5">
-                      <BrainCircuit className="w-3.5 h-3.5 text-purple-400" /> Strategic Diagnostic:
+                  <div className="text-xs text-[var(--text-secondary)] leading-relaxed bg-[var(--page-bg)]/40 border border-[var(--border-color)] p-3 rounded-lg">
+                    <p className="font-bold text-[var(--text-primary)] mb-1.5 flex items-center gap-1.5">
+                      <BrainCircuit className="w-3.5 h-3.5 text-[var(--accent-magenta)]" /> Strategic Diagnostic:
                     </p>
                     {aiReport.reasoning}
                   </div>
                   <div className="grid grid-cols-2 gap-3 mt-1">
-                    <div className="bg-emerald-500/5 border border-emerald-500/10 p-2.5 rounded-xl">
-                      <span className="text-[9px] font-bold text-emerald-400 uppercase">Core Strength</span>
-                      <p className="text-[10px] text-gray-300 mt-1">Biological triggers (Dopamine loops) get 4x more DMs than general quotes.</p>
+                    <div className="bg-emerald-500/5 border border-emerald-500/10 p-2.5 rounded-lg">
+                      <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Core Strength</span>
+                      <p className="text-[10px] text-[var(--text-secondary)] mt-1">Biological triggers (Dopamine loops) get 4x more DMs than general quotes.</p>
                     </div>
-                    <div className="bg-rose-500/5 border border-rose-500/10 p-2.5 rounded-xl">
-                      <span className="text-[9px] font-bold text-rose-400 uppercase">Primary Leak</span>
-                      <p className="text-[10px] text-gray-300 mt-1">Lack of direct trigger call-to-actions in visual frames creates a 80% loss in conversions.</p>
+                    <div className="bg-rose-500/5 border border-rose-500/10 p-2.5 rounded-lg">
+                      <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>Primary Leak</span>
+                      <p className="text-[10px] text-[var(--text-secondary)] mt-1">Lack of direct trigger call-to-actions in visual frames creates a 80% loss in conversions.</p>
                     </div>
                   </div>
                 </div>
@@ -609,13 +616,13 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
               {/* Tab Content 2: Roadmap */}
               {aiTab === "roadmap" && (
                 <div className="flex flex-col gap-y-2 flex-1 overflow-y-auto max-h-[220px] pr-2 scrollbar-thin">
-                  <span className="text-[10px] font-bold uppercase text-purple-400 tracking-wider">CREATOR ACTION GUIDELINE:</span>
+                  <span className="text-[10px] font-bold uppercase text-[var(--accent-magenta)] tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>CREATOR ACTION GUIDELINE:</span>
                   {aiReport.actionPlan.map((rule, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-x-2 bg-[#121214]/50 border border-white/[0.03] p-2 rounded-xl text-xs text-gray-300"
+                      className="flex items-start gap-x-2 bg-[var(--page-bg)]/40 border border-[var(--border-color)] p-2 rounded-lg text-xs text-[var(--text-secondary)]"
                     >
-                      <span className="text-purple-400 font-bold font-mono mt-0.5">{idx + 1}.</span>
+                      <span className="text-[var(--accent-magenta)] font-bold font-mono mt-0.5">{idx + 1}.</span>
                       <p className="leading-relaxed">{rule}</p>
                     </div>
                   ))}
@@ -630,39 +637,40 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
                     return (
                       <div
                         key={idx}
-                        className="bg-[#121214]/40 border border-white/[0.06] rounded-xl p-3 flex flex-col gap-y-2"
+                        className="bg-[var(--page-bg)]/40 border border-[var(--border-color)] rounded-xl p-3 flex flex-col gap-y-2"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-extrabold text-white flex items-center gap-1.5">
-                            <CornerDownRight className="w-3.5 h-3.5 text-purple-400" /> {script.title}
+                          <span className="text-xs font-extrabold text-[var(--text-primary)] flex items-center gap-1.5">
+                            <CornerDownRight className="w-3.5 h-3.5 text-[var(--accent-magenta)]" /> {script.title}
                           </span>
-                          <span className="text-[9px] font-black uppercase text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/10">
+                          <span className="text-[9px] font-bold uppercase text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                             🔥 {script.prediction} Viral Score
                           </span>
                         </div>
 
-                        <div className="space-y-1.5 text-[10px] leading-relaxed text-gray-300 mt-1">
+                        <div className="space-y-1.5 text-[10px] leading-relaxed text-[var(--text-secondary)] mt-1">
                           <p>
-                            <strong className="text-purple-400">Hook: </strong>
+                            <strong className="text-[var(--accent-magenta)]">Hook: </strong>
                             {script.hook}
                           </p>
                           <p>
-                            <strong className="text-purple-400">Body: </strong>
+                            <strong className="text-[var(--accent-magenta)]">Body: </strong>
                             {script.body}
                           </p>
                           <p>
-                            <strong className="text-purple-400 font-bold">CTA: </strong>
-                            <span className="bg-blue-500/10 text-blue-400 px-1 rounded font-semibold">{script.cta}</span>
+                            <strong className="text-[var(--accent-magenta)] font-bold">CTA: </strong>
+                            <span className="bg-[var(--accent-whisper)] text-[var(--accent-magenta)] px-1.5 py-0.5 rounded-full font-bold">{script.cta}</span>
                           </p>
                         </div>
 
                         <button
                           onClick={() => copyToClipboard(fullText, idx)}
-                          className="mt-2 text-[10px] font-semibold text-white bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] py-1 rounded flex items-center justify-center gap-1.5 transition"
+                          className="mt-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-primary)] bg-[var(--page-bg)] border border-[var(--border-color)] hover:bg-[var(--accent-whisper)] py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-smooth"
+                          style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                         >
                           {copiedScript === idx ? (
                             <>
-                              <Check className="w-3 h-3 text-emerald-400" /> Copied!
+                              <Check className="w-3 text-emerald-500" /> Copied!
                             </>
                           ) : (
                             <>
@@ -683,19 +691,19 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
       {/* Connected Posts Grid Section */}
       <div className="flex flex-col gap-y-4">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-x-2">
-            <Layers className="w-5 h-5 text-blue-400" /> Connected Posts Gallery
+          <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-x-2" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+            <Layers className="w-5 h-5 text-[var(--accent-magenta)]" /> Connected Posts Gallery
           </h2>
-          <p className="text-text-secondary text-xs">
+          <p className="text-[var(--text-secondary)] text-xs">
             Review recent Instagram posts, view statistics, and run transcription files.
           </p>
         </div>
 
         {posts.length === 0 && !loadingPosts ? (
-          <div className="glass-card py-16 text-center border border-white/[0.08] rounded-2xl flex flex-col items-center">
-            <AlertCircle className="w-10 h-10 text-gray-500 mb-3 animate-pulse" />
-            <h3 className="text-sm font-semibold text-white">No Connected Posts Found</h3>
-            <p className="text-xs text-gray-400 max-w-[280px] mt-1 leading-normal">
+          <div className="glass-card py-16 text-center flex flex-col items-center">
+            <AlertCircle className="w-10 h-10 text-[var(--text-tertiary)] mb-3 animate-pulse" />
+            <h3 className="text-sm font-bold text-[var(--text-primary)]">No Connected Posts Found</h3>
+            <p className="text-xs text-[var(--text-secondary)] max-w-[280px] mt-1 leading-normal">
               Connect your account in the Integrations panel or select Demo Mode to load interactive posts.
             </p>
           </div>
@@ -704,25 +712,25 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
             {posts.map((post) => {
               const engagementScore = post.like_count + post.comments_count;
               let scoreBadge = (
-                <span className="text-[9px] font-bold bg-rose-500/10 border border-rose-500/20 text-rose-400 px-2 py-0.5 rounded-full">
+                <span className="text-[9px] font-bold bg-rose-500/5 border border-rose-500/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-full" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                   💤 Sleepy
                 </span>
               );
               if (engagementScore > 10000) {
                 scoreBadge = (
-                  <span className="text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full animate-pulse">
+                  <span className="text-[9px] font-bold bg-amber-500/5 border border-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full animate-pulse" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                     🔥 Viral
                   </span>
                 );
               } else if (engagementScore > 3000) {
                 scoreBadge = (
-                  <span className="text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">
+                  <span className="text-[9px] font-bold bg-emerald-500/5 border border-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                     ⚡ Healthy
                   </span>
                 );
               } else if (engagementScore > 100) {
                 scoreBadge = (
-                  <span className="text-[9px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">
+                  <span className="text-[9px] font-bold bg-[var(--accent-whisper)] border border-[var(--accent-veil)] text-[var(--accent-magenta)] px-2 py-0.5 rounded-full" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                     📈 Average
                   </span>
                 );
@@ -731,19 +739,19 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
               return (
                 <div
                   key={post.id}
-                  className="glass-card border border-white/[0.08] rounded-2xl p-5 hover:border-white/[0.12] transition-all duration-300 hover:scale-[1.01] flex flex-col justify-between gap-y-4 shadow-lg group"
+                  className="glass-card p-5 hover:scale-[1.01] flex flex-col justify-between gap-y-4 group"
                 >
                   <div className="flex gap-x-3.5">
                     {/* Media type icon / Thumbnail visualizer */}
-                    <div className="w-[100px] h-[100px] bg-[#121214] border border-white/[0.06] rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative">
+                    <div className="w-[100px] h-[100px] bg-[var(--page-bg)]/40 border border-[var(--border-color)] rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative">
                       {post.media_type === "VIDEO" ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-purple-500/5 group-hover:bg-purple-500/10 transition">
-                          <Play className="w-6 h-6 text-purple-400 fill-purple-400/25" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-[var(--accent-whisper)]/50 group-hover:bg-[var(--accent-whisper)] transition">
+                          <Play className="w-6 h-6 text-[var(--accent-magenta)] fill-[var(--accent-magenta)]/25" />
                         </div>
                       ) : post.media_type === "CAROUSEL_ALBUM" ? (
-                        <Layers className="w-6 h-6 text-blue-400" />
+                        <Layers className="w-6 h-6 text-[var(--accent-magenta)]" />
                       ) : (
-                        <FileText className="w-6 h-6 text-gray-500" />
+                        <FileText className="w-6 h-6 text-[var(--text-tertiary)]" />
                       )}
                       {post.thumbnail_url && (
                         <img
@@ -757,16 +765,16 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
                     <div className="flex flex-col flex-1 justify-between">
                       <div>
                         <div className="flex items-center justify-between gap-x-2">
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 bg-white/[0.04] border border-white/[0.06] px-1.5 py-0.5 rounded">
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--text-secondary)] bg-[var(--page-bg)] border border-[var(--border-color)] px-1.5 py-0.5 rounded-full" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                             {post.media_type === "VIDEO" ? "Reel" : post.media_type === "IMAGE" ? "Image" : "Carousel"}
                           </span>
                           {scoreBadge}
                         </div>
-                        <p className="text-[11px] text-[#9B9CA0] line-clamp-3 mt-2 leading-relaxed">
+                        <p className="text-[11px] text-[var(--text-secondary)] line-clamp-3 mt-2 leading-relaxed">
                           {post.caption || "No caption provided."}
                         </p>
                       </div>
-                      <span className="text-[9px] text-gray-600 font-mono">
+                      <span className="text-[9px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                         {new Date(post.timestamp).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",
@@ -777,24 +785,24 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
                   </div>
 
                   {/* Metrics Bar */}
-                  <div className="flex items-center gap-x-4 border-t border-b border-white/[0.04] py-2 text-[11px] text-gray-400 font-semibold">
+                  <div className="flex items-center gap-x-4 border-t border-b border-[var(--border-color)] py-2 text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                     <div className="flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5 text-rose-500" />
-                      <span className="text-white">{post.like_count.toLocaleString()}</span> Likes
+                      <Flame className="w-3.5 h-3.5 text-[var(--accent-magenta)]" />
+                      <span className="text-[var(--text-primary)]">{post.like_count.toLocaleString()}</span> Likes
                     </div>
                     <div className="flex items-center gap-1">
-                      <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
-                      <span className="text-white">{post.comments_count.toLocaleString()}</span> Comments
+                      <MessageSquare className="w-3.5 h-3.5 text-[var(--accent-magenta)]" />
+                      <span className="text-[var(--text-primary)]">{post.comments_count.toLocaleString()}</span> Comments
                     </div>
                   </div>
 
                   {/* Transcript Viewer / Action */}
                   <div className="flex flex-col gap-y-2">
                     {post.transcript ? (
-                      <div className="bg-[#121214]/60 border border-white/[0.05] p-2.5 rounded-xl text-[10px] text-gray-300">
-                        <span className="font-extrabold text-[9px] text-purple-400 uppercase tracking-wider flex items-center justify-between mb-1">
+                      <div className="bg-[var(--page-bg)]/40 border border-[var(--border-color)] p-2.5 rounded-lg text-[10px] text-[var(--text-secondary)]">
+                        <span className="font-bold text-[9px] text-[var(--accent-magenta)] uppercase tracking-wider flex items-center justify-between mb-1" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
                           <span>Transcription File</span>
-                          <span className="text-gray-500 text-[8px] font-normal lowercase">{post.transcriptSource}</span>
+                          <span className="text-[var(--text-tertiary)] text-[8px] font-normal lowercase">{post.transcriptSource}</span>
                         </span>
                         <p className="whitespace-pre-wrap leading-relaxed line-clamp-4 hover:line-clamp-none transition-all duration-300 cursor-pointer">
                           {post.transcript}
@@ -804,7 +812,8 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
                       <button
                         onClick={() => handleTranscribe(post)}
                         disabled={transcribing[post.id]}
-                        className="w-full py-2 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 hover:from-blue-500/20 hover:to-indigo-500/20 border border-blue-500/20 text-[10px] font-bold text-blue-400 rounded-xl flex items-center justify-center gap-1.5 transition"
+                        className="w-full py-2 bg-[var(--text-primary)] hover:bg-[var(--accent-magenta)] hover:text-white border border-[var(--border-color)] text-[10px] font-bold uppercase tracking-wider text-[var(--page-bg)] rounded-lg flex items-center justify-center gap-1.5 transition-smooth"
+                        style={{ fontFamily: "var(--font-space-grotesk), monospace" }}
                       >
                         {transcribing[post.id] ? (
                           <>
@@ -817,7 +826,7 @@ export default function AnalyticsPage({ params: { slug } }: { params: { slug: st
                         )}
                       </button>
                     ) : (
-                      <div className="text-[10px] text-center text-gray-500 italic py-1 bg-white/[0.01] rounded">
+                      <div className="text-[10px] text-center text-[var(--text-tertiary)] italic py-1 bg-[var(--page-bg)]/20 border border-[var(--border-color)] rounded-lg">
                         Images/Carousels have no audio file to transcribe
                       </div>
                     )}
