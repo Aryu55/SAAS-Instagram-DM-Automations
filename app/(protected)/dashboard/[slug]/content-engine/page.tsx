@@ -223,6 +223,39 @@ export default function ContentEnginePage({ params }: Props) {
         ]);
         if (ideasRes.status === 200 && ideasRes.data) setIdeas(ideasRes.data);
         if (jobsRes.status === 200 && jobsRes.data) setJobs(jobsRes.data);
+      } else {
+        // Auto-create default business config if not present
+        const nameFormatted = slug.charAt(0).toUpperCase() + slug.slice(1);
+        const autoRes = await updateBusinessConfig(slug, {
+          name: nameFormatted,
+          tagline: "AI-Powered Social Growth",
+          description: "Autonomous content factory generating high-retention social media scripts and videos.",
+          targetAudience: "Creators, Marketers, and Brands",
+          painPoints: ["Slow content creation", "Low retention rates", "Writer's block"],
+          contentPillars: ["AI Automation", "Growth Marketing", "Content Creation"],
+          voiceTone: "Engaging & Informative",
+          cta: "Comment Automate to learn more!",
+          hashtags: "#socialmedia #contentcreation #growthmarketing #aiautomation",
+          active: true,
+          language: "hinglish",
+          ttsProvider: "auto",
+          ttsVoiceId: "v2/hi_speaker_2"
+        });
+        if (autoRes.status === 200 && autoRes.data) {
+          const biz = autoRes.data;
+          setBusiness(biz);
+          setSettingsForm({
+            name: biz.name || "", tagline: biz.tagline || "",
+            description: biz.description || "", targetAudience: biz.targetAudience || "",
+            painPoints: biz.painPoints?.join(", ") || "",
+            contentPillars: biz.contentPillars?.join(", ") || "",
+            voiceTone: biz.voiceTone || "", cta: biz.cta || "",
+            hashtags: biz.hashtags || "", complianceNotes: biz.complianceNotes || "",
+            ttsProvider: biz.ttsProvider || "auto",
+            ttsVoiceId: biz.ttsVoiceId || "v2/hi_speaker_2",
+            language: biz.language || "hinglish", active: biz.active || false
+          });
+        }
       }
     } catch (e: any) {
       toast.error(`Error loading data: ${e.message}`);

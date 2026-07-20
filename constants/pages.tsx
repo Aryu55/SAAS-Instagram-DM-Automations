@@ -5,7 +5,7 @@ import {
   RocketDuoToneBlue,
   SettingsDuoToneWhite,
 } from "@/icons";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Video, Flame } from "lucide-react";
 
 export const PAGE_BREAD_CRUMBS: string[] = [
   "contacts",
@@ -13,6 +13,7 @@ export const PAGE_BREAD_CRUMBS: string[] = [
   "integrations",
   "settings",
   "content-engine",
+  "virality",
   "analytics",
 ];
 
@@ -27,6 +28,8 @@ export const PAGE_ICONS: Props = {
   SETTINGS: <SettingsDuoToneWhite />,
   HOME: <HomeDuoToneBlue />,
   ANALYTICS: <BarChart3 className="text-blue-400 w-5 h-5" />,
+  "CONTENT-ENGINE": <Video className="text-blue-400 w-5 h-5" />,
+  VIRALITY: <Flame className="text-blue-400 w-5 h-5" />,
 };
 
 export const PLANS = [
