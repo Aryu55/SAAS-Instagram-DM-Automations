@@ -188,20 +188,35 @@ export async function POST(req: NextRequest) {
   try {
     const { scriptA, scriptB, platform = "instagram", niche = "tech", language = "hinglish" } = await req.json();
 
+    console.log("[VIRALITY FEATURE] API POST received:", {
+      platform,
+      niche,
+      language,
+      scriptALength: scriptA?.length || 0,
+      scriptBLength: scriptB?.length || 0,
+      scriptAPreview: scriptA ? scriptA.substring(0, 60) + "..." : "none"
+    });
+
     if (!scriptA) {
+      console.log("[VIRALITY FEATURE] Validation failed: Script A content is missing.");
       return NextResponse.json({ error: "Script A content is required" }, { status: 400 });
     }
 
     const hasKeys = isUsingOpenRouter || !!process.env.OPEN_AI_KEY || !!process.env.GEMINI_API_KEY;
+    console.log("[VIRALITY FEATURE] LLM Keys status: hasKeys =", hasKeys);
 
     if (!hasKeys) {
+      console.log("[VIRALITY FEATURE] LLM keys not detected, running rule-based heuristic fallback simulator...");
       // Return simulated responses immediately
       const analysisA = computeSimulatedScore(scriptA, platform, niche, language);
       const analysisB = scriptB ? computeSimulatedScore(scriptB, platform, niche, language) : null;
+      console.log("[VIRALITY FEATURE] Heuristic simulator computed:", {
+        scoreA: analysisA.score,
+        scoreB: analysisB?.score || "N/A"
+      });
       return NextResponse.json({ versionA: analysisA, versionB: analysisB });
     }
 
-    // Call LLM for script evaluation
     const systemPrompt = `You are an expert short-form content director and virality optimizer. 
 Evaluate the provided short-form script(s) for platforms like Instagram Reels, TikTok, and YouTube Shorts.
 You MUST analyze the scripts across five key criteria:
@@ -268,6 +283,7 @@ ${scriptB ? `### USER SCRIPT B TO EVALUATE:\n${scriptB}\n` : ""}
 Evaluate them carefully, compare their structure and pacing against the proven reference templates provided above, compute realistic simulated retention curves based on script pace and length, and suggest practical line refinements. Remember to return raw JSON matching the schema.`;
 
     try {
+      console.log("[VIRALITY FEATURE] Calling LLM API for deep evaluation of scripts...");
       const completion = await openai.chat.completions.create({
         model: getModelName(),
         response_format: { type: "json_object" },
@@ -277,16 +293,22 @@ Evaluate them carefully, compare their structure and pacing against the proven r
         ]
       });
 
+      console.log("[VIRALITY FEATURE] LLM API responded successfully. Parsing JSON output...");
       const jsonResponse = JSON.parse(completion.choices[0].message.content || "{}");
+      console.log("[VIRALITY FEATURE] Parsed LLM analysis successfully:", {
+        scoreA: jsonResponse.versionA?.score,
+        scoreB: jsonResponse.versionB?.score || "N/A"
+      });
       return NextResponse.json(jsonResponse);
     } catch (err: any) {
-      console.error("LLM evaluation failed, calling fallback simulator:", err.message);
+      console.error("[VIRALITY FEATURE] LLM evaluation failed, calling fallback simulator:", err.message);
       const analysisA = computeSimulatedScore(scriptA, platform, niche, language);
       const analysisB = scriptB ? computeSimulatedScore(scriptB, platform, niche, language) : null;
       return NextResponse.json({ versionA: analysisA, versionB: analysisB });
     }
 
   } catch (error: any) {
+    console.error("[VIRALITY FEATURE] Fatal error in API POST:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
