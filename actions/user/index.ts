@@ -30,19 +30,22 @@ export const onboardUser = async () => {
 
         if (days < 5) {
           console.log("refresh");
+          try {
+            const refresh = await refreshToken(found.integrations[0].token);
+            const today = new Date();
+            const expire_date = today.setDate(today.getDate() + 60);
 
-          const refresh = await refreshToken(found.integrations[0].token);
-          const today = new Date();
-          const expire_date = today.setDate(today.getDate() + 60);
+            const update_token = await updateIntegration(
+              refresh.access_token,
+              new Date(expire_date),
+              found.integrations[0].id
+            );
 
-          const update_token = await updateIntegration(
-            refresh.access_token,
-            new Date(expire_date),
-            found.integrations[0].id
-          );
-
-          if (!update_token) {
-            console.log("Failed to update token");
+            if (!update_token) {
+              console.log("Failed to update token");
+            }
+          } catch (refreshError) {
+            console.error("Graceful exit: Token refresh failed:", refreshError instanceof Error ? refreshError.message : refreshError);
           }
         }
       }
