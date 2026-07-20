@@ -226,6 +226,19 @@ To modernize the product and align it with state-of-the-art tech platforms, the 
 - **Component Polish**:
   - Refactored `DoubleGradientCard`, `MetricsCard`, `Sidebar`, mobile navigation sheets, search bars, settings blocks, and voice script profiles to use rounded edges and theme-aware variables.
 
+### [Revision 03] — Content Factory Integration (Phases 0-4)
+To implement a complete, autonomous, multi-business Content Factory:
+- **7-Tab Dashboard UI**: Created a highly polished, interactive dashboard page for the Content Engine containing:
+  - *Ideas Calendar*: Grid of concepts with staggered fade-in animations, manual idea submission sidebar, and batch generate triggers.
+  - *Review Queue*: 9:16 interactive video player mockup, editable captions, script text parser, hook variations, and approval/rejection modals.
+  - *Render Pipeline*: Status tracker with expandable accordion logs showing detailed execution outputs.
+  - *Trends*: Engagement-scoring competitor analysis and semantic topic clustering views.
+  - *Analytics*: Performance tracking cards, winning patterns output, and weekly reports.
+  - *Documentary Log*: Automated timeline tracking onboarding, publishes, rejections, and milestone achievements with markdown copy export.
+  - *Settings*: Automated brand configuration details, language/voice presets, toggle controls, and asset checklists.
+- **Server Actions & Database Controllers**: Built dedicated server actions for scraping integrations (`scraper.ts`), metrics aggregation (`metrics.ts`), timeline export (`documentary.ts`), and pipeline triggers.
+- **Vercel Cron & Webhooks**: Configured automated daily creation pipeline cron (`/api/factory/cron`) and weekly feedback analysis cron (`/api/factory/weekly`).
+
 ---
 
 ## 7. Installation & Local Setup
