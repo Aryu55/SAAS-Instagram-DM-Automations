@@ -106,6 +106,14 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
   const handleEvaluate = async () => {
     setLoading(true);
     setResults(null);
+    console.log("ℹ️ [Janus UI Engine] Initiating virality script prediction...", {
+      platform,
+      niche,
+      language,
+      isComparing,
+      scriptASize: scriptA?.length || 0,
+      scriptBSize: isComparing ? scriptB?.length : 0
+    });
     try {
       const response = await fetch("/api/predict-virality", {
         method: "POST",
@@ -126,9 +134,11 @@ Comment "GROWTH" below, and I'll instantly DM you my secret templates and direct
       }
 
       const data = await response.json();
+      console.log("✅ [Janus UI Engine] Virality prediction response received:", data);
       setResults(data);
       toast.success("Virality prediction complete!");
     } catch (err: any) {
+      console.error("❌ [Janus UI Engine] Virality evaluation failed:", err.message);
       toast.error(err.message || "Failed to analyze scripts.");
     } finally {
       setLoading(false);

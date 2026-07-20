@@ -200,10 +200,12 @@ export default function ContentEnginePage({ params }: Props) {
   const [milestones, setMilestones] = useState<any[]>([]);
 
   const loadAllData = useCallback(async () => {
+    console.log("ℹ️ [Janus UI Engine] Loading Content Engine data for business slug:", slug);
     try {
       const bizRes = await getBusinessConfig(slug);
       if (bizRes.status === 200 && bizRes.data) {
         const biz = bizRes.data;
+        console.log("✅ [Janus UI Engine] Loaded business profile:", biz);
         setBusiness(biz);
         setSettingsForm({
           name: biz.name || "", tagline: biz.tagline || "",
@@ -221,10 +223,17 @@ export default function ContentEnginePage({ params }: Props) {
           getContentIdeas(biz.id),
           getContentJobs(biz.id)
         ]);
-        if (ideasRes.status === 200 && ideasRes.data) setIdeas(ideasRes.data);
-        if (jobsRes.status === 200 && jobsRes.data) setJobs(jobsRes.data);
+        if (ideasRes.status === 200 && ideasRes.data) {
+          console.log("✅ [Janus UI Engine] Loaded Content Ideas count:", ideasRes.data.length);
+          setIdeas(ideasRes.data);
+        }
+        if (jobsRes.status === 200 && jobsRes.data) {
+          console.log("✅ [Janus UI Engine] Loaded Production Jobs count:", jobsRes.data.length);
+          setJobs(jobsRes.data);
+        }
       } else {
         // Auto-create default business config if not present
+        console.log("⚠️ [Janus UI Engine] Business profile not found. Auto-creating default profile for slug:", slug);
         const nameFormatted = slug.charAt(0).toUpperCase() + slug.slice(1);
         const autoRes = await updateBusinessConfig(slug, {
           name: nameFormatted,
@@ -242,6 +251,7 @@ export default function ContentEnginePage({ params }: Props) {
           ttsVoiceId: "v2/hi_speaker_2"
         });
         if (autoRes.status === 200 && autoRes.data) {
+          console.log("✅ [Janus UI Engine] Auto-created default business profile successfully:", autoRes.data);
           const biz = autoRes.data;
           setBusiness(biz);
           setSettingsForm({
@@ -258,13 +268,21 @@ export default function ContentEnginePage({ params }: Props) {
         }
       }
     } catch (e: any) {
+      console.error("❌ [Janus UI Engine] Error loading data:", e.message);
       toast.error(`Error loading data: ${e.message}`);
     } finally {
       setLoading(false);
     }
   }, [slug]);
 
-  useEffect(() => { loadAllData(); }, [loadAllData]);
+  useEffect(() => { 
+    console.log("🚀 [Janus UI Engine] Content Engine mounted. Initiating workspace load...");
+    loadAllData(); 
+  }, [loadAllData]);
+
+  useEffect(() => {
+    console.log("ℹ️ [Janus UI Engine] Active tab changed to:", activeTab);
+  }, [activeTab]);
 
   // ─── Handlers ───
 
@@ -282,21 +300,25 @@ export default function ContentEnginePage({ params }: Props) {
         ttsProvider: settingsForm.ttsProvider, ttsVoiceId: settingsForm.ttsVoiceId,
         language: settingsForm.language, active: settingsForm.active
       };
+      console.log("💾 [Janus UI Engine] Submitting updated brand profile settings:", payload);
       const res = await updateBusinessConfig(slug, payload);
+      console.log("💾 [Janus UI Engine] updateBusinessConfig response:", res);
       if (res.status === 200) { toast.success("Settings saved"); loadAllData(); }
       else toast.error(res.error || "Failed to update");
-    } catch (err: any) { toast.error(err.message); }
+    } catch (err: any) { console.error("❌ [Janus UI Engine] Settings submit failed:", err.message); toast.error(err.message); }
     finally { setActionLoading(null); }
   };
 
   const triggerBatchGenerate = async () => {
     if (!business) return;
     setActionLoading("generate_ideas");
+    console.log("🧠 [Janus UI Engine] Requesting 10 new AI script ideas from Worker...");
     try {
       const res = await generateIdeaBatch(slug);
+      console.log("🧠 [Janus UI Engine] generateIdeaBatch response:", res);
       if (res.status === 200) { toast.success("10 new ideas generated"); loadAllData(); }
       else toast.error(res.error || "Failed to generate ideas");
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e: any) { console.error("❌ [Janus UI Engine] Batch generate failed:", e.message); toast.error(e.message); }
     finally { setActionLoading(null); }
   };
 
@@ -304,42 +326,50 @@ export default function ContentEnginePage({ params }: Props) {
     e.preventDefault();
     if (!business || !manualIdea.topic.trim()) return;
     setActionLoading("create_manual_idea");
+    console.log("✏️ [Janus UI Engine] Creating manual script idea:", manualIdea);
     try {
       const res = await createManualIdea(business.id, manualIdea.topic, manualIdea.angle, manualIdea.pillar);
+      console.log("✏️ [Janus UI Engine] createManualIdea response:", res);
       if (res.status === 200) { toast.success("Idea added"); setManualIdea({ topic: "", angle: "", pillar: "" }); loadAllData(); }
       else toast.error(res.error || "Failed to create");
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e: any) { console.error("❌ [Janus UI Engine] Create manual idea failed:", e.message); toast.error(e.message); }
     finally { setActionLoading(null); }
   };
 
   const triggerRender = async (ideaId: string) => {
     if (!business) return;
     setActionLoading(`render_${ideaId}`);
+    console.log("🎬 [Janus UI Engine] Dispatching script idea ID:", ideaId, "to video production pipeline (Script ➔ TTS ➔ VPS Render)...");
     const toastId = toast.loading("Running pipeline: Script → TTS → Render...");
     try {
       const res = await runPipelineForIdea(business.id, ideaId);
+      console.log("🎬 [Janus UI Engine] runPipelineForIdea response:", res);
       toast.dismiss(toastId);
       if (res.status === 200) { toast.success("Job queued for rendering"); loadAllData(); setActiveTab("jobs"); }
       else toast.error(res.error || "Pipeline failed");
-    } catch (e: any) { toast.dismiss(toastId); toast.error(e.message); }
+    } catch (e: any) { console.error("❌ [Janus UI Engine] Pipeline dispatch failed:", e.message); toast.dismiss(toastId); toast.error(e.message); }
     finally { setActionLoading(null); }
   };
 
   const handleApproveJob = async (jobId: string, caption: string) => {
     setActionLoading(`approve_${jobId}`);
+    console.log("🚀 [Janus UI Engine] Approving video job ID:", jobId, "with custom caption:", caption);
     try {
       const res = await approveAndPublishJob(jobId, caption);
+      console.log("🚀 [Janus UI Engine] approveAndPublishJob response:", res);
       if (res.status === 200) { toast.success("Approved & scheduled to Postiz"); loadAllData(); }
       else toast.error(res.error || "Approval failed");
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e: any) { console.error("❌ [Janus UI Engine] Job approval failed:", e.message); toast.error(e.message); }
     finally { setActionLoading(null); }
   };
 
   const handleRejectJob = async () => {
     if (!rejectingJobId) return;
     setActionLoading(`reject_${rejectingJobId}`);
+    console.log("❌ [Janus UI Engine] Rejecting video job ID:", rejectingJobId, "Reason:", rejectReason);
     try {
       const res = await rejectJob(rejectingJobId, rejectReason);
+      console.log("❌ [Janus UI Engine] rejectJob response:", res);
       if (res.status === 200) { toast.success("Job rejected"); setRejectingJobId(null); setRejectReason(""); loadAllData(); }
       else toast.error(res.error || "Rejection failed");
     } catch (e: any) { toast.error(e.message); }
