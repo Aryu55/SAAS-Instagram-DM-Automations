@@ -33,6 +33,15 @@ const MODULES = [
     bgColor: "bg-emerald-500/10",
     borderColor: "border-emerald-500/20",
   },
+  {
+    id: "analyzer",
+    label: "Viral Analyzer",
+    description: "Reverse engineer viral videos to extract hooks, format, and storytelling.",
+    icon: <Flame className="w-5 h-5" />,
+    color: "text-rose-400",
+    bgColor: "bg-rose-500/10",
+    borderColor: "border-rose-500/20",
+  },
 ];
 
 export default function IntelligencePage() {

@@ -361,6 +361,10 @@ model ScrapedPost {
   cluster  String?
   postDate DateTime?
   createdAt DateTime    @default(now())
+  
+  // Video Analysis fields
+  status       String       @default("COMPLETED")
+  analysisData Json?
 }
 
 model DocumentaryLog {
