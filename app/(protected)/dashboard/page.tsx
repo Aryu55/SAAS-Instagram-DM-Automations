@@ -10,11 +10,11 @@ export default async function MasterDashboardPage() {
   console.log("[AUTH TRACE] MasterDashboardPage: onboardUser status:", user.status);
 
   if (user.status !== 200 && user.status !== 201) {
-    return redirect("/sign-in");
+    return redirect("/api/auth/logout");
   }
 
   const userId = user.data?.id;
-  if (!userId) return redirect("/sign-in");
+  if (!userId) return redirect("/api/auth/logout");
 
   // Fetch all organizations this user is a member of
   let memberships = await prisma.orgMember.findMany({
