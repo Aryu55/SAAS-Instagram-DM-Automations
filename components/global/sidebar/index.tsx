@@ -17,26 +17,32 @@ function Sidebar({ slug }: Props) {
   const { page } = usePath();
 
   return (
-    <div className="w-[250px] border-r border-[var(--border-color)] fixed left-0 lg:inline-block bg-[var(--card-bg)] hidden bottom-0 top-0 overflow-hidden">
-      <div className="flex flex-col h-full p-6 justify-between">
-        <div className="flex flex-col gap-y-6">
-          <div className="flex gap-x-2 items-center py-4 justify-center">
+    <div className="w-[250px] border-r border-[var(--border-color)] fixed left-0 lg:inline-block bg-[var(--card-bg)] hidden bottom-0 top-0">
+      <div className="flex flex-col h-full">
+        {/* Fixed Header */}
+        <div className="p-6 pb-2">
+          <div className="flex gap-x-2 items-center justify-center mb-4">
             <LogoSmall />
           </div>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-2">
           <div className="flex flex-col gap-y-1.5">
             <Items page={page} slug={slug} />
           </div>
         </div>
 
-        <div className="flex flex-col gap-y-5">
-          <div className="px-4">
+        {/* Fixed Footer */}
+        <div className="p-6 pt-4 mt-auto">
+          <div className="flex flex-col gap-y-5">
             <Separator orientation="horizontal" className="bg-[var(--border-color)]" />
-          </div>
-          <div className="px-3 flex flex-col gap-y-4">
-            <ClerkAuthState />
-            <div className="flex items-center gap-x-3 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] cursor-pointer transition-colors duration-200">
-              <HelpDuoToneWhite />
-              <span>Help</span>
+            <div className="flex flex-col gap-y-4 px-1">
+              <ClerkAuthState />
+              <div className="flex items-center gap-x-3 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] cursor-pointer transition-colors duration-200">
+                <HelpDuoToneWhite />
+                <span>Help</span>
+              </div>
             </div>
           </div>
         </div>
