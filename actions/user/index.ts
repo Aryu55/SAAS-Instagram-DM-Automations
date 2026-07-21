@@ -77,6 +77,7 @@ export const onboardUser = async () => {
       return {
         status: 200,
         data: {
+          id: found.id,
           firstname: found.firstname,
           lastname: found.lastname,
         },
