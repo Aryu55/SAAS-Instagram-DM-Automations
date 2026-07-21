@@ -39,8 +39,8 @@ export default function SignUpPage() {
       }
 
       console.log("🎉 [Janus Auth] Account created successfully for", firstname);
-      console.log("🚀 [Janus Auth] Redirecting to /dashboard...");
-      router.push("/dashboard");
+      console.log("🚀 [Janus Auth] Navigating to /dashboard...");
+      window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("💥 [Janus Auth] Network error during signup:", err.message);
       setError("Something went wrong. Try again.");

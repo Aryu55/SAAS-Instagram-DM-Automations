@@ -37,8 +37,8 @@ export default function SignInPage() {
       }
 
       console.log("🎉 [Janus Auth] Auth successful! Welcome back", data.firstname || email);
-      console.log("🚀 [Janus Auth] Redirecting to /dashboard...");
-      router.push("/dashboard");
+      console.log("🚀 [Janus Auth] Navigating to /dashboard...");
+      window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("💥 [Janus Auth] Network error during sign in:", err.message);
       setError("Something went wrong. Try again.");
