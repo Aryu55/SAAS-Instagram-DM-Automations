@@ -17,7 +17,7 @@ export default async function MasterDashboardPage() {
   if (!userId) return redirect("/sign-in");
 
   // Fetch all organizations this user is a member of
-  const memberships = await prisma.orgMember.findMany({
+  let memberships = await prisma.orgMember.findMany({
     where: { userId },
     include: {
       org: {
@@ -36,7 +36,62 @@ export default async function MasterDashboardPage() {
 
   console.log(`[AUTH TRACE] MasterDashboardPage: user belongs to ${memberships.length} orgs`);
 
-  // If user has exactly 1 org, auto-redirect into it
+  // If user has NO org memberships yet, auto-assign them as OWNER of all organizations
+  if (memberships.length === 0) {
+    console.log("[AUTH TRACE] MasterDashboardPage: No org memberships found. Auto-linking user to default orgs...");
+    let allOrgs = await prisma.organization.findMany();
+    
+    if (allOrgs.length === 0) {
+      console.log("[AUTH TRACE] MasterDashboardPage: Creating default 'Hisaab' organization...");
+      const defaultOrg = await prisma.organization.create({
+        data: {
+          name: "Hisaab",
+          slug: "hisaab",
+          tagline: "Automatic expense tracking for freelancers and creators",
+          description: "Auto-imports bank statements, categorizes write-offs, and calculates quarterly taxes.",
+        },
+      });
+      allOrgs = [defaultOrg];
+    }
+
+    // Assign user to all orgs as OWNER
+    for (const org of allOrgs) {
+      await prisma.orgMember.upsert({
+        where: {
+          orgId_userId: {
+            orgId: org.id,
+            userId,
+          },
+        },
+        update: { role: "OWNER" },
+        create: {
+          orgId: org.id,
+          userId,
+          role: "OWNER",
+        },
+      });
+    }
+
+    // Re-fetch memberships
+    memberships = await prisma.orgMember.findMany({
+      where: { userId },
+      include: {
+        org: {
+          include: {
+            _count: {
+              select: {
+                jobs: true,
+                automations: true,
+                contacts: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  // If user has 1 org, auto-redirect straight into it
   if (memberships.length === 1) {
     const destination = `/dashboard/${memberships[0].org.slug}`;
     console.log("[AUTH TRACE] MasterDashboardPage: auto-redirecting to slug:", destination);
