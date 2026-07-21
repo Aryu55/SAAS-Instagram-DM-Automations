@@ -174,7 +174,7 @@ export default function AnalyzerPage() {
                         <Play className="w-3 h-3 text-rose-400" /> The Hook
                       </span>
                       <p className="text-sm font-semibold text-[var(--text-primary)] line-clamp-2 leading-tight">
-                        "{data.hook}"
+                        &quot;{data.hook}&quot;
                       </p>
                     </div>
 
@@ -229,7 +229,7 @@ export default function AnalyzerPage() {
                       <h3 className="text-xs font-bold text-rose-300 uppercase tracking-wider">The Hook (First 3 Seconds)</h3>
                     </div>
                     <p className="text-lg font-black text-white italic leading-tight">
-                      "{selectedPost.analysisData.hook}"
+                      &quot;{selectedPost.analysisData.hook}&quot;
                     </p>
                   </div>
 
