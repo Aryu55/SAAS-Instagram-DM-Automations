@@ -56,20 +56,18 @@ export default async function MasterDashboardPage() {
 
     // Assign user to all orgs as OWNER
     for (const org of allOrgs) {
-      await prisma.orgMember.upsert({
-        where: {
-          orgId_userId: {
-            orgId: org.id,
-            userId,
-          },
-        },
-        update: { role: "OWNER" },
-        create: {
-          orgId: org.id,
-          userId,
-          role: "OWNER",
-        },
+      const existingMember = await prisma.orgMember.findFirst({
+        where: { userId, orgId: org.id },
       });
+      if (!existingMember) {
+        await prisma.orgMember.create({
+          data: {
+            userId,
+            orgId: org.id,
+            role: "OWNER",
+          },
+        });
+      }
     }
 
     // Re-fetch memberships
