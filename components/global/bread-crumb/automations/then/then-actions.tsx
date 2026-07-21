@@ -8,6 +8,7 @@ import { useListener } from "@/hooks/use-automation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import TriggerButton from "../trigger-button";
+import IphoneMockup from "@/components/global/live-preview/iphone-mockup";
 
 type Props = {
   id: string;
@@ -20,6 +21,7 @@ function ThenActions({ id }: Props) {
     register,
     isPending,
     listener: Listener,
+    watch,
   } = useListener(id);
 
   return (
@@ -69,6 +71,11 @@ function ThenActions({ id }: Props) {
         )}
       </div>
       <form onSubmit={onFormSubmit} className="flex flex-col gap-y-2">
+        {Listener === "MESSAGE" && (
+          <div className="flex justify-center mb-4 mt-2">
+            <IphoneMockup message={watch("prompt") || ""} />
+          </div>
+        )}
         <Textarea
           placeholder={
             Listener === "SMARTAI"

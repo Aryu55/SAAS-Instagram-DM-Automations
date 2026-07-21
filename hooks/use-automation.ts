@@ -95,7 +95,7 @@ export const useListener = (id: string) => {
     reset();
   };
 
-  return { onSetListener, onFormSubmit, register, isPending, listener };
+  return { onSetListener, onFormSubmit, register, isPending, listener, watch };
 };
 
 export const useTrigger = (id: string) => {

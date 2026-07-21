@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { useQueryAutomations } from "@/hooks/user-queries";
 import { PlaneBlue, SmartAi, Warning } from "@/icons";
 import PostButton from "../post";
+import InfoTooltip from "@/components/global/info-tooltip";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -56,6 +57,7 @@ function ThenNode({ id }: Props) {
             <Warning />
           </span>
           <span>Then...</span>
+          <InfoTooltip message="Define the action or reply the AI will execute when the trigger fires." />
         </div>
 
         <div className="bg-[var(--page-bg)] border border-[var(--border-color)] p-5 rounded-none flex flex-col gap-y-2">

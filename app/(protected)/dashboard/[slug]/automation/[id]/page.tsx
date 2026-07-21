@@ -3,6 +3,7 @@ import PostNode from "@/components/global/bread-crumb/automations/post/node";
 import ThenNode from "@/components/global/bread-crumb/automations/then/node";
 import Trigger from "@/components/global/bread-crumb/automations/trigger";
 import { Warning } from "@/icons";
+import InfoTooltip from "@/components/global/info-tooltip";
 
 type Props = {
   params: {
@@ -23,6 +24,7 @@ async function Page({ params }: Props) {
               <Warning />
             </span>
             <span>When...</span>
+            <InfoTooltip message="Select an event that will cause this automation to fire." />
           </div>
           <Trigger id={params.id} />
         </div>
