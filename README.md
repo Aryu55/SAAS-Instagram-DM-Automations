@@ -239,6 +239,17 @@ To implement a complete, autonomous, multi-business Content Factory:
 - **Server Actions & Database Controllers**: Built dedicated server actions for scraping integrations (`scraper.ts`), metrics aggregation (`metrics.ts`), timeline export (`documentary.ts`), and pipeline triggers.
 - **Vercel Cron & Webhooks**: Configured automated daily creation pipeline cron (`/api/factory/cron`) and weekly feedback analysis cron (`/api/factory/weekly`).
 
+### [Revision 04] — Premium UX & Intelligence Suite Expansion
+- **Premium UX / Skeleton Loading**: Implemented true skeleton loading states to replace generic spinners across the dashboard, reducing perceived wait times and stopping layout shifts.
+- **Interactive Live Previews**: Added a real-time `iPhone Mockup` component inside the automation builder (`ThenActions`), allowing users to live-preview their DM responses exactly as they will appear on Instagram while typing.
+- **Advanced Skills Engine & AI Auto-Categorization**: 
+  - Added a **Bulk AI Import** feature that allows users to paste raw text of skills and uses Gemini 2.0 to auto-categorize them (e.g., `EDITING_STYLE`, `CAPTION_STYLE`, `BROLL_GENERATION`, `VOICE`).
+  - Added **Style Reference Links**: Users can attach `/watch` video links specifically for editing style skills.
+  - **Dynamic Specimen Caching**: The system permanently generates and caches visual UI specimens (e.g., dynamic subtitles, fake waveforms) in the DB for non-editing skills to save LLM tokens.
+- **Viral Analyzer Intelligence Feature (`/analyze`)**: 
+  - Expanded `ScrapedPost` schema to support structural deep dives.
+  - Built a batch-analysis dashboard where users can paste video links to automatically extract transcripts and have the LLM reverse-engineer the exact **Hook**, **Format**, and **Storytelling Structure** that made the video go viral.
+
 ---
 
 ## 7. Installation & Local Setup
