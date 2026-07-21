@@ -5,16 +5,21 @@ import {
   RocketDuoToneBlue,
   SettingsDuoToneWhite,
 } from "@/icons";
-import { BarChart3, Video, Flame } from "lucide-react";
+import { BarChart3, Video, Flame, Inbox, Factory, BookOpen, Eye, Brain } from "lucide-react";
 
 export const PAGE_BREAD_CRUMBS: string[] = [
   "contacts",
+  "inbox",
   "automation",
   "integrations",
   "settings",
   "content-engine",
+  "studio",
+  "skills",
   "virality",
   "analytics",
+  "research",
+  "intelligence",
 ];
 
 type Props = {
@@ -30,6 +35,11 @@ export const PAGE_ICONS: Props = {
   ANALYTICS: <BarChart3 className="text-blue-400 w-5 h-5" />,
   "CONTENT-ENGINE": <Video className="text-blue-400 w-5 h-5" />,
   VIRALITY: <Flame className="text-blue-400 w-5 h-5" />,
+  INBOX: <Inbox className="text-blue-400 w-5 h-5" />,
+  STUDIO: <Factory className="text-blue-400 w-5 h-5" />,
+  SKILLS: <BookOpen className="text-blue-400 w-5 h-5" />,
+  RESEARCH: <Eye className="text-blue-400 w-5 h-5" />,
+  INTELLIGENCE: <Brain className="text-blue-400 w-5 h-5" />,
 };
 
 export const PLANS = [

@@ -10,9 +10,12 @@ import {
   Share2, Bookmark, ArrowUpRight, Layers, Activity
 } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { getPipelines } from "@/actions/pipelines";
+import PipelineSelector from "./_components/pipeline-selector";
 import {
-  getBusinessConfig,
-  updateBusinessConfig,
+  getOrganizationConfig,
+  updateOrganizationConfig,
   getContentIdeas,
   getContentJobs,
   runPipelineForIdea,
@@ -169,6 +172,14 @@ export default function ContentEnginePage({ params }: Props) {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
+  const { data: pipelinesData } = useQuery({
+    queryKey: ["pipelines", business?.id],
+    queryFn: () => getPipelines(business?.id),
+    enabled: !!business?.id,
+  });
+  const pipelines = pipelinesData?.status === 200 ? (pipelinesData.data as any[]) : [];
+
   // Settings Form
   const [settingsForm, setSettingsForm] = useState({
     name: "", tagline: "", description: "", targetAudience: "",
@@ -212,7 +223,7 @@ export default function ContentEnginePage({ params }: Props) {
   const loadAllData = useCallback(async () => {
     console.log("ℹ️ [Janus UI Engine] Loading Content Engine data for business slug:", slug);
     try {
-      const bizRes = await getBusinessConfig(slug);
+      const bizRes = await getOrganizationConfig(slug);
       logServerTraces(bizRes);
       if (bizRes.status === 200 && bizRes.data) {
         const biz = bizRes.data;
@@ -248,7 +259,7 @@ export default function ContentEnginePage({ params }: Props) {
         // Auto-create default business config if not present
         console.log("⚠️ [Janus UI Engine] Business profile not found. Auto-creating default profile for slug:", slug);
         const nameFormatted = slug.charAt(0).toUpperCase() + slug.slice(1);
-        const autoRes = await updateBusinessConfig(slug, {
+        const autoRes = await updateOrganizationConfig(slug, {
           name: nameFormatted,
           tagline: "AI-Powered Social Growth",
           description: "Autonomous content factory generating high-retention social media scripts and videos.",
@@ -315,9 +326,9 @@ export default function ContentEnginePage({ params }: Props) {
         language: settingsForm.language, active: settingsForm.active
       };
       console.log("💾 [Janus UI Engine] Submitting updated brand profile settings:", payload);
-      const res = await updateBusinessConfig(slug, payload);
+      const res = await updateOrganizationConfig(slug, payload);
       logServerTraces(res);
-      console.log("💾 [Janus UI Engine] updateBusinessConfig response:", res);
+      console.log("💾 [Janus UI Engine] updateOrganizationConfig response:", res);
       if (res.status === 200) { toast.success("Settings saved"); loadAllData(); }
       else toast.error(res.error || "Failed to update");
     } catch (err: any) { console.error("❌ [Janus UI Engine] Settings submit failed:", err.message); toast.error(err.message); }
@@ -580,6 +591,12 @@ export default function ContentEnginePage({ params }: Props) {
           )}
         </div>
       </div>
+
+      <PipelineSelector
+        pipelines={pipelines}
+        selectedId={selectedPipelineId}
+        onSelect={setSelectedPipelineId}
+      />
 
       {/* ── Tab Navigation ── */}
       <div className="flex gap-1 border-b border-white/[0.06] overflow-x-auto pb-px -mb-px">

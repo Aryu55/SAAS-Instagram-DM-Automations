@@ -13,30 +13,30 @@ export async function GET(req: NextRequest) {
   const results: any[] = [];
 
   try {
-    const businesses = await client.business.findMany({
+    const organizations = await client.organization.findMany({
       where: { active: true }
     });
 
-    for (const biz of businesses) {
+    for (const org of organizations) {
       // Pull latest metrics
-      const metricsResult = await pullInstagramMetrics(biz.id);
+      const metricsResult = await pullInstagramMetrics(org.id);
 
-      // Check if business has enough published posts for analysis
+      // Check if organization has enough published posts for analysis
       const publishedCount = await client.contentJob.count({
-        where: { businessId: biz.id, status: { in: ["PUBLISHED", "SCHEDULED", "APPROVED"] } }
+        where: { orgId: org.id, status: { in: ["PUBLISHED", "SCHEDULED", "APPROVED"] } }
       });
 
       if (publishedCount >= 5) {
-        const analysisResult = await analyzeWeeklyPerformance(biz.id);
+        const analysisResult = await analyzeWeeklyPerformance(org.id);
         results.push({
-          slug: biz.slug,
+          slug: org.slug,
           metrics: metricsResult.status === 200 ? "ok" : metricsResult.error,
           analysis: analysisResult.status === 200 ? "ok" : analysisResult.error,
           patterns: (analysisResult as any).data?.patterns || null
         });
       } else {
         results.push({
-          slug: biz.slug,
+          slug: org.slug,
           metrics: metricsResult.status === 200 ? "ok" : metricsResult.error,
           analysis: `skipped (${publishedCount}/5 published posts minimum)`
         });

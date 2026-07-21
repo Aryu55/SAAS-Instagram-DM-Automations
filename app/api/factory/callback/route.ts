@@ -17,10 +17,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing jobId or status" }, { status: 400 });
     }
 
-    // Check if the job exists in the DB
     const existingJob = await client.contentJob.findUnique({
       where: { id: jobId },
-      include: { business: true }
+      include: { org: true }
     });
 
     if (!existingJob) {
@@ -37,10 +36,10 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // Write to business DocumentaryLog
+    // Write to organization DocumentaryLog
     await client.documentaryLog.create({
       data: {
-        businessId: existingJob.businessId,
+        orgId: existingJob.orgId,
         event: status === "REVIEW" ? "video_rendered" : "video_render_failed",
         detail: {
           jobId,

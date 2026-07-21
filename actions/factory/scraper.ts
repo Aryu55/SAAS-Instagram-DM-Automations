@@ -9,7 +9,7 @@ const WORKER_BASE = "https://marketing-machine-orchestrator.mindmaxing.workers.d
 /**
  * Run Apify scrape for a business's competitor handles/keywords
  */
-export async function runScrape(businessId: string, config: {
+export async function runScrape(orgId: string, config: {
   handles: string[];
   keywords: string[];
   platform: "instagram" | "youtube";
@@ -20,8 +20,8 @@ export async function runScrape(businessId: string, config: {
   }
 
   try {
-    const biz = await client.business.findUnique({ where: { id: businessId } });
-    if (!biz) return { status: 404, error: "Business not found" };
+    const org = await client.organization.findUnique({ where: { id: orgId } });
+    if (!org) return { status: 404, error: "Organization not found" };
 
     const actorId = config.platform === "instagram"
       ? "apify/instagram-reel-scraper"
@@ -85,7 +85,7 @@ export async function runScrape(businessId: string, config: {
 
       await client.scrapedPost.create({
         data: {
-          businessId,
+          orgId,
           platform: config.platform,
           handle: item.ownerUsername || item.channelName || item.channelId || "unknown",
           url: item.url || item.videoUrl || "",
@@ -110,7 +110,7 @@ export async function runScrape(businessId: string, config: {
  * Score scraped posts using ER + weighted normalize math
  * (Ported from ai-agent-content-system scoring)
  */
-export async function scoreScrapedPosts(businessId: string, weights?: {
+export async function scoreScrapedPosts(orgId: string, weights?: {
   viewsWeight?: number;
   erWeight?: number;
   commentsWeight?: number;
@@ -133,7 +133,7 @@ export async function scoreScrapedPosts(businessId: string, weights?: {
 
     const posts = await client.scrapedPost.findMany({
       where: {
-        businessId,
+        orgId,
         views: { gte: w.minViews },
         er: { gte: w.minER },
         postDate: { gte: cutoff }
@@ -175,10 +175,10 @@ export async function scoreScrapedPosts(businessId: string, weights?: {
 /**
  * Cluster top posts into named topic groups using LLM
  */
-export async function clusterTopPosts(businessId: string, topN: number = 20) {
+export async function clusterTopPosts(orgId: string, topN: number = 20) {
   try {
     const posts = await client.scrapedPost.findMany({
-      where: { businessId, score: { gt: 0 } },
+      where: { orgId, score: { gt: 0 } },
       orderBy: { score: "desc" },
       take: topN
     });
@@ -251,10 +251,10 @@ Respond with valid JSON: { "clusters": [...] }`;
 /**
  * Get scraped posts for a business
  */
-export async function getScrapedPosts(businessId: string, limit: number = 50) {
+export async function getScrapedPosts(orgId: string, limit: number = 50) {
   try {
     const posts = await client.scrapedPost.findMany({
-      where: { businessId },
+      where: { orgId },
       orderBy: { score: "desc" },
       take: limit
     });
@@ -268,17 +268,17 @@ export async function getScrapedPosts(businessId: string, limit: number = 50) {
  * Generate ideas from a specific cluster
  */
 export async function generateIdeasFromCluster(
-  businessId: string,
+  orgId: string,
   clusterName: string,
   count: number = 5
 ) {
   try {
-    const biz = await client.business.findUnique({ where: { id: businessId } });
-    if (!biz) return { status: 404, error: "Business not found" };
+    const org = await client.organization.findUnique({ where: { id: orgId } });
+    if (!org) return { status: 404, error: "Organization not found" };
 
     // Get posts in this cluster for context
     const clusterPosts = await client.scrapedPost.findMany({
-      where: { businessId, cluster: clusterName },
+      where: { orgId, cluster: clusterName },
       orderBy: { score: "desc" },
       take: 10
     });
@@ -295,9 +295,9 @@ export async function generateIdeasFromCluster(
         "Authorization": `Bearer ${FACTORY_SECRET}`
       },
       body: JSON.stringify({
-        business: biz,
+        business: org,
         count,
-        clusterContext: `These trending posts in the "${clusterName}" cluster performed well:\n${clusterContext}\n\nGenerate ideas inspired by these patterns.`
+        clusterContext: `These trending posts in the "${clusterName}" cluster performed well:\n${clusterContext}\n\n`
       })
     });
 
@@ -310,7 +310,7 @@ export async function generateIdeasFromCluster(
     for (const idea of data.ideas || []) {
       const createdIdea = await client.contentIdea.create({
         data: {
-          businessId,
+          orgId,
           topic: idea.topic,
           angle: idea.angle,
           hookStyle: idea.hookStyle,

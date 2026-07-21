@@ -18,40 +18,40 @@ function checkSecret(tracer: ActionTracer) {
 }
 
 /**
- * Fetch business profile by slug
+ * Fetch organization profile by slug
  */
-export async function getBusinessConfig(slug: string) {
+export async function getOrganizationConfig(slug: string) {
   const tracer = new ActionTracer();
-  tracer.log("getBusinessConfig called for slug:", slug);
+  tracer.log("getOrganizationConfig called for slug:", slug);
   try {
-    const biz = await client.business.findUnique({
+    const org = await client.organization.findUnique({
       where: { slug }
     });
-    tracer.log("getBusinessConfig result resolved:", biz ? { id: biz.id, name: biz.name } : "null (404)");
-    if (!biz) return { status: 404, data: null, logs: tracer.getTraces() };
-    return { status: 200, data: biz, logs: tracer.getTraces() };
+    tracer.log("getOrganizationConfig result resolved:", org ? { id: org.id, name: org.name } : "null (404)");
+    if (!org) return { status: 404, data: null, logs: tracer.getTraces() };
+    return { status: 200, data: org, logs: tracer.getTraces() };
   } catch (err: any) {
-    tracer.error("getBusinessConfig failed:", err.message);
+    tracer.error("getOrganizationConfig failed:", err.message);
     return { status: 500, error: err.message, logs: tracer.getTraces() };
   }
 }
 
 /**
- * Update business config
+ * Update organization config
  */
-export async function updateBusinessConfig(slug: string, data: any) {
+export async function updateOrganizationConfig(slug: string, data: any) {
   const tracer = new ActionTracer();
-  tracer.log("updateBusinessConfig called for slug:", slug, "with payload keys:", Object.keys(data));
+  tracer.log("updateOrganizationConfig called for slug:", slug, "with payload keys:", Object.keys(data));
   try {
-    const updated = await client.business.upsert({
+    const updated = await client.organization.upsert({
       where: { slug },
       update: data,
       create: { slug, ...data }
     });
-    tracer.log("updateBusinessConfig success. Upserted business record ID:", updated.id);
+    tracer.log("updateOrganizationConfig success. Upserted organization record ID:", updated.id);
     return { status: 200, data: updated, logs: tracer.getTraces() };
   } catch (err: any) {
-    tracer.error("updateBusinessConfig failed:", err.message);
+    tracer.error("updateOrganizationConfig failed:", err.message);
     return { status: 500, error: err.message, logs: tracer.getTraces() };
   }
 }
@@ -59,12 +59,12 @@ export async function updateBusinessConfig(slug: string, data: any) {
 /**
  * Get content ideas
  */
-export async function getContentIdeas(businessId: string) {
+export async function getContentIdeas(orgId: string) {
   const tracer = new ActionTracer();
-  tracer.log("getContentIdeas called for businessId:", businessId);
+  tracer.log("getContentIdeas called for orgId:", orgId);
   try {
     const ideas = await client.contentIdea.findMany({
-      where: { businessId },
+      where: { orgId },
       orderBy: { createdAt: "desc" }
     });
     tracer.log("getContentIdeas returned ideas count:", ideas.length);
@@ -78,12 +78,12 @@ export async function getContentIdeas(businessId: string) {
 /**
  * Get content jobs
  */
-export async function getContentJobs(businessId: string) {
+export async function getContentJobs(orgId: string) {
   const tracer = new ActionTracer();
-  tracer.log("getContentJobs called for businessId:", businessId);
+  tracer.log("getContentJobs called for orgId:", orgId);
   try {
     const jobs = await client.contentJob.findMany({
-      where: { businessId },
+      where: { orgId },
       orderBy: { createdAt: "desc" },
       include: { metrics: true }
     });
@@ -98,23 +98,23 @@ export async function getContentJobs(businessId: string) {
 /**
  * Run content pipeline manually for a specific idea
  */
-export async function runPipelineForIdea(businessId: string, ideaId: string) {
+export async function runPipelineForIdea(orgId: string, ideaId: string) {
   const tracer = new ActionTracer();
-  tracer.log("runPipelineForIdea called:", { businessId, ideaId });
+  tracer.log("runPipelineForIdea called:", { orgId, ideaId });
   try {
     checkSecret(tracer);
-    const biz = await client.business.findUnique({ where: { id: businessId } });
+    const org = await client.organization.findUnique({ where: { id: orgId } });
     const idea = await client.contentIdea.findUnique({ where: { id: ideaId } });
 
-    if (!biz || !idea) {
-      tracer.warn("Business or Idea record not found in database.");
-      return { status: 404, error: "Business or Idea not found", logs: tracer.getTraces() };
+    if (!org || !idea) {
+      tracer.warn("Organization or Idea record not found in database.");
+      return { status: 404, error: "Organization or Idea not found", logs: tracer.getTraces() };
     }
 
     // Create rendering job in DB
     const job = await client.contentJob.create({
       data: {
-        businessId,
+        orgId,
         ideaId,
         status: "IDEA"
       }
@@ -129,7 +129,7 @@ export async function runPipelineForIdea(businessId: string, ideaId: string) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${FACTORY_SECRET}`
       },
-      body: JSON.stringify({ business: biz, idea })
+      body: JSON.stringify({ business: org, idea })
     });
 
     if (!scriptRes.ok) {
@@ -149,7 +149,7 @@ export async function runPipelineForIdea(businessId: string, ideaId: string) {
       data: {
         status: "SCRIPTED",
         script: script,
-        caption: `${script.hook}\n\n${script.body.join("\n")}\n\n${script.cta}\n\n${biz.hashtags || ""}`
+        caption: `${script.hook}\n\n${script.body.join("\n")}\n\n${script.cta}\n\n${org.hashtags || ""}`
       }
     });
     tracer.log("Job status updated to 'SCRIPTED' in DB.");
@@ -163,7 +163,7 @@ export async function runPipelineForIdea(businessId: string, ideaId: string) {
         "Authorization": `Bearer ${FACTORY_SECRET}`
       },
       body: JSON.stringify({
-        business: biz,
+        business: org,
         jobId: job.id,
         scriptText: script.scriptText
       })
@@ -198,7 +198,7 @@ export async function runPipelineForIdea(businessId: string, ideaId: string) {
         "Authorization": `Bearer ${FACTORY_SECRET}`
       },
       body: JSON.stringify({
-        businessSlug: biz.slug,
+        businessSlug: org.slug,
         jobId: job.id
       })
     });
@@ -234,7 +234,7 @@ export async function approveAndPublishJob(jobId: string, customCaption: string)
   try {
     const job = await client.contentJob.findUnique({
       where: { id: jobId },
-      include: { business: true }
+      include: { org: true }
     });
 
     if (!job || !job.videoKey) {
@@ -296,7 +296,7 @@ export async function approveAndPublishJob(jobId: string, customCaption: string)
     tracer.log("Recording documentary timeline event for job publication approval...");
     await client.documentaryLog.create({
       data: {
-        businessId: job.businessId,
+        orgId: job.orgId,
         event: "video_approved_and_published",
         detail: { jobId, postizPostId: updated.postizPostId }
       }
@@ -327,7 +327,7 @@ export async function rejectJob(jobId: string, reason: string) {
     tracer.log("Job status set to 'REJECTED' in DB. Recording event in documentary timeline log...");
     await client.documentaryLog.create({
       data: {
-        businessId: job.businessId,
+        orgId: job.orgId,
         event: "video_rejected",
         detail: { jobId, reason }
       }
@@ -343,13 +343,13 @@ export async function rejectJob(jobId: string, reason: string) {
 /**
  * Generate manual ContentIdea
  */
-export async function createManualIdea(businessId: string, topic: string, angle: string, pillar: string) {
+export async function createManualIdea(orgId: string, topic: string, angle: string, pillar: string) {
   const tracer = new ActionTracer();
-  tracer.log("createManualIdea called:", { businessId, topic, angle, pillar });
+  tracer.log("createManualIdea called:", { orgId, topic, angle, pillar });
   try {
     const idea = await client.contentIdea.create({
       data: {
-        businessId,
+        orgId,
         topic,
         angle,
         contentPillar: pillar,
@@ -370,13 +370,13 @@ export async function createManualIdea(businessId: string, topic: string, angle:
  */
 export async function generateIdeaBatch(slug: string) {
   const tracer = new ActionTracer();
-  tracer.log("generateIdeaBatch requested for business slug:", slug);
+  tracer.log("generateIdeaBatch requested for organization slug:", slug);
   try {
     checkSecret(tracer);
-    const biz = await client.business.findUnique({ where: { slug } });
-    if (!biz) {
-      tracer.warn("Business not found for slug:", slug);
-      return { status: 404, error: "Business not found", logs: tracer.getTraces() };
+    const org = await client.organization.findUnique({ where: { slug } });
+    if (!org) {
+      tracer.warn("Organization not found for slug:", slug);
+      return { status: 404, error: "Organization not found", logs: tracer.getTraces() };
     }
 
     tracer.log("Calling Worker /ideas endpoint to fetch 10 script ideas...");
@@ -386,7 +386,7 @@ export async function generateIdeaBatch(slug: string) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${FACTORY_SECRET}`
       },
-      body: JSON.stringify({ business: biz, count: 10 })
+      body: JSON.stringify({ business: org, count: 10 })
     });
 
     if (!res.ok) {
@@ -403,7 +403,7 @@ export async function generateIdeaBatch(slug: string) {
     for (const idea of ideas || []) {
       const createdIdea = await client.contentIdea.create({
         data: {
-          businessId: biz.id,
+          orgId: org.id,
           topic: idea.topic,
           angle: idea.angle,
           hookStyle: idea.hookStyle,

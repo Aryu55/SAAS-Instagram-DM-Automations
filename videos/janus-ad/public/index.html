@@ -1,0 +1,2259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Janus Video Overlays - Telusko Style</title>
+    <style>
+      @font-face {
+        font-family: "Inter";
+        src: url("fonts/Inter-400-latin.woff2") format("woff2");
+        font-weight: 400;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Inter";
+        src: url("fonts/Inter-700-latin.woff2") format("woff2");
+        font-weight: 700;
+        font-display: block;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #060412;
+        font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+      }
+      #stage {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #050508;
+      }
+
+      /* Top Zone: 40% height cosmic nebula space for floating cards */
+      .top-zone {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1080px;
+        height: 768px;
+        overflow: hidden;
+        background: #0a0a0c;
+        background-image:
+          radial-gradient(ellipse at 30% 40%, rgba(120, 40, 180, 0.12) 0%, transparent 60%),
+          radial-gradient(ellipse at 70% 30%, rgba(80, 30, 160, 0.08) 0%, transparent 55%);
+      }
+
+      /* Bottom Zone: 60% height container for cropped talking-head video */
+      .video-wrapper {
+        position: absolute;
+        left: 0;
+        top: 768px;
+        width: 1080px;
+        height: 1152px;
+        overflow: hidden;
+        border-top: 2px solid rgba(255, 255, 255, 0.08);
+      }
+      .video-wrapper video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
+
+      .card-host {
+        position: absolute;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .card-host .card {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      data-composition-id="graphic-overlays"
+      data-start="0"
+      data-duration="182.02"
+      data-fps="30"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- Layer 0: Cosmic background space for cards -->
+      <div class="top-zone"></div>
+
+      <!-- Layer 1: source video centered and cropped to portrait -->
+      <div class="video-wrapper" id="video-wrap">
+        <video
+          id="bg-video"
+          src="input-video.mp4"
+          muted
+          playsinline
+          data-start="0"
+          data-duration="182.02"
+          data-track-index="1"
+        ></video>
+      </div>
+
+      <!-- Audio track to merge in render -->
+      <audio
+        id="bg-audio"
+        src="audio.mp3"
+        data-start="0"
+        data-duration="182.02"
+        data-track-index="3"
+      ></audio>
+
+      <!-- Layer 2: card hosts -->
+      <!-- Card Host for card-01 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-01"
+        data-start="0.0400"
+        data-duration="8.0000"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-01">
+  <style>
+    .card[data-card-id="card-01"] .root {
+      --accent: #38bdf8;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-01"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-01"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-01"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-01"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-01"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-01"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">WAKE UP CALL</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">YOU <span class="hl">WATCHED</span> IT AGAIN <span class="hl">LAST NIGHT</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">And now you are feeling tired, ashamed, and guilty this morning.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-02 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-02"
+        data-start="8.0400"
+        data-duration="14.9600"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-02">
+  <style>
+    .card[data-card-id="card-02"] .root {
+      --accent: #fb7185;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-02"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-02"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-02"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-02"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-02"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-02"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">THE REPEAT CYCLE</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7"><span class="hl">TODAY</span> IS THE <span class="hl">LAST TIME</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">You promise yourself: 'From tomorrow, I am definitely changing.' But it never happens.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-03 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-03"
+        data-start="23.0400"
+        data-duration="15.9600"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-03">
+  <style>
+    .card[data-card-id="card-03"] .root {
+      --accent: #4ade80;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-03"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-03"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-03"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-03"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-03"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-03"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">THE TRUTH</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">IT IS NOT ABOUT <span class="hl">WILLPOWER</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">1,000 failed attempts prove that generic discipline and willpower aren't enough.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-04 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-04"
+        data-start="39.0000"
+        data-duration="9.0000"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-04">
+  <style>
+    .card[data-card-id="card-04"] .root {
+      --accent: #fb923c;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-04"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-04"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-04"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-04"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-04"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-04"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">GENERIC GURUS</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">STOP LISTENING TO <span class="hl">YOUTUBERS</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">They give copy-pasted advice that they didn't even write.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-05 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-05"
+        data-start="48.0000"
+        data-duration="10.0000"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-05">
+  <style>
+    .card[data-card-id="card-05"] .root {
+      --accent: #a78bfa;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-05"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-05"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-05"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-05"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-05"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-05"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">THE TRAP</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">ADVICE FOR <span class="hl">100 CRORE</span> PEOPLE</h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">How can a single generic advice fit millions of people with different backgrounds?</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-06 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-06"
+        data-start="58.0400"
+        data-duration="14.9600"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-06">
+  <style>
+    .card[data-card-id="card-06"] .root {
+      --accent: #38bdf8;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-06"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-06"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-06"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-06"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-06"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-06"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">MY STORY</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">STUCK IN THE TRAP FOR <span class="hl">9 YEARS</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">I asked myself the same question every single day: 'How do I get out?'</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-07 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-07"
+        data-start="73.0000"
+        data-duration="14.0000"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-07">
+  <style>
+    .card[data-card-id="card-07"] .root {
+      --accent: #fb7185;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-07"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-07"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-07"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-07"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-07"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-07"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">THE RESEARCH</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">2 YEARS OF <span class="hl">NEUROSCIENCE</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">I studied brain mechanics, philosophies, and self-help systems to find the root cause.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-08 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-08"
+        data-start="87.0000"
+        data-duration="13.0000"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-08">
+  <style>
+    .card[data-card-id="card-08"] .root {
+      --accent: #4ade80;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-08"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-08"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-08"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-08"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-08"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-08"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">THE DISCOVERY</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">THE <span class="hl">INNER VOID</span> (<span class="hl">GADDHA</span>)</h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">Porn watchers aren't weak. They are simply trying to fill a massive emotional void.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-09 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-09"
+        data-start="100.0000"
+        data-duration="14.3800"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-09">
+  <style>
+    .card[data-card-id="card-09"] .root {
+      --accent: #fb923c;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-09"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-09"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-09"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-09"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-09"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-09"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">THE CLASSIFICATION</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">THE <span class="hl">5 TYPES</span> OF PORN WATCHERS</h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">Regardless of your age, culture, or background, you fit into one of these 5 profiles.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-10 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-10"
+        data-start="114.3800"
+        data-duration="12.6200"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-10">
+  <style>
+    .card[data-card-id="card-10"] .root {
+      --accent: #a78bfa;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-10"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-10"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-10"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-10"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-10"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-10"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">THE 5 PROFILES</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">GHOST · REBEL · ESCAPIST · <span class="hl">DRIFTER</span> · <span class="hl">ACHIEVER</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">Each profile has a completely different neurological trigger and requires a custom cure.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-11 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-11"
+        data-start="127.0000"
+        data-duration="10.0000"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-11">
+  <style>
+    .card[data-card-id="card-11"] .root {
+      --accent: #38bdf8;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-11"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-11"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-11"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-11"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-11"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-11"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">WHAT I TEACH</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">SYSTEMATIC <span class="hl">RECOVERY BLUEPRINT</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">I don't teach generic motivation. I help you build a personalized neural system.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-12 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-12"
+        data-start="137.0000"
+        data-duration="12.0000"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-12">
+  <style>
+    .card[data-card-id="card-12"] .root {
+      --accent: #fb7185;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-12"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-12"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-12"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-12"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-12"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-12"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">URGE MECHANICS</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">HOW TO CONTROL THE <span class="hl">3-DAY URGE</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">When your body demands dopamine after 3 days of abstinence, willpower fails. You need a trigger system.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-13 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-13"
+        data-start="149.0000"
+        data-duration="7.0000"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-13">
+  <style>
+    .card[data-card-id="card-13"] .root {
+      --accent: #4ade80;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-13"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-13"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-13"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-13"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-13"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-13"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">THE OFFER</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">1-ON-1 RECOVERY SYSTEM</h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">Access the entire blueprint in this session for just ₹197.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-14 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-14"
+        data-start="156.0000"
+        data-duration="7.0400"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-14">
+  <style>
+    .card[data-card-id="card-14"] .root {
+      --accent: #fb923c;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-14"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-14"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-14"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-14"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-14"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-14"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">THE RESULTS</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7"><span class="hl">800+ PEOPLE</span> PERSONALLY TRAINED</h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">This is a battle-tested system that has helped hundreds escape the loop.</p>
+  </div>
+</div>
+
+      </div>
+
+      <!-- Card Host for card-15 -->
+      <div
+        class="card-host clip"
+        data-card-id="card-15"
+        data-start="163.0400"
+        data-duration="18.9600"
+        data-track-index="2"
+        style="left:40px;top:40px;width:1000px;height:688px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-15">
+  <style>
+    .card[data-card-id="card-15"] .root {
+      --accent: #a78bfa;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      font-family: 'Inter', system-ui, sans-serif;
+      
+      /* Glassmorphism background */
+      background: rgba(45, 45, 55, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      
+      padding: 50px 60px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+    
+    .card[data-card-id="card-15"] .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card[data-card-id="card-15"] .kicker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+    }
+    
+    .card[data-card-id="card-15"] .kicker {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .card[data-card-id="card-15"] .title {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+    
+    /* Telusko yellow highlight style */
+    .card[data-card-id="card-15"] .title span.hl {
+      color: #facc15;
+      text-shadow: 0 0 24px rgba(250, 204, 21, 0.45);
+    }
+    
+    .card[data-card-id="card-15"] .detail {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #d1d5db;
+      max-width: 95%;
+    }
+  </style>
+  <div class="root">
+    <div class="meta">
+      <span class="kicker-dot" data-anim="scale-pop" data-anim-at="0.05" data-anim-duration="0.4"></span>
+      <span class="kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">TAKE ACTION NOW</span>
+    </div>
+    <h2 class="title" data-anim="blur-in" data-anim-at="0.3" data-anim-duration="0.7">JOIN THE SYSTEM <span class="hl">TODAY</span></h2>
+    <p class="detail" data-anim="fade-in" data-anim-at="0.8" data-anim-duration="0.5">If you are serious about changing your life. Click below to join the course.</p>
+  </div>
+</div>
+
+      </div>
+
+
+
+      <script src="vendor/gsap.min.js"></script>
+      <script>
+        (function () {
+          window.__fmt = function (v, fmt) {
+            if (typeof fmt === "string" && /^\.[0-9]+f$/.test(fmt)) {
+              return Number(v).toFixed(Number(fmt.slice(1, -1)));
+            }
+            if (fmt === ",d") return Math.round(v).toLocaleString();
+            return String(Math.round(v));
+          };
+
+          const tl = window.gsap.timeline({ paused: true });
+
+          // ── card-01 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-01"]', { visibility: "visible" }, 0.0400);
+          tl.fromTo(
+            '.card-host[data-card-id="card-01"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            0.0400
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.00, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            0.0400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-01"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            0.0900
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-01"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            0.1400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-01"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            0.3400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-01"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            0.8400
+          );
+          tl.to(
+            '.card-host[data-card-id="card-01"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            7.6900
+          );
+          tl.set('.card-host[data-card-id="card-01"]', { visibility: "hidden" }, 8.0400);
+          
+          // ── card-02 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-02"]', { visibility: "visible" }, 8.0400);
+          tl.fromTo(
+            '.card-host[data-card-id="card-02"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            8.0400
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.35, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            8.0400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-02"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            8.0900
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-02"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            8.1400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-02"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            8.3400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-02"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            8.8400
+          );
+          tl.to(
+            '.card-host[data-card-id="card-02"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            22.6500
+          );
+          tl.set('.card-host[data-card-id="card-02"]', { visibility: "hidden" }, 23.0000);
+          
+          // ── card-03 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-03"]', { visibility: "visible" }, 23.0400);
+          tl.fromTo(
+            '.card-host[data-card-id="card-03"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            23.0400
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.00, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            23.0400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-03"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            23.0900
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-03"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            23.1400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-03"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            23.3400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-03"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            23.8400
+          );
+          tl.to(
+            '.card-host[data-card-id="card-03"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            38.6500
+          );
+          tl.set('.card-host[data-card-id="card-03"]', { visibility: "hidden" }, 39.0000);
+          
+          // ── card-04 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-04"]', { visibility: "visible" }, 39.0000);
+          tl.fromTo(
+            '.card-host[data-card-id="card-04"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            39.0000
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.35, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            39.0000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-04"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            39.0500
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-04"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            39.1000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-04"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            39.3000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-04"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            39.8000
+          );
+          tl.to(
+            '.card-host[data-card-id="card-04"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            47.6500
+          );
+          tl.set('.card-host[data-card-id="card-04"]', { visibility: "hidden" }, 48.0000);
+          
+          // ── card-05 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-05"]', { visibility: "visible" }, 48.0000);
+          tl.fromTo(
+            '.card-host[data-card-id="card-05"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            48.0000
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.00, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            48.0000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-05"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            48.0500
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-05"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            48.1000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-05"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            48.3000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-05"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            48.8000
+          );
+          tl.to(
+            '.card-host[data-card-id="card-05"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            57.6500
+          );
+          tl.set('.card-host[data-card-id="card-05"]', { visibility: "hidden" }, 58.0000);
+          
+          // ── card-06 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-06"]', { visibility: "visible" }, 58.0400);
+          tl.fromTo(
+            '.card-host[data-card-id="card-06"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            58.0400
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.35, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            58.0400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-06"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            58.0900
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-06"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            58.1400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-06"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            58.3400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-06"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            58.8400
+          );
+          tl.to(
+            '.card-host[data-card-id="card-06"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            72.6500
+          );
+          tl.set('.card-host[data-card-id="card-06"]', { visibility: "hidden" }, 73.0000);
+          
+          // ── card-07 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-07"]', { visibility: "visible" }, 73.0000);
+          tl.fromTo(
+            '.card-host[data-card-id="card-07"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            73.0000
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.00, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            73.0000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-07"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            73.0500
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-07"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            73.1000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-07"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            73.3000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-07"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            73.8000
+          );
+          tl.to(
+            '.card-host[data-card-id="card-07"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            86.6500
+          );
+          tl.set('.card-host[data-card-id="card-07"]', { visibility: "hidden" }, 87.0000);
+          
+          // ── card-08 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-08"]', { visibility: "visible" }, 87.0000);
+          tl.fromTo(
+            '.card-host[data-card-id="card-08"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            87.0000
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.35, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            87.0000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-08"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            87.0500
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-08"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            87.1000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-08"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            87.3000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-08"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            87.8000
+          );
+          tl.to(
+            '.card-host[data-card-id="card-08"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            99.6500
+          );
+          tl.set('.card-host[data-card-id="card-08"]', { visibility: "hidden" }, 100.0000);
+          
+          // ── card-09 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-09"]', { visibility: "visible" }, 100.0000);
+          tl.fromTo(
+            '.card-host[data-card-id="card-09"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            100.0000
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.00, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            100.0000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-09"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            100.0500
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-09"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            100.1000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-09"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            100.3000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-09"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            100.8000
+          );
+          tl.to(
+            '.card-host[data-card-id="card-09"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            114.0300
+          );
+          tl.set('.card-host[data-card-id="card-09"]', { visibility: "hidden" }, 114.3800);
+          
+          // ── card-10 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-10"]', { visibility: "visible" }, 114.3800);
+          tl.fromTo(
+            '.card-host[data-card-id="card-10"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            114.3800
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.35, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            114.3800
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-10"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            114.4300
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-10"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            114.4800
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-10"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            114.6800
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-10"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            115.1800
+          );
+          tl.to(
+            '.card-host[data-card-id="card-10"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            126.6500
+          );
+          tl.set('.card-host[data-card-id="card-10"]', { visibility: "hidden" }, 127.0000);
+          
+          // ── card-11 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-11"]', { visibility: "visible" }, 127.0000);
+          tl.fromTo(
+            '.card-host[data-card-id="card-11"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            127.0000
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.00, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            127.0000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-11"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            127.0500
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-11"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            127.1000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-11"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            127.3000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-11"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            127.8000
+          );
+          tl.to(
+            '.card-host[data-card-id="card-11"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            136.6500
+          );
+          tl.set('.card-host[data-card-id="card-11"]', { visibility: "hidden" }, 137.0000);
+          
+          // ── card-12 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-12"]', { visibility: "visible" }, 137.0000);
+          tl.fromTo(
+            '.card-host[data-card-id="card-12"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            137.0000
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.35, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            137.0000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-12"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            137.0500
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-12"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            137.1000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-12"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            137.3000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-12"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            137.8000
+          );
+          tl.to(
+            '.card-host[data-card-id="card-12"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            148.6500
+          );
+          tl.set('.card-host[data-card-id="card-12"]', { visibility: "hidden" }, 149.0000);
+          
+          // ── card-13 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-13"]', { visibility: "visible" }, 149.0000);
+          tl.fromTo(
+            '.card-host[data-card-id="card-13"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            149.0000
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.00, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            149.0000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-13"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            149.0500
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-13"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            149.1000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-13"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            149.3000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-13"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            149.8000
+          );
+          tl.to(
+            '.card-host[data-card-id="card-13"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            155.6500
+          );
+          tl.set('.card-host[data-card-id="card-13"]', { visibility: "hidden" }, 156.0000);
+          
+          // ── card-14 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-14"]', { visibility: "visible" }, 156.0000);
+          tl.fromTo(
+            '.card-host[data-card-id="card-14"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            156.0000
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.35, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            156.0000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-14"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            156.0500
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-14"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            156.1000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-14"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            156.3000
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-14"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            156.8000
+          );
+          tl.to(
+            '.card-host[data-card-id="card-14"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            162.6900
+          );
+          tl.set('.card-host[data-card-id="card-14"]', { visibility: "hidden" }, 163.0400);
+          
+          // ── card-15 Lifecycle ──
+          tl.set('.card-host[data-card-id="card-15"]', { visibility: "visible" }, 163.0400);
+          tl.fromTo(
+            '.card-host[data-card-id="card-15"]',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            163.0400
+          );
+          tl.to(
+            '#bg-video',
+            { scale: 1.00, transformOrigin: "center 40%", duration: 0.3, ease: "power2.inOut" },
+            163.0400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-15"] .kicker-dot',
+            { opacity: 0, scale: 0.6 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" },
+            163.0900
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-15"] .kicker',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power2.out" },
+            163.1400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-15"] .title',
+            { opacity: 0, filter: "blur(12px)" },
+            { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+            163.3400
+          );
+          tl.fromTo(
+            '.card[data-card-id="card-15"] .detail',
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            163.8400
+          );
+          tl.to(
+            '.card-host[data-card-id="card-15"]',
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            181.6500
+          );
+          tl.set('.card-host[data-card-id="card-15"]', { visibility: "hidden" }, 182.0000);
+          
+
+
+          window.__timelines = window.__timelines || {};
+          window.__timelines["graphic-overlays"] = tl;
+        })();
+      </script>
+    </div>
+  </body>
+</html>

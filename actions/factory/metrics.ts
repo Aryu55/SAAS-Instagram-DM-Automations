@@ -8,11 +8,11 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
  * Pull metrics for published jobs (Instagram Graph API)
  * Reuses the existing Instagram token infrastructure from the DM module
  */
-export async function pullInstagramMetrics(businessId: string) {
+export async function pullInstagramMetrics(orgId: string) {
   try {
     const publishedJobs = await client.contentJob.findMany({
       where: {
-        businessId,
+        orgId,
         status: { in: ["PUBLISHED", "SCHEDULED"] },
         postizPostId: { not: null }
       }
@@ -56,10 +56,10 @@ export async function pullInstagramMetrics(businessId: string) {
 /**
  * Get all metrics for a business's jobs
  */
-export async function getBusinessMetrics(businessId: string) {
+export async function getBusinessMetrics(orgId: string) {
   try {
     const jobs = await client.contentJob.findMany({
-      where: { businessId, status: { in: ["PUBLISHED", "SCHEDULED", "APPROVED"] } },
+      where: { orgId, status: { in: ["PUBLISHED", "SCHEDULED", "APPROVED"] } },
       include: { metrics: { orderBy: { fetchedAt: "desc" } } },
       orderBy: { createdAt: "desc" }
     });
@@ -111,14 +111,14 @@ export async function getBusinessMetrics(businessId: string) {
 /**
  * Analyze weekly performance and update winning patterns
  */
-export async function analyzeWeeklyPerformance(businessId: string) {
+export async function analyzeWeeklyPerformance(orgId: string) {
   if (!GEMINI_KEY) {
     return { status: 400, error: "GEMINI_API_KEY not configured" };
   }
 
   try {
-    const biz = await client.business.findUnique({ where: { id: businessId } });
-    if (!biz) return { status: 404, error: "Business not found" };
+    const org = await client.organization.findUnique({ where: { id: orgId } });
+    if (!org) return { status: 404, error: "Organization not found" };
 
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -126,7 +126,7 @@ export async function analyzeWeeklyPerformance(businessId: string) {
     // Get this week's jobs with metrics
     const weekJobs = await client.contentJob.findMany({
       where: {
-        businessId,
+        orgId,
         createdAt: { gte: weekAgo }
       },
       include: { metrics: true }
@@ -155,9 +155,9 @@ export async function analyzeWeeklyPerformance(businessId: string) {
       };
     });
 
-    const prompt = `You are analyzing a week of short-form video content performance for "${biz.name}" (${biz.description}).
+    const prompt = `You are analyzing a week of short-form video content performance for "${org.name}" (${org.description}).
 
-Current winning patterns: ${biz.winningPatterns || "None established yet"}
+Current winning patterns: ${org.winningPatterns || "None established yet"}
 
 This week's content jobs:
 ${JSON.stringify(jobSummaries, null, 2)}
@@ -192,16 +192,16 @@ Respond with valid JSON: { "patterns": "...", "report": "..." }`;
     const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
     const parsed = JSON.parse(text);
 
-    // Update business winning patterns
-    await client.business.update({
-      where: { id: businessId },
+    // Update organization winning patterns
+    await client.organization.update({
+      where: { id: orgId },
       data: { winningPatterns: parsed.patterns }
     });
 
     // Log the weekly analysis
     await client.documentaryLog.create({
       data: {
-        businessId,
+        orgId,
         event: "weekly_analysis_completed",
         detail: {
           weekOf: weekAgo.toISOString().split("T")[0],
@@ -228,10 +228,10 @@ Respond with valid JSON: { "patterns": "...", "report": "..." }`;
 /**
  * Get the latest weekly report for a business
  */
-export async function getLatestWeeklyReport(businessId: string) {
+export async function getLatestWeeklyReport(orgId: string) {
   try {
     const log = await client.documentaryLog.findFirst({
-      where: { businessId, event: "weekly_analysis_completed" },
+      where: { orgId, event: "weekly_analysis_completed" },
       orderBy: { createdAt: "desc" }
     });
     return { status: 200, data: log };

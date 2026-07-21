@@ -5,19 +5,19 @@ import { client } from "@/lib/prisma";
 /**
  * Get full documentary timeline for a business
  */
-export async function getDocumentaryTimeline(businessId: string) {
+export async function getDocumentaryTimeline(orgId: string) {
   try {
     const logs = await client.documentaryLog.findMany({
-      where: { businessId },
+      where: { orgId },
       orderBy: { createdAt: "asc" }
     });
 
-    const biz = await client.business.findUnique({ where: { id: businessId } });
+    const org = await client.organization.findUnique({ where: { id: orgId } });
 
     return {
       status: 200,
       data: {
-        business: biz,
+        org: org,
         timeline: logs,
         milestones: extractMilestones(logs)
       }
@@ -30,23 +30,23 @@ export async function getDocumentaryTimeline(businessId: string) {
 /**
  * Export documentary timeline as markdown
  */
-export async function exportTimelineMarkdown(businessId: string) {
+export async function exportTimelineMarkdown(orgId: string) {
   try {
-    const biz = await client.business.findUnique({ where: { id: businessId } });
-    if (!biz) return { status: 404, error: "Business not found" };
+    const org = await client.organization.findUnique({ where: { id: orgId } });
+    if (!org) return { status: 404, error: "Organization not found" };
 
     const logs = await client.documentaryLog.findMany({
-      where: { businessId },
+      where: { orgId },
       orderBy: { createdAt: "asc" }
     });
 
     // Get stats
-    const totalJobs = await client.contentJob.count({ where: { businessId } });
-    const publishedJobs = await client.contentJob.count({ where: { businessId, status: "PUBLISHED" } });
-    const rejectedJobs = await client.contentJob.count({ where: { businessId, status: "REJECTED" } });
+    const totalJobs = await client.contentJob.count({ where: { orgId } });
+    const publishedJobs = await client.contentJob.count({ where: { orgId, status: "PUBLISHED" } });
+    const rejectedJobs = await client.contentJob.count({ where: { orgId, status: "REJECTED" } });
 
-    let md = `# ${biz.name} — Documentary Timeline\n\n`;
-    md += `> ${biz.description}\n\n`;
+    let md = `# ${org.name} — Documentary Timeline\n\n`;
+    md += `> ${org.description}\n\n`;
     md += `**Stats:** ${totalJobs} total jobs | ${publishedJobs} published | ${rejectedJobs} rejected\n\n`;
     md += `---\n\n`;
 

@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 3,
+  "composition": {
+    "fps": 30,
+    "width": 1920,
+    "height": 1080,
+    "durationSeconds": 182.02,
+    "layout": "landscape",
+    "themeId": "noir",
+    "seed": 42
+  },
+  "videoTrack": {
+    "sourcePath": "/Users/aryupanchal/Downloads/2026-05-21 09-09-22.mp4",
+    "startSec": 0,
+    "endSec": 182.02,
+    "bounds": { "x": 14, "y": 14, "width": 1892, "height": 548 }
+  },
+  "subtitles": { "enabled": false },
+  "cards": [
+    {
+      "id": "card-01",
+      "intent": "Hook: Wake up call",
+      "startSec": 0.04,
+      "endSec": 8.04,
+      "accentIndex": 0,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "WAKE UP CALL",
+        "title": "YOU WATCHED IT AGAIN LAST NIGHT",
+        "detail": "And now you are feeling tired, ashamed, and guilty this morning."
+      }
+    },
+    {
+      "id": "card-02",
+      "intent": "The repeat cycle of broken promises",
+      "startSec": 8.04,
+      "endSec": 23.00,
+      "accentIndex": 1,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "THE REPEAT CYCLE",
+        "title": "TODAY IS THE LAST TIME",
+        "detail": "You promise yourself: 'From tomorrow, I am definitely changing.' But it never happens."
+      }
+    },
+    {
+      "id": "card-03",
+      "intent": "Debunking the willpower myth",
+      "startSec": 23.04,
+      "endSec": 39.00,
+      "accentIndex": 2,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "THE TRUTH",
+        "title": "IT IS NOT ABOUT WILLPOWER",
+        "detail": "1,000 failed attempts prove that generic discipline and willpower aren't enough."
+      }
+    },
+    {
+      "id": "card-04",
+      "intent": "Generic YouTubers advice warning",
+      "startSec": 39.00,
+      "endSec": 48.00,
+      "accentIndex": 3,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "GENERIC GURUS",
+        "title": "STOP LISTENING TO YOUTUBERS",
+        "detail": "They give copy-pasted advice that they didn't even write."
+      }
+    },
+    {
+      "id": "card-05",
+      "intent": "Why generic advice fails everyone",
+      "startSec": 48.00,
+      "endSec": 58.00,
+      "accentIndex": 4,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "THE TRAP",
+        "title": "ADVICE FOR 100 CRORE PEOPLE",
+        "detail": "How can a single generic advice fit millions of people with different backgrounds?"
+      }
+    },
+    {
+      "id": "card-06",
+      "intent": "My personal 9-year struggle",
+      "startSec": 58.04,
+      "endSec": 73.00,
+      "accentIndex": 0,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "MY STORY",
+        "title": "STUCK IN THE TRAP FOR 9 YEARS",
+        "detail": "I asked myself the same question every single day: 'How do I get out?'"
+      }
+    },
+    {
+      "id": "card-07",
+      "intent": "Studying neuroscience for the solution",
+      "startSec": 73.00,
+      "endSec": 87.00,
+      "accentIndex": 1,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "THE RESEARCH",
+        "title": "2 YEARS OF NEUROSCIENCE",
+        "detail": "I studied brain mechanics, philosophies, and self-help systems to find the root cause."
+      }
+    },
+    {
+      "id": "card-08",
+      "intent": "The true cause: the inner void",
+      "startSec": 87.00,
+      "endSec": 100.00,
+      "accentIndex": 2,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "THE DISCOVERY",
+        "title": "THE INNER VOID (GADDHA)",
+        "detail": "Porn watchers aren't weak. They are simply trying to fill a massive emotional void."
+      }
+    },
+    {
+      "id": "card-09",
+      "intent": "Classifying the 5 types of watchers",
+      "startSec": 100.00,
+      "endSec": 114.38,
+      "accentIndex": 3,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "THE CLASSIFICATION",
+        "title": "THE 5 TYPES OF PORN WATCHERS",
+        "detail": "Regardless of your age, culture, or background, you fit into one of these 5 profiles."
+      }
+    },
+    {
+      "id": "card-10",
+      "intent": "The 5 distinct profiles",
+      "startSec": 114.38,
+      "endSec": 127.00,
+      "accentIndex": 4,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "THE 5 PROFILES",
+        "title": "GHOST · REBEL · ESCAPIST · DRIFTER · ACHIEVER",
+        "detail": "Each profile has a completely different neurological trigger and requires a custom cure."
+      }
+    },
+    {
+      "id": "card-11",
+      "intent": "What this blueprint teaches",
+      "startSec": 127.00,
+      "endSec": 137.00,
+      "accentIndex": 0,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "WHAT I TEACH",
+        "title": "SYSTEMATIC RECOVERY BLUEPRINT",
+        "detail": "I don't teach generic motivation. I help you build a personalized neural system."
+      }
+    },
+    {
+      "id": "card-12",
+      "intent": "Understanding urge mechanics",
+      "startSec": 137.00,
+      "endSec": 149.00,
+      "accentIndex": 1,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "URGE MECHANICS",
+        "title": "HOW TO CONTROL THE 3-DAY URGE",
+        "detail": "When your body demands dopamine after 3 days of abstinence, willpower fails. You need a trigger system."
+      }
+    },
+    {
+      "id": "card-13",
+      "intent": "The ₹197 offer",
+      "startSec": 149.00,
+      "endSec": 156.00,
+      "accentIndex": 2,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "THE OFFER",
+        "title": "1-ON-1 RECOVERY SYSTEM",
+        "detail": "Access the entire blueprint in this session for just ₹197."
+      }
+    },
+    {
+      "id": "card-14",
+      "intent": "Proven success statistics",
+      "startSec": 156.00,
+      "endSec": 163.04,
+      "accentIndex": 3,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "THE RESULTS",
+        "title": "800+ PEOPLE PERSONALLY TRAINED",
+        "detail": "This is a battle-tested system that has helped hundreds escape the loop."
+      }
+    },
+    {
+      "id": "card-15",
+      "intent": "Call to action outro",
+      "startSec": 163.04,
+      "endSec": 182.00,
+      "accentIndex": 4,
+      "zone": "lower-third",
+      "contentHints": {
+        "kicker": "TAKE ACTION NOW",
+        "title": "JOIN THE SYSTEM TODAY",
+        "detail": "If you are serious about changing your life. Click below to join the course."
+      }
+    }
+  ]
+}

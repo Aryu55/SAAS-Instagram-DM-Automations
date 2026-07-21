@@ -14,32 +14,32 @@ export async function GET(req: NextRequest) {
   const results: any[] = [];
 
   try {
-    // Get all active businesses
-    const businesses = await client.business.findMany({
+    // Get all active organizations
+    const organizations = await client.organization.findMany({
       where: { active: true }
     });
 
-    for (const biz of businesses) {
+    for (const org of organizations) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Count jobs created today for this business
+      // Count jobs created today for this organization
       const todayJobCount = await client.contentJob.count({
         where: {
-          businessId: biz.id,
+          orgId: org.id,
           createdAt: { gte: today }
         }
       });
 
-      const deficit = biz.postsPerDay - todayJobCount;
+      const deficit = org.postsPerDay - todayJobCount;
       if (deficit <= 0) {
-        results.push({ slug: biz.slug, action: "skipped", reason: "quota met" });
+        results.push({ slug: org.slug, action: "skipped", reason: "quota met" });
         continue;
       }
 
       // Check for unused ideas, generate if needed
       let unusedIdeas = await client.contentIdea.findMany({
-        where: { businessId: biz.id, used: false },
+        where: { orgId: org.id, used: false },
         take: deficit
       });
 
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${FACTORY_SECRET}`
             },
-            body: JSON.stringify({ business: biz, count: 10 })
+            body: JSON.stringify({ business: org, count: 10 })
           });
 
           if (ideasRes.ok) {
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
             for (const idea of ideasData.ideas || []) {
               await client.contentIdea.create({
                 data: {
-                  businessId: biz.id,
+                  orgId: org.id,
                   topic: idea.topic,
                   angle: idea.angle,
                   hookStyle: idea.hookStyle,
@@ -72,11 +72,11 @@ export async function GET(req: NextRequest) {
           }
 
           unusedIdeas = await client.contentIdea.findMany({
-            where: { businessId: biz.id, used: false },
+            where: { orgId: org.id, used: false },
             take: deficit
           });
         } catch (e: any) {
-          results.push({ slug: biz.slug, action: "error", reason: `Idea gen failed: ${e.message}` });
+          results.push({ slug: org.slug, action: "error", reason: `Idea gen failed: ${e.message}` });
           continue;
         }
       }
@@ -86,14 +86,14 @@ export async function GET(req: NextRequest) {
         try {
           // Create job
           const job = await client.contentJob.create({
-            data: { businessId: biz.id, ideaId: idea.id, status: "IDEA" }
+            data: { orgId: org.id, ideaId: idea.id, status: "IDEA" }
           });
 
           // 1. Script
           const scriptRes = await fetch(`${WORKER_BASE}/script`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${FACTORY_SECRET}` },
-            body: JSON.stringify({ business: biz, idea })
+            body: JSON.stringify({ business: org, idea })
           });
 
           if (!scriptRes.ok) {
@@ -106,14 +106,14 @@ export async function GET(req: NextRequest) {
 
           await client.contentJob.update({
             where: { id: job.id },
-            data: { status: "SCRIPTED", script, caption: `${script.hook}\n\n${script.body?.join("\n") || ""}\n\n${script.cta}\n\n${biz.hashtags || ""}` }
+            data: { status: "SCRIPTED", script, caption: `${script.hook}\n\n${script.body?.join("\n") || ""}\n\n${script.cta}\n\n${org.hashtags || ""}` }
           });
 
           // 2. TTS
           const ttsRes = await fetch(`${WORKER_BASE}/tts`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${FACTORY_SECRET}` },
-            body: JSON.stringify({ business: biz, jobId: job.id, scriptText: script.scriptText })
+            body: JSON.stringify({ business: org, jobId: job.id, scriptText: script.scriptText })
           });
 
           if (!ttsRes.ok) {
@@ -131,7 +131,7 @@ export async function GET(req: NextRequest) {
           await fetch(`${WORKER_BASE}/render`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${FACTORY_SECRET}` },
-            body: JSON.stringify({ businessSlug: biz.slug, jobId: job.id })
+            body: JSON.stringify({ businessSlug: org.slug, jobId: job.id })
           });
 
           // Mark idea as used
@@ -139,12 +139,12 @@ export async function GET(req: NextRequest) {
 
           // Log
           await client.documentaryLog.create({
-            data: { businessId: biz.id, event: "cron_pipeline_dispatched", detail: { jobId: job.id, ideaTopic: idea.topic } }
+            data: { orgId: org.id, event: "cron_pipeline_dispatched", detail: { jobId: job.id, ideaTopic: idea.topic } }
           });
 
-          results.push({ slug: biz.slug, action: "dispatched", jobId: job.id });
+          results.push({ slug: org.slug, action: "dispatched", jobId: job.id });
         } catch (e: any) {
-          results.push({ slug: biz.slug, action: "error", reason: e.message });
+          results.push({ slug: org.slug, action: "error", reason: e.message });
         }
       }
     }

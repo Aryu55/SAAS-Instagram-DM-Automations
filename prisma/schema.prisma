@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
@@ -13,6 +7,10 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ═══════════════════════════════════════════════════════════════
+// CORE USER & AUTH
+// ═══════════════════════════════════════════════════════════════
 
 model User {
   id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -26,6 +24,24 @@ model User {
   integrations Integrations[]
   automations  Automation[]
   contacts     Contact[]
+  memberships  OrgMember[]
+}
+
+model OrgMember {
+  id     String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String     @db.Uuid
+  orgId  String     @db.Uuid
+  role   MemberRole @default(OWNER)
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+}
+
+enum MemberRole {
+  OWNER
+  EDITOR
 }
 
 model Subscription {
@@ -38,15 +54,63 @@ model Subscription {
   customerId String?           @unique
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ORGANIZATION (replaces old "Business" model)
+// ═══════════════════════════════════════════════════════════════
+
+model Organization {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug            String   @unique
+  name            String
+  tagline         String?
+  description     String?
+  targetAudience  String?
+  painPoints      String[]
+  contentPillars  String[]
+  voiceTone       String?
+  language        String   @default("hinglish")
+  hinglishRatio   String?  @default("65% Hindi, 35% English")
+  cta             String?
+  hashtags        String?
+  complianceNotes String?
+  logoUrl         String?
+  brandColors     Json?
+  ttsProvider     String   @default("auto")
+  ttsVoiceId      String?
+  postizChannels  String[]
+  postsPerDay     Int      @default(1)
+  active          Boolean  @default(false)
+  winningPatterns String?
+  createdAt       DateTime @default(now())
+
+  // Relationships
+  members         OrgMember[]
+  integrations    Integrations[]
+  automations     Automation[]
+  contacts        Contact[]
+  skills          Skill[]
+  pipelines       PipelineConfig[]
+  jobs            ContentJob[]
+  ideas           ContentIdea[]
+  logs            DocumentaryLog[]
+  scraped         ScrapedPost[]
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INSTAGRAM DM AUTOMATION (LinkPlease)
+// ═══════════════════════════════════════════════════════════════
+
 model Integrations {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        INTEGRATIONS @default(INSTAGRAM)
-  createdAt   DateTime     @default(now())
-  User        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String?      @db.Uuid
-  token       String       @unique
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        INTEGRATIONS  @default(INSTAGRAM)
+  createdAt   DateTime      @default(now())
+  User        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?       @db.Uuid
+  org         Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId       String?       @db.Uuid
+  token       String        @unique
   expiresAt   DateTime?
-  instagramId String?      @unique
+  instagramId String?       @unique
 }
 
 model Automation {
@@ -60,6 +124,8 @@ model Automation {
   dms       Dms[]
   User      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String?   @db.Uuid
+  org       Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId     String?   @db.Uuid
   keywords  Keyword[]
 }
 
@@ -107,98 +173,144 @@ model Keyword {
   Automation   Automation? @relation(fields: [automationId], references: [id], onDelete: Cascade)
   automationId String?     @db.Uuid
 
-  @@unique([automationId, word]) //this constraints ensure user cant use the same keyword on multiple automations
-}
-
-enum SUBSCRIPTION_PLAN {
-  PRO
-  FREE
-}
-
-enum INTEGRATIONS {
-  INSTAGRAM
-}
-
-enum MEDIATYPE {
-  IMAGE
-  VIDEO
-  CAROSEL_ALBUM
-}
-
-enum LISTENERS {
-  SMARTAI
-  MESSAGE
+  @@unique([automationId, word])
 }
 
 model Contact {
-  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   instagramId  String
   username     String?
-  createdAt    DateTime    @default(now())
-  User         User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String?     @db.Uuid
+  createdAt    DateTime      @default(now())
+  User         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String?       @db.Uuid
+  org          Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId        String?       @db.Uuid
 
   @@unique([userId, instagramId])
 }
 
-model Business {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  slug            String   @unique            // "hisaab", "pause", "safespot"
-  name            String
-  tagline         String?
-  description     String                       // what the product actually does
-  targetAudience  String
-  painPoints      String[]
-  contentPillars  String[]
-  voiceTone       String
-  language        String   @default("hinglish") // "hinglish" | "en" | "hi"
-  hinglishRatio   String?  @default("65% Hindi, 35% English")
-  cta             String
-  hashtags        String?
-  complianceNotes String?
-  ttsProvider     String   @default("auto")     // auto | aura | bark
-  ttsVoiceId      String?                          // Bark speaker preset, e.g. "v2/hi_speaker_2"
-  postizChannels  String[]                      // Postiz integration ids to publish to
-  postsPerDay     Int      @default(1)
-  active          Boolean  @default(false)
-  winningPatterns String?                       // updated weekly by feedback loop
-  createdAt       DateTime @default(now())
-  jobs            ContentJob[]
-  ideas           ContentIdea[]
-  logs            DocumentaryLog[]
-  scraped         ScrapedPost[]
+// ═══════════════════════════════════════════════════════════════
+// SKILLS & STYLE REFERENCES (/watch feature)
+// ═══════════════════════════════════════════════════════════════
+
+model Skill {
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId             String      @db.Uuid
+  name              String
+  type              SkillType
+  description       String?
+  skillFilePath     String?     // path to SKILL.md on disk
+  config            Json?       // parsed skill parameters
+  isVisual          Boolean     @default(false)
+  createdAt         DateTime    @default(now())
+
+  org               Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  styleReference    StyleReference?
+  pipelineSteps     PipelineStep[]
 }
 
+model StyleReference {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  skillId           String   @unique @db.Uuid
+  referenceVideoUrl String?  // URL or file path to the reference video
+  thumbnailUrl      String?  // static thumbnail
+  analysisJson      Json?    // extracted style analysis (pacing, overlays, colors, etc.)
+  frameExtracts     String[] // paths to extracted keyframes
+  createdAt         DateTime @default(now())
+
+  skill             Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+}
+
+enum SkillType {
+  EDITING_STYLE
+  CAPTION_STYLE
+  BROLL_GENERATION
+  CLIP_GENERATION
+  SCRAPER
+  ANALYTICS
+  VOICE
+  CUSTOM
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PIPELINE TEMPLATES (Manufacturer's View)
+// ═══════════════════════════════════════════════════════════════
+
+model PipelineConfig {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @db.Uuid
+  name        String
+  templateId  String   // "talking-head-reel", "faceless-explainer", etc.
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  org   Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  steps PipelineStep[]
+}
+
+model PipelineStep {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pipelineId String   @db.Uuid
+  stepType   StepType
+  orderIndex Int
+  isEnabled  Boolean  @default(true)
+  skillId    String?  @db.Uuid
+  config     Json?
+  
+  pipeline PipelineConfig @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  skill    Skill?         @relation(fields: [skillId], references: [id])
+
+  @@unique([pipelineId, orderIndex])
+}
+
+enum StepType {
+  IDEATION
+  SCRIPT
+  AUDIO_TTS
+  FOOTAGE_PREP
+  VIDEO_EDIT
+  BROLL_INJECTION
+  CAPTION_OVERLAY
+  THUMBNAIL
+  REVIEW
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONTENT ENGINE
+// ═══════════════════════════════════════════════════════════════
+
 model ContentIdea {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId    String   @db.Uuid
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org           Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId         String       @db.Uuid
   topic         String
   angle         String
   hookStyle     String
   contentPillar String
-  source        String   @default("llm")   // llm | scraper | manual
-  used          Boolean  @default(false)
-  createdAt     DateTime @default(now())
+  source        String       @default("llm")
+  used          Boolean      @default(false)
+  createdAt     DateTime     @default(now())
 }
 
 model ContentJob {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId   String    @db.Uuid
-  ideaId       String?   @db.Uuid
-  status       JOB_STATUS @default(IDEA)
-  script       Json?      // {hook, body[], cta, scriptText, brollPrompts[], hookVariants[]}
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId        String       @db.Uuid
+  ideaId       String?      @db.Uuid
+  pipelineId   String?      @db.Uuid  // which pipeline template was used
+  status       JOB_STATUS   @default(IDEA)
+  script       Json?
   caption      String?
-  audioKey     String?    // R2 keys
+  audioKey     String?
   videoKey     String?
   renderLog    String?
   postizPostId String?
   scheduledAt  DateTime?
   publishedAt  DateTime?
   rejectReason String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   metrics      PostMetric[]
 }
 
@@ -219,40 +331,67 @@ model PostMetric {
   job       ContentJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
   jobId     String     @db.Uuid
   platform  String
-  views     Int @default(0)
-  likes     Int @default(0)
-  comments  Int @default(0)
-  shares    Int @default(0)
-  saves     Int @default(0)
-  followers Int @default(0)
-  fetchedAt DateTime @default(now())
+  views     Int        @default(0)
+  likes     Int        @default(0)
+  comments  Int        @default(0)
+  shares    Int        @default(0)
+  saves     Int        @default(0)
+  followers Int        @default(0)
+  fetchedAt DateTime   @default(now())
 }
 
+// ═══════════════════════════════════════════════════════════════
+// INTELLIGENCE (Competitive Research)
+// ═══════════════════════════════════════════════════════════════
+
 model ScrapedPost {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String   @db.Uuid
-  platform   String
-  handle     String
-  url        String
-  caption    String?
+  id       String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId    String       @db.Uuid
+  platform String
+  handle   String
+  url      String
+  caption  String?
   transcript String?
-  views      Int @default(0)
-  likes      Int @default(0)
-  comments   Int @default(0)
-  er         Float @default(0)
-  score      Float @default(0)
-  cluster    String?
-  postDate   DateTime?
-  createdAt  DateTime @default(now())
+  views    Int          @default(0)
+  likes    Int          @default(0)
+  comments Int          @default(0)
+  er       Float        @default(0)
+  score    Float        @default(0)
+  cluster  String?
+  postDate DateTime?
+  createdAt DateTime    @default(now())
 }
 
 model DocumentaryLog {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String   @db.Uuid
-  event      String   // "onboarded", "first_video_published", "crossed_10k_views", freeform
-  detail     Json?
-  createdAt  DateTime @default(now())
+  id       String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId    String       @db.Uuid
+  event    String
+  detail   Json?
+  createdAt DateTime    @default(now())
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ENUMS
+// ═══════════════════════════════════════════════════════════════
+
+enum SUBSCRIPTION_PLAN {
+  PRO
+  FREE
+}
+
+enum INTEGRATIONS {
+  INSTAGRAM
+}
+
+enum MEDIATYPE {
+  IMAGE
+  VIDEO
+  CAROSEL_ALBUM
+}
+
+enum LISTENERS {
+  SMARTAI
+  MESSAGE
+}

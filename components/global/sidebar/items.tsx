@@ -19,6 +19,11 @@ const SIDEBAR_TOOLTIPS: Record<string, string> = {
   analytics: "Instagram post analytics & AI recommendation blueprints",
   integrations: "Connect Instagram & other services",
   settings: "Account & app settings",
+  inbox: "Unified DM inbox & contacts",
+  studio: "Content pipeline templates & manufacturing",
+  skills: "SOPs, editing styles & reusable capabilities",
+  research: "Competitive research & scraped posts",
+  intelligence: "Analytics, virality & competitive intelligence",
 };
 
 type Props = {
