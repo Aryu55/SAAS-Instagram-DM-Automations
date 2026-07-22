@@ -30,7 +30,7 @@ function Sidebar({ slug }: Props) {
           </div>
 
           {/* Master Org Navigation Card */}
-          <Link
+          <a
             href="/dashboard"
             className="flex items-center justify-between p-2.5 rounded-xl border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-indigo-950/20 to-black text-amber-300 hover:border-purple-500/40 transition-all shadow-sm group"
           >
@@ -42,7 +42,7 @@ function Sidebar({ slug }: Props) {
               </div>
             </div>
             <ArrowLeftRight className="w-3.5 h-3.5 text-purple-400 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+          </a>
         </div>
 
         {/* Scrollable Content */}

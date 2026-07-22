@@ -59,14 +59,14 @@ function NavBar({ slug }: Props) {
           </span>
 
           {/* Master Org Quick Navigation Button */}
-          <Link
+          <a
             href="/dashboard"
             className="flex items-center gap-x-1.5 px-3 py-1.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-950/40 to-indigo-950/30 text-amber-300 hover:text-white text-xs font-bold font-mono transition-all shadow-sm shrink-0"
             title="Navigate to Master Org Overview"
           >
             <Crown className="w-3.5 h-3.5 text-amber-400" />
             <span>Master Org</span>
-          </Link>
+          </a>
 
           <Search />
           <CreateAutomation />
