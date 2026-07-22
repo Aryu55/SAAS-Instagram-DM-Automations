@@ -4,7 +4,7 @@ import {
   RocketDuoToneWhite,
   SettingsDuoToneWhite,
 } from "@/icons";
-import { Video, Users, Flame, BarChart3, Inbox, Factory, BookOpen, Eye, Brain } from "lucide-react";
+import { Video, Users, Flame, BarChart3, Inbox, Factory, BookOpen, Eye, Brain, Activity as ActivityIcon } from "lucide-react";
 import { v4 as uuid } from "uuid";
 
 type Props = {
@@ -40,6 +40,11 @@ export const SIDEBAR_MENU: SIDEBAR_MENU_TYPE[] = [
     id: uuid(),
     label: "contacts",
     icon: <Users className="w-5 h-5 text-white" />,
+  },
+  {
+    id: uuid(),
+    label: "activity",
+    icon: <ActivityIcon className="w-5 h-5 text-white" />,
   },
   // ── CREATE ──
   {

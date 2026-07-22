@@ -137,6 +137,13 @@ model Dms {
   senderId     String?
   reciever     String?
   message      String?
+
+  // Activity & Error Ledger Fields
+  status       String      @default("outbound") // outbound, inbound, failed, queued, read
+  source       String?     @default("automation") // automation, abandoned_cart, smart_ai, comment_reply
+  errorReason  String?     // e.g. "Authentication Error", "Token Expired"
+  evidence     String?     // e.g. trace ID or payload ID
+  contactInfo  String?     // phone, username, or contact label
 }
 
 model Post {

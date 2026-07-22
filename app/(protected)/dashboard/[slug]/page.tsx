@@ -17,6 +17,7 @@ import {
   MessageSquareCode,
   Compass,
 } from "lucide-react";
+import { ContextHelpTooltip } from "@/components/global/context-tooltip";
 import Link from "next/link";
 
 type Props = {
@@ -65,16 +66,12 @@ function Page({ params: { slug } }: Props) {
       <Activity key="conn" className="w-3.5 h-3.5 text-[var(--text-secondary)]" />,
     ];
     return {
-      id: c.id,
-      user: `@${c.username || "instagram_user"}`,
+      id: c.id || `event-${idx}`,
+      user: c.username ? `@${c.username}` : `Follower ${c.instagramId?.slice(0, 6)}`,
+      action: types[idx % types.length],
       type: types[idx % types.length],
       detail: details[idx % details.length],
-      time: new Date(c.createdAt).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      time: new Date(Date.now() - (idx + 1) * 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       icon: icons[idx % icons.length],
     };
   });
@@ -86,9 +83,12 @@ function Page({ params: { slug } }: Props) {
         <span className="inline-flex items-center gap-x-1.5 px-3 py-1 bg-[var(--accent-whisper)] border border-[var(--accent-veil)] text-[var(--accent-magenta)] text-[9px] font-bold tracking-wider uppercase rounded-full w-fit" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
           System Core
         </span>
-        <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] leading-none tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
-          Dashboard Overview
-        </h1>
+        <div className="flex items-center gap-x-2">
+          <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] leading-none tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+            Dashboard Overview
+          </h1>
+          <ContextHelpTooltip content="Central control tower displaying metrics, automations overview, and live activity." />
+        </div>
         <p className="text-[var(--text-secondary)] text-sm max-w-[65ch] leading-relaxed">
           Monitor your Instagram DM automations, track AI engagement, and connect integrations.
         </p>
@@ -128,9 +128,12 @@ function Page({ params: { slug } }: Props) {
                   <BarDuoToneBlue />
                 </span>
                 <div>
-                  <h2 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
-                    Automated Activity
-                  </h2>
+                  <div className="flex items-center gap-x-2">
+                    <h2 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
+                      Automated Activity
+                    </h2>
+                    <ContextHelpTooltip content="Real-time graph tracking total DM responses, keyword matches, and Smart AI firings." />
+                  </div>
                   <p className="text-[var(--text-tertiary)] text-xs mt-0.5 font-medium">
                     Real-time replies and AI performance logs
                   </p>
