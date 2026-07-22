@@ -21,7 +21,7 @@ function Sidebar({ slug }: Props) {
       <div className="flex flex-col h-full">
         {/* Fixed Header */}
         <div className="p-6 pb-2">
-          <div className="flex gap-x-2 items-center justify-center mb-4">
+          <div className="flex gap-x-2 items-center justify-start mb-4 px-2">
             <LogoSmall />
           </div>
         </div>
