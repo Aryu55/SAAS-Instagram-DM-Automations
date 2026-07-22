@@ -3,21 +3,24 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Crown, Compass, ArrowRight, LogIn, Loader2 } from "lucide-react";
-import { getDashboardOverview } from "@/actions/user";
 
 export default function MasterDashboardPage() {
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [memberships, setMemberships] = useState<any[]>([]);
   const [errorState, setErrorState] = useState<string | null>(null);
 
   useEffect(() => {
+    setMounted(true);
+
     console.log("==========================================================");
     console.log("🚀 [JANUS AI DASHBOARD CLIENT] Initializing Master Dashboard Overview");
     console.log("==========================================================");
 
     async function loadData() {
       try {
-        console.log("📡 [JANUS AI DASHBOARD CLIENT] Fetching user organization memberships...");
+        console.log("📡 [JANUS AI DASHBOARD CLIENT] Dynamically fetching getDashboardOverview...");
+        const { getDashboardOverview } = await import("@/actions/user");
         const res = await getDashboardOverview();
         console.log("📥 [JANUS AI DASHBOARD CLIENT] Server action response:", res);
 
@@ -25,7 +28,7 @@ export default function MasterDashboardPage() {
           console.warn("⚠️ [JANUS AI DASHBOARD CLIENT] User is not logged in. Prompting sign in.");
           setErrorState("UNAUTHENTICATED");
         } else if (res.status === 200 && Array.isArray(res.data)) {
-          console.log(`✅ [JANUS AI DASHBOARD CLIENT] Loaded ${res.data.length} organization workspaces successfully:`, res.data);
+          console.log(`✅ [JANUS AI DASHBOARD CLIENT] Loaded ${res.data.length} organization workspaces:`, res.data);
           setMemberships(res.data);
         } else {
           console.error("❌ [JANUS AI DASHBOARD CLIENT] Failed to load memberships:", res.error);
@@ -42,7 +45,7 @@ export default function MasterDashboardPage() {
     loadData();
   }, []);
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-[var(--page-bg)] text-[var(--text-primary)] flex flex-col items-center justify-center p-6">
         <Loader2 className="w-8 h-8 text-[var(--accent-magenta)] animate-spin mb-4" />
