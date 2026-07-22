@@ -116,7 +116,7 @@ export async function batchAnalyzeVideos(orgId: string, urls: string[], platform
 export async function getAnalyzedVideos(orgId: string) {
   try {
     const data = await client.scrapedPost.findMany({
-      where: { orgId, analysisData: { not: null } },
+      where: { orgId, status: "COMPLETED" },
       orderBy: { createdAt: 'desc' }
     });
     return { status: 200, data };
