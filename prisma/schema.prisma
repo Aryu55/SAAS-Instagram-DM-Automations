@@ -25,6 +25,7 @@ model User {
   automations  Automation[]
   contacts     Contact[]
   memberships  OrgMember[]
+  joinRequests OrgJoinRequest[]
 }
 
 model OrgMember {
@@ -40,8 +41,38 @@ model OrgMember {
 }
 
 enum MemberRole {
+  MASTER_ADMIN
+  ORG_ADMIN
   OWNER
   EDITOR
+  MEMBER
+  VIEWER
+}
+
+model OrgInvite {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email           String
+  orgId           String?    @db.Uuid
+  role            MemberRole @default(MEMBER)
+  code            String     @unique
+  status          String     @default("PENDING")
+  invitedByUserId String?    @db.Uuid
+  createdAt       DateTime   @default(now())
+
+  org Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+model OrgJoinRequest {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String     @db.Uuid
+  orgId         String?    @db.Uuid
+  targetType    String     @default("INDIVIDUAL_ORG")
+  requestedRole MemberRole @default(MEMBER)
+  status        String     @default("PENDING")
+  createdAt     DateTime   @default(now())
+
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }
 
 model Subscription {
@@ -81,7 +112,8 @@ model Organization {
   postsPerDay     Int      @default(1)
   active          Boolean  @default(false)
   winningPatterns String?
-  createdAt       DateTime @default(now())
+  isPublic        Boolean  @default(true)
+  joinCode        String?
 
   // Relationships
   members         OrgMember[]
@@ -94,6 +126,8 @@ model Organization {
   ideas           ContentIdea[]
   logs            DocumentaryLog[]
   scraped         ScrapedPost[]
+  invites         OrgInvite[]
+  joinRequests    OrgJoinRequest[]
 }
 
 // ═══════════════════════════════════════════════════════════════

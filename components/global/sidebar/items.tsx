@@ -25,6 +25,7 @@ const SIDEBAR_TOOLTIPS: Record<string, string> = {
   research: "Competitive research & scraped posts",
   intelligence: "Analytics, virality & competitive intelligence",
   activity: "Real-time message activity ledger & error diagnostics",
+  discover: "Discord-style organization directory & access requests",
 };
 
 type Props = {

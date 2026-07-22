@@ -4,7 +4,7 @@ import {
   RocketDuoToneWhite,
   SettingsDuoToneWhite,
 } from "@/icons";
-import { Video, Users, Flame, BarChart3, Inbox, Factory, BookOpen, Eye, Brain, Activity as ActivityIcon } from "lucide-react";
+import { Video, Users, Flame, BarChart3, Inbox, Factory, BookOpen, Eye, Brain, Activity as ActivityIcon, Compass } from "lucide-react";
 import { v4 as uuid } from "uuid";
 
 type Props = {
@@ -89,9 +89,14 @@ export const SIDEBAR_MENU: SIDEBAR_MENU_TYPE[] = [
   // ── System ──
   {
     id: uuid(),
+    label: "discover",
+    icon: <Compass className="w-5 h-5 text-white" />,
+    section: "SYSTEM",
+  },
+  {
+    id: uuid(),
     label: "integrations",
     icon: <RocketDuoToneWhite />,
-    section: "",
   },
   {
     id: uuid(),
