@@ -83,26 +83,39 @@ export default function DiscoverPage() {
               </span>
             </div>
             <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
-              Request Master Org Access
+              {orgsRes?.isMasterAdmin ? "Master Control Tower Active" : "Request Master Org Access"}
             </h2>
             <p className="text-xs text-purple-200/80 mt-1 leading-relaxed">
-              Need access across all organizations and team management? Submit a Master Org access request directly to the Admin Approval Queue.
+              {orgsRes?.isMasterAdmin
+                ? "You have active Master Platform & Admin privileges across your organizations."
+                : "Need access across all organizations and team management? Submit a Master Org access request directly to the Admin Approval Queue."}
             </p>
           </div>
 
           <div className="pt-4 mt-2 border-t border-purple-500/20 flex items-center justify-between">
             <span className="text-[10px] text-purple-300 font-mono">
-              Badge: <strong className="text-purple-200">[MASTER ORG]</strong>
+              Badge: <strong className="text-purple-200">{orgsRes?.isMasterAdmin ? "[MASTER ADMIN]" : "[MEMBER]"}</strong>
             </span>
-            <button
-              onClick={() => requestMut.mutate({ targetType: "MASTER_ORG", orgId: null })}
-              disabled={requestMut.isPending}
-              className="flex items-center gap-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-smooth shadow-md disabled:opacity-50"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-            >
-              {requestMut.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-              Request Master Org
-            </button>
+
+            {orgsRes?.isMasterAdmin ? (
+              <a
+                href="/dashboard"
+                className="flex items-center gap-x-2 bg-gradient-to-r from-amber-500 to-purple-600 text-white rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-md font-mono"
+              >
+                <Crown className="w-3.5 h-3.5 text-amber-200" />
+                Go to Master Dashboard
+              </a>
+            ) : (
+              <button
+                onClick={() => requestMut.mutate({ targetType: "MASTER_ORG", orgId: null })}
+                disabled={requestMut.isPending}
+                className="flex items-center gap-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-smooth shadow-md disabled:opacity-50"
+                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+              >
+                {requestMut.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
+                Request Master Org
+              </button>
+            )}
           </div>
         </div>
 
@@ -169,52 +182,67 @@ export default function DiscoverPage() {
 
         {/* Orgs Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredOrgs.map((org) => (
-            <div
-              key={org.id}
-              className="rounded-xl border border-[var(--border-color)] bg-[var(--card-bg)] p-5 flex flex-col justify-between hover:border-[var(--accent-magenta)]/40 transition-all shadow-sm group"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-bold flex items-center justify-center text-sm shadow-md">
-                      {org.name.slice(0, 2).toUpperCase()}
+          {filteredOrgs.map((org: any) => {
+            const isJoined = Boolean(org.isJoined);
+            const userRole = org.userRole || "MEMBER";
+
+            return (
+              <div
+                key={org.id}
+                className="rounded-xl border border-[var(--border-color)] bg-[var(--card-bg)] p-5 flex flex-col justify-between hover:border-[var(--accent-magenta)]/40 transition-all shadow-sm group"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-bold flex items-center justify-center text-sm shadow-md">
+                        {org.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-[var(--text-primary)] leading-tight group-hover:text-[var(--accent-magenta)] transition-colors">
+                          {org.name}
+                        </h3>
+                        <span className="text-[10px] text-[var(--text-tertiary)] font-mono">
+                          /{org.slug}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-base font-bold text-[var(--text-primary)] leading-tight group-hover:text-[var(--accent-magenta)] transition-colors">
-                        {org.name}
-                      </h3>
-                      <span className="text-[10px] text-[var(--text-tertiary)] font-mono">
-                        /{org.slug}
-                      </span>
-                    </div>
+
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--text-secondary)] font-mono bg-[var(--page-bg)] px-2 py-1 rounded-md border border-[var(--border-color)]">
+                      <Users className="w-3 h-3 text-[var(--text-tertiary)]" />
+                      {org._count?.members || 1}
+                    </span>
                   </div>
 
-                  <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--text-secondary)] font-mono bg-[var(--page-bg)] px-2 py-1 rounded-md border border-[var(--border-color)]">
-                    <Users className="w-3 h-3 text-[var(--text-tertiary)]" />
-                    {org._count?.members || 1}
-                  </span>
+                  <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                    {org.tagline || org.description || "No description provided."}
+                  </p>
                 </div>
 
-                <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
-                  {org.tagline || org.description || "No description provided."}
-                </p>
-              </div>
+                <div className="pt-4 mt-4 border-t border-[var(--border-color)] flex items-center justify-between">
+                  <span className={`text-[9px] font-bold uppercase tracking-wider font-mono ${isJoined ? "text-emerald-400" : "text-blue-400"}`}>
+                    {isJoined ? `[ ${userRole} ]` : "[ INDIVIDUAL ORG ]"}
+                  </span>
 
-              <div className="pt-4 mt-4 border-t border-[var(--border-color)] flex items-center justify-between">
-                <span className="text-[9px] font-bold uppercase tracking-wider text-blue-400 font-mono">
-                  [INDIVIDUAL ORG]
-                </span>
-                <button
-                  onClick={() => requestMut.mutate({ targetType: "INDIVIDUAL_ORG", orgId: org.id })}
-                  disabled={requestMut.isPending}
-                  className="flex items-center gap-1 text-xs font-bold text-[var(--accent-magenta)] hover:underline"
-                >
-                  Request Access <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                  {isJoined ? (
+                    <a
+                      href={`/dashboard/${org.slug}`}
+                      className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 font-mono transition-colors"
+                    >
+                      Enter Workspace <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => requestMut.mutate({ targetType: "INDIVIDUAL_ORG", orgId: org.id })}
+                      disabled={requestMut.isPending}
+                      className="flex items-center gap-1 text-xs font-bold text-[var(--accent-magenta)] hover:underline"
+                    >
+                      Request Access <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

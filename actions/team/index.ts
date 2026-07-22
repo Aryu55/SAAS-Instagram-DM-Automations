@@ -60,13 +60,33 @@ export async function requestOrgAccess(data: {
     const user = await onCurrentUser();
     if (!user) return { status: 401, error: "Unauthorized" };
 
+    const dbUser = await client.user.findUnique({
+      where: { clerkId: user.id },
+    });
+    if (!dbUser) return { status: 404, error: "User not found" };
+
+    // Check if user is already a member of this org
+    if (data.orgId) {
+      const existingMember = await client.orgMember.findUnique({
+        where: {
+          userId_orgId: {
+            userId: dbUser.id,
+            orgId: data.orgId,
+          },
+        },
+      });
+      if (existingMember) {
+        return { status: 400, error: "You are already a member of this organization!" };
+      }
+    }
+
     // Check if request already exists
     const existing = await client.orgJoinRequest.findFirst({
       where: {
-        userId: user.id,
+        userId: dbUser.id,
         orgId: data.orgId || null,
-        status: "PENDING"
-      }
+        status: "PENDING",
+      },
     });
 
     if (existing) {
@@ -75,12 +95,12 @@ export async function requestOrgAccess(data: {
 
     const joinReq = await client.orgJoinRequest.create({
       data: {
-        userId: user.id,
+        userId: dbUser.id,
         orgId: data.orgId || null,
         targetType: data.targetType,
         requestedRole: data.requestedRole || MemberRole.MEMBER,
-        status: "PENDING"
-      }
+        status: "PENDING",
+      },
     });
 
     return { status: 200, data: joinReq, message: "Access request submitted to Admin Approval Queue!" };
@@ -281,8 +301,16 @@ export async function removeOrgMember(memberId: string) {
  */
 export async function getPublicOrganizations() {
   try {
+    const user = await onCurrentUser();
+    let dbUser = null;
+    if (user) {
+      dbUser = await client.user.findUnique({
+        where: { clerkId: user.id },
+        include: { memberships: true },
+      });
+    }
+
     const orgs = await client.organization.findMany({
-      where: { isPublic: true },
       select: {
         id: true,
         name: true,
@@ -291,12 +319,30 @@ export async function getPublicOrganizations() {
         description: true,
         logoUrl: true,
         _count: {
-          select: { members: true }
-        }
-      }
+          select: { members: true },
+        },
+      },
     });
 
-    return { status: 200, data: orgs };
+    const userMembershipsMap = new Map(
+      dbUser?.memberships?.map((m) => [m.orgId, m.role]) || []
+    );
+
+    const isMasterAdmin = dbUser?.memberships?.some(
+      (m) => m.role === "MASTER_ADMIN" || m.role === "OWNER"
+    ) || false;
+
+    const data = orgs.map((o) => ({
+      ...o,
+      userRole: userMembershipsMap.get(o.id) || null,
+      isJoined: userMembershipsMap.has(o.id),
+    }));
+
+    return {
+      status: 200,
+      data,
+      isMasterAdmin,
+    };
   } catch (err: any) {
     return { status: 500, error: err.message };
   }
