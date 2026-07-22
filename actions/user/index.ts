@@ -12,8 +12,8 @@ export const onCurrentUser = async () => {
   const user = await getSession();
   console.log("[AUTH TRACE] onCurrentUser: session resolved:", user ? { id: user.id, email: user.emailAddresses?.[0]?.emailAddress } : "null");
   if (!user) {
-    console.log("[AUTH TRACE] onCurrentUser: No session cookie. Redirecting to /api/auth/logout to clear state");
-    return redirect("/api/auth/logout");
+    console.log("[AUTH TRACE] onCurrentUser: No session cookie. Redirecting to /sign-in");
+    return redirect("/sign-in");
   }
 
   return user;
