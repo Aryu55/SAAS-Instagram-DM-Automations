@@ -25,16 +25,16 @@ export default function OrgSwitcher({ currentSlug }: Props) {
     <div className="relative z-50">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-x-2 px-3 py-1.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-black text-white hover:border-purple-500/60 transition-all shadow-sm group"
+        className="flex items-center gap-x-2 px-3 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--card-bg)] text-[var(--text-primary)] hover:border-[var(--accent-magenta)]/50 transition-all shadow-sm group"
         title="Switch Organization Workspace"
       >
-        <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
+        <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
           {activeOrg.name.slice(0, 2).toUpperCase()}
         </div>
-        <span className="text-xs font-bold font-mono tracking-tight text-purple-200 group-hover:text-white max-w-[120px] truncate">
+        <span className="text-xs font-bold font-mono tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent-magenta)] max-w-[120px] truncate">
           {activeOrg.name}
         </span>
-        <ChevronDown className={`w-3.5 h-3.5 text-purple-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-[var(--text-tertiary)] group-hover:text-[var(--accent-magenta)] transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (

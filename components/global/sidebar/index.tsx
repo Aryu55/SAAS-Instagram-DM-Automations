@@ -41,17 +41,17 @@ function Sidebar({ slug }: Props) {
           {/* Master Org Platform Control Tower Button */}
           <a
             href="/dashboard"
-            className="flex items-center justify-between p-2.5 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-purple-950/40 to-black text-amber-300 hover:border-amber-500/60 transition-all shadow-md group"
+            className="flex items-center justify-between p-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:border-amber-500/70 hover:bg-amber-500/15 transition-all shadow-sm group"
             title="Return to Master Platform Overview"
           >
             <div className="flex items-center gap-2">
-              <Crown className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+              <Crown className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 animate-pulse" />
               <div className="flex flex-col">
                 <span className="text-[11px] font-bold leading-none font-mono">Master Org</span>
-                <span className="text-[9px] text-amber-200/70 font-mono">Control Tower</span>
+                <span className="text-[9px] text-amber-600/80 dark:text-amber-200/70 font-mono">Control Tower</span>
               </div>
             </div>
-            <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowLeftRight className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform" />
           </a>
         </div>
 

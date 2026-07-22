@@ -62,10 +62,10 @@ function NavBar({ slug }: Props) {
           {/* Master Org Direct Anchor Link */}
           <a
             href="/dashboard"
-            className="hidden sm:flex items-center gap-x-1.5 px-3 py-1.5 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-purple-950/30 to-black text-amber-300 hover:text-white text-xs font-bold font-mono transition-all shadow-sm shrink-0 hover:border-amber-500/60"
+            className="hidden sm:flex items-center gap-x-1.5 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-300 hover:bg-amber-500/20 text-xs font-bold font-mono transition-all shadow-sm shrink-0 hover:border-amber-500/60"
             title="Navigate to Master Org Overview"
           >
-            <Crown className="w-3.5 h-3.5 text-amber-400" />
+            <Crown className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
             <span>Master Org</span>
           </a>
 
