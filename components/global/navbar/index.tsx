@@ -15,6 +15,10 @@ import Items from "../sidebar/items";
 import Notification from "./notification";
 import Search from "./search";
 
+import Link from "next/link";
+import { Crown, Building2 } from "lucide-react";
+import { ThemeToggle } from "../theme-toggle";
+
 type Props = {
   slug: string;
 };
@@ -25,8 +29,8 @@ function NavBar({ slug }: Props) {
 
   return (
     currentPage && (
-      <div className="flex flex-col">
-        <div className="flex gap-x-3 lg:gap-x-5 justify-end">
+      <div className="flex flex-col gap-y-2">
+        <div className="flex gap-x-3 lg:gap-x-4 items-center justify-end">
           <span className="lg:hidden flex items-center flex-1 gap-x-2">
             <Sheet trigger={<Menu className="text-[var(--text-primary)] w-5 h-5 cursor-pointer" />} className="lg:hidden" side="left">
               <div className="flex flex-col gap-y-5 w-full h-full p-6 bg-[var(--card-bg)] border-r border-[var(--border-color)]">
@@ -53,9 +57,21 @@ function NavBar({ slug }: Props) {
               </div>
             </Sheet>
           </span>
+
+          {/* Master Org Quick Navigation Button */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-x-1.5 px-3 py-1.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-950/40 to-indigo-950/30 text-amber-300 hover:text-white text-xs font-bold font-mono transition-all shadow-sm shrink-0"
+            title="Navigate to Master Org Overview"
+          >
+            <Crown className="w-3.5 h-3.5 text-amber-400" />
+            <span>Master Org</span>
+          </Link>
+
           <Search />
           <CreateAutomation />
           <Notification />
+          <ThemeToggle />
         </div>
         <MainBreadCrumbs page={page === slug ? "Home" : page} slug={slug} />
       </div>
