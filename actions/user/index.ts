@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { updateIntegration } from "../integration/queries";
 import { createUser, findUser, updateSubscription } from "./queries";
+import { client as prisma } from "@/lib/prisma";
 
 export const onCurrentUser = async () => {
   console.log("[AUTH TRACE] onCurrentUser: retrieving session from cookies...");
@@ -133,5 +134,115 @@ export const onSubscribe = async (session_id: string) => {
     return { status: 404 };
   } catch (error) {
     return { status: 500 };
+  }
+};
+
+export const getDashboardOverview = async () => {
+  try {
+    const session = await getSession();
+    if (!session || !session.id) {
+      return { status: 401, error: "Unauthenticated" };
+    }
+
+    const clerkId = session.id;
+    const email = session.emailAddresses?.[0]?.emailAddress || `${clerkId}@mindmaxing.com`;
+
+    let dbUser = await prisma.user.findUnique({
+      where: { clerkId },
+    });
+
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          clerkId,
+          email,
+          firstname: session.firstName || "Creator",
+          lastname: session.lastName || "User",
+        },
+      });
+    }
+
+    const rawMemberships = await prisma.orgMember.findMany({
+      where: { userId: dbUser.id },
+      include: {
+        org: {
+          include: {
+            _count: {
+              select: {
+                jobs: true,
+                automations: true,
+                contacts: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let memberships = rawMemberships.filter((m) => Boolean(m && m.org));
+
+    if (memberships.length === 0) {
+      let allOrgs = await prisma.organization.findMany();
+
+      if (allOrgs.length === 0) {
+        const coursesOrg = await prisma.organization.create({
+          data: {
+            name: "Courses Business",
+            slug: "courses",
+            tagline: "Course creation & student lead capture",
+            description: "Automates DMs and student onboarding for digital courses.",
+          },
+        });
+        const hisaabOrg = await prisma.organization.create({
+          data: {
+            name: "Hisaab Finance",
+            slug: "hisaab",
+            tagline: "Automatic expense tracking for freelancers",
+            description: "Auto-imports bank statements and tracks tax write-offs.",
+          },
+        });
+        allOrgs = [coursesOrg, hisaabOrg];
+      }
+
+      for (const org of allOrgs) {
+        await prisma.orgMember.upsert({
+          where: {
+            userId_orgId: {
+              userId: dbUser.id,
+              orgId: org.id,
+            },
+          },
+          create: {
+            userId: dbUser.id,
+            orgId: org.id,
+            role: "OWNER",
+          },
+          update: {},
+        });
+      }
+
+      const refetched = await prisma.orgMember.findMany({
+        where: { userId: dbUser.id },
+        include: {
+          org: {
+            include: {
+              _count: {
+                select: {
+                  jobs: true,
+                  automations: true,
+                  contacts: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      memberships = refetched.filter((m) => Boolean(m && m.org));
+    }
+
+    return { status: 200, data: memberships };
+  } catch (error: any) {
+    console.error("[AUTH TRACE] getDashboardOverview error:", error);
+    return { status: 500, error: error.message };
   }
 };

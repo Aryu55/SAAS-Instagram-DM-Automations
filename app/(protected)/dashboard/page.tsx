@@ -1,20 +1,59 @@
-import { getSession } from "@/lib/auth";
-import { client as prisma } from "@/lib/prisma";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Crown, Compass, ArrowRight, ShieldAlert, LogIn } from "lucide-react";
+import { Crown, Compass, ArrowRight, LogIn, Loader2 } from "lucide-react";
+import { getDashboardOverview } from "@/actions/user";
 
-export const dynamic = "force-dynamic";
+export default function MasterDashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [memberships, setMemberships] = useState<any[]>([]);
+  const [errorState, setErrorState] = useState<string | null>(null);
 
-export default async function MasterDashboardPage() {
-  let session = null;
-  try {
-    session = await getSession();
-  } catch (err) {
-    console.error("[AUTH TRACE] MasterDashboardPage getSession error:", err);
+  useEffect(() => {
+    console.log("==========================================================");
+    console.log("🚀 [JANUS AI DASHBOARD CLIENT] Initializing Master Dashboard Overview");
+    console.log("==========================================================");
+
+    async function loadData() {
+      try {
+        console.log("📡 [JANUS AI DASHBOARD CLIENT] Fetching user organization memberships...");
+        const res = await getDashboardOverview();
+        console.log("📥 [JANUS AI DASHBOARD CLIENT] Server action response:", res);
+
+        if (res.status === 401) {
+          console.warn("⚠️ [JANUS AI DASHBOARD CLIENT] User is not logged in. Prompting sign in.");
+          setErrorState("UNAUTHENTICATED");
+        } else if (res.status === 200 && Array.isArray(res.data)) {
+          console.log(`✅ [JANUS AI DASHBOARD CLIENT] Loaded ${res.data.length} organization workspaces successfully:`, res.data);
+          setMemberships(res.data);
+        } else {
+          console.error("❌ [JANUS AI DASHBOARD CLIENT] Failed to load memberships:", res.error);
+          setErrorState(res.error || "Failed to load organizations");
+        }
+      } catch (err: any) {
+        console.error("🔥 [JANUS AI DASHBOARD CLIENT] Unhandled fetch error:", err);
+        setErrorState(err.message || "An unexpected error occurred");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--page-bg)] text-[var(--text-primary)] flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-8 h-8 text-[var(--accent-magenta)] animate-spin mb-4" />
+        <p className="text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider">
+          Loading Master Workspace Command Center...
+        </p>
+      </div>
+    );
   }
 
-  // If user is unauthenticated or session cookie is missing/expired
-  if (!session || !session.id) {
+  if (errorState === "UNAUTHENTICATED") {
     return (
       <div className="min-h-screen bg-[var(--page-bg)] text-[var(--text-primary)] flex items-center justify-center p-6">
         <div className="max-w-md w-full rounded-2xl border border-[var(--border-color)] bg-[var(--card-bg)] p-8 shadow-2xl text-center space-y-6">
@@ -54,117 +93,6 @@ export default async function MasterDashboardPage() {
         </div>
       </div>
     );
-  }
-
-  const clerkId = session.id;
-  const email = session.emailAddresses?.[0]?.emailAddress || `${clerkId}@mindmaxing.com`;
-
-  // Find or create user record in DB safely
-  let dbUser = null;
-  try {
-    dbUser = await prisma.user.findUnique({
-      where: { clerkId },
-    });
-
-    if (!dbUser) {
-      dbUser = await prisma.user.create({
-        data: {
-          clerkId,
-          email,
-          firstname: session.firstName || "Creator",
-          lastname: session.lastName || "User",
-        },
-      });
-    }
-  } catch (dbErr) {
-    console.error("[AUTH TRACE] MasterDashboardPage DB user query error:", dbErr);
-  }
-
-  // Fetch all org memberships for this user
-  let memberships: any[] = [];
-  if (dbUser?.id) {
-    try {
-      const rawMemberships = await prisma.orgMember.findMany({
-        where: { userId: dbUser.id },
-        include: {
-          org: {
-            include: {
-              _count: {
-                select: {
-                  jobs: true,
-                  automations: true,
-                  contacts: true,
-                },
-              },
-            },
-          },
-        },
-      });
-
-      memberships = rawMemberships.filter((m) => Boolean(m && m.org));
-
-      // If user has NO org memberships, auto-assign them to default orgs
-      if (memberships.length === 0) {
-        let allOrgs = await prisma.organization.findMany();
-
-        if (allOrgs.length === 0) {
-          const coursesOrg = await prisma.organization.create({
-            data: {
-              name: "Courses Business",
-              slug: "courses",
-              tagline: "Course creation & student lead capture",
-              description: "Automates DMs and student onboarding for digital courses.",
-            },
-          });
-          const hisaabOrg = await prisma.organization.create({
-            data: {
-              name: "Hisaab Finance",
-              slug: "hisaab",
-              tagline: "Automatic expense tracking for freelancers",
-              description: "Auto-imports bank statements and tracks tax write-offs.",
-            },
-          });
-          allOrgs = [coursesOrg, hisaabOrg];
-        }
-
-        for (const org of allOrgs) {
-          await prisma.orgMember.upsert({
-            where: {
-              userId_orgId: {
-                userId: dbUser.id,
-                orgId: org.id,
-              },
-            },
-            create: {
-              userId: dbUser.id,
-              orgId: org.id,
-              role: "OWNER",
-            },
-            update: {},
-          });
-        }
-
-        const refetched = await prisma.orgMember.findMany({
-          where: { userId: dbUser.id },
-          include: {
-            org: {
-              include: {
-                _count: {
-                  select: {
-                    jobs: true,
-                    automations: true,
-                    contacts: true,
-                  },
-                },
-              },
-            },
-          },
-        });
-        memberships = refetched.filter((m) => Boolean(m && m.org));
-      }
-    } catch (orgErr) {
-      console.error("[AUTH TRACE] MasterDashboardPage DB org query error:", orgErr);
-    }
   }
 
   return (
