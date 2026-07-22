@@ -1,24 +1,42 @@
-import { onboardUser } from "@/actions/user";
+import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { client as prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Crown, Building2, Compass, ArrowRight, ShieldCheck, Layers } from "lucide-react";
+import { Crown, Building2, Compass, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function MasterDashboardPage() {
-  const user = await onboardUser();
+  const session = await getSession();
 
-  if (!user || (user.status !== 200 && user.status !== 201)) {
+  if (!session || !session.id) {
+    console.log("[AUTH TRACE] MasterDashboardPage: No valid session cookie found. Redirecting to /sign-in");
     return redirect("/sign-in");
   }
 
-  const userId = user.data?.id;
-  if (!userId) return redirect("/sign-in");
+  const clerkId = session.id;
+  const email = session.emailAddresses?.[0]?.emailAddress || `${clerkId}@mindmaxing.com`;
 
-  // Fetch all organizations this user is a member of
+  // Find or create user record in DB
+  let dbUser = await prisma.user.findUnique({
+    where: { clerkId },
+  });
+
+  if (!dbUser) {
+    console.log("[AUTH TRACE] MasterDashboardPage: User record missing in DB. Auto-creating user:", clerkId);
+    dbUser = await prisma.user.create({
+      data: {
+        clerkId,
+        email,
+        firstname: session.firstName || "Creator",
+        lastname: session.lastName || "User",
+      },
+    });
+  }
+
+  // Fetch all org memberships for this user
   const rawMemberships = await prisma.orgMember.findMany({
-    where: { userId },
+    where: { userId: dbUser.id },
     include: {
       org: {
         include: {
@@ -34,11 +52,11 @@ export default async function MasterDashboardPage() {
     },
   });
 
-  // Safely filter memberships that have valid non-null org objects
   let memberships = rawMemberships.filter((m) => Boolean(m && m.org));
 
-  // If user has NO valid org memberships, auto-link to default orgs
+  // If user has NO org memberships, auto-assign them to default orgs
   if (memberships.length === 0) {
+    console.log("[AUTH TRACE] MasterDashboardPage: User has 0 memberships. Seeding default orgs...");
     let allOrgs = await prisma.organization.findMany();
 
     if (allOrgs.length === 0) {
@@ -61,17 +79,16 @@ export default async function MasterDashboardPage() {
       allOrgs = [coursesOrg, hisaabOrg];
     }
 
-    // Assign user to all orgs as OWNER
     for (const org of allOrgs) {
       await prisma.orgMember.upsert({
         where: {
           userId_orgId: {
-            userId,
+            userId: dbUser.id,
             orgId: org.id,
           },
         },
         create: {
-          userId,
+          userId: dbUser.id,
           orgId: org.id,
           role: "OWNER",
         },
@@ -79,9 +96,8 @@ export default async function MasterDashboardPage() {
       });
     }
 
-    // Re-fetch valid memberships
     const refetched = await prisma.orgMember.findMany({
-      where: { userId },
+      where: { userId: dbUser.id },
       include: {
         org: {
           include: {
@@ -101,8 +117,8 @@ export default async function MasterDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[var(--page-bg)] text-[var(--text-primary)] p-6 lg:p-12">
-      {/* Top Banner */}
       <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-y-4 border-b border-[var(--border-color)] pb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
