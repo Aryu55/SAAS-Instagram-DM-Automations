@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai, getModelName, isUsingOpenRouter } from "@/lib/openai";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { postId, mediaUrl, mediaType, caption, niche } = await req.json();
 
     const hfToken = process.env.HF_TOKEN;
@@ -78,7 +84,7 @@ Keep the script punchy, direct, under 120 words, and in a vernacular spoken styl
     const transcript = completion.choices[0]?.message?.content?.trim() || "";
     return NextResponse.json({ transcript, source: "AI Reconstructed (Caption-Based)" });
   } catch (error: any) {
-    console.error("Error in transcribe endpoint:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Error in transcribe endpoint:", error);
+    return NextResponse.json({ error: "Failed to transcribe content" }, { status: 500 });
   }
 }

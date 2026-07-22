@@ -184,26 +184,34 @@ function computeSimulatedScore(
   };
 }
 
+import { getSession } from "@/lib/auth";
+
 export async function POST(req: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { scriptA, scriptB, platform = "instagram", niche = "tech", language = "hinglish" } = await req.json();
 
-    console.log("[VIRALITY FEATURE] API POST received:", {
-      platform,
-      niche,
-      language,
-      scriptALength: scriptA?.length || 0,
-      scriptBLength: scriptB?.length || 0,
-      scriptAPreview: scriptA ? scriptA.substring(0, 60) + "..." : "none"
-    });
-
     if (!scriptA) {
-      console.log("[VIRALITY FEATURE] Validation failed: Script A content is missing.");
       return NextResponse.json({ error: "Script A content is required" }, { status: 400 });
     }
 
+    if (typeof scriptA !== "string" || scriptA.length > 5000) {
+      return NextResponse.json({ error: "Script A content exceeds maximum length of 5000 characters" }, { status: 400 });
+    }
+
+    if (scriptB && (typeof scriptB !== "string" || scriptB.length > 5000)) {
+      return NextResponse.json({ error: "Script B content exceeds maximum length of 5000 characters" }, { status: 400 });
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[VIRALITY FEATURE] API POST received for user:", session.id);
+    }
+
     const hasKeys = isUsingOpenRouter || !!process.env.OPEN_AI_KEY || !!process.env.GEMINI_API_KEY;
-    console.log("[VIRALITY FEATURE] LLM Keys status: hasKeys =", hasKeys);
 
     if (!hasKeys) {
       console.log("[VIRALITY FEATURE] LLM keys not detected, running rule-based heuristic fallback simulator...");
@@ -308,7 +316,7 @@ Evaluate them carefully, compare their structure and pacing against the proven r
     }
 
   } catch (error: any) {
-    console.error("[VIRALITY FEATURE] Fatal error in API POST:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[VIRALITY FEATURE] Fatal error in API POST:", error);
+    return NextResponse.json({ error: "Failed to evaluate virality prediction" }, { status: 500 });
   }
 }

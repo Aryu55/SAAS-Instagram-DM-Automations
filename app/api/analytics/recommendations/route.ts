@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai, getModelName, isUsingOpenRouter } from "@/lib/openai";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { posts, niche } = await req.json();
 
-    if (!posts || posts.length === 0) {
+    if (!posts || !Array.isArray(posts) || posts.length === 0) {
       return NextResponse.json({ error: "No posts provided for analysis" }, { status: 400 });
     }
 
@@ -137,7 +143,7 @@ Analyze this, perform deep reasoning on the metrics and transcripts, write an ac
 
     return NextResponse.json(data);
   } catch (error: any) {
-    console.error("Error generating recommendations:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Error generating recommendations:", error);
+    return NextResponse.json({ error: "Failed to generate content recommendations" }, { status: 500 });
   }
 }

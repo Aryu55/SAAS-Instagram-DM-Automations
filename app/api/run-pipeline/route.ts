@@ -376,7 +376,17 @@ Rewrite the script to optimize it based on the critiques and reference templates
   }
 }
 
+import { getSession } from "@/lib/auth";
+
 export async function POST(req: NextRequest) {
+  const session = await getSession();
+  if (!session) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const encoder = new TextEncoder();
   
   let topic = "How to build local AI agents in terminal";
@@ -619,10 +629,13 @@ export async function POST(req: NextRequest) {
         } else if (process.env.GEMINI_API_KEY) {
           try {
             sendEvent('log', { message: '🤖 [AI Generator] Querying Gemini for screenplay...', type: 'agent' });
-            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
             const geminiRes = await fetch(geminiUrl, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 
+                'Content-Type': 'application/json',
+                'x-goog-api-key': process.env.GEMINI_API_KEY || ''
+              },
               body: JSON.stringify({
                 contents: [{
                   role: "user",

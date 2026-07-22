@@ -1,11 +1,7 @@
 import { client } from "@/lib/prisma";
 import { setSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { createHash } from "crypto";
-
-function hashPassword(password: string): string {
-  return createHash("sha256").update(password + (process.env.AUTH_SECRET || "ig-internal-salt")).digest("hex");
-}
+import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,46 +11,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
-    const hashed = hashPassword(password);
+    if (password.length < 8) {
+      return NextResponse.json({ error: "Password must be at least 8 characters long" }, { status: 400 });
+    }
 
-    // Check if user already exists
-    const existing = await client.user.findUnique({ where: { email } });
+    const normalizedEmail = email.toLowerCase().trim();
+    const existing = await client.user.findUnique({ where: { email: normalizedEmail } });
 
     if (existing) {
-      // If old Clerk user with no password, let them claim the account
-      if (!existing.password) {
-        const updated = await client.user.update({
-          where: { email },
-          data: {
-            password: hashed,
-            firstname,
-            lastname,
-          },
-          select: { clerkId: true, firstname: true, lastname: true, email: true },
-        });
-
-        await setSession({
-          clerkId: updated.clerkId,
-          firstname: updated.firstname || "",
-          lastname: updated.lastname || "",
-          email: updated.email,
-        });
-
-        return NextResponse.json({ status: 200, firstname: updated.firstname, lastname: updated.lastname });
-      }
-
       return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 12);
     const clerkId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 
     const user = await client.user.create({
       data: {
         clerkId,
-        email,
+        email: normalizedEmail,
         firstname,
         lastname,
-        password: hashed,
+        password: hashedPassword,
         subscription: {
           create: {
             plan: "PRO",
@@ -78,6 +55,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ status: 201, firstname: user.firstname, lastname: user.lastname });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("💥 [Janus Auth API] Unexpected error during signup:", err);
+    return NextResponse.json({ error: "An unexpected signup error occurred" }, { status: 500 });
   }
 }

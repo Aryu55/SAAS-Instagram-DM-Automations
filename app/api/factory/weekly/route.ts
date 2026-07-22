@@ -4,9 +4,13 @@ import { analyzeWeeklyPerformance, pullInstagramMetrics } from "@/actions/factor
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
-  const FACTORY_SECRET = process.env.FACTORY_SECRET || "";
+  const cronSecret = process.env.CRON_SECRET;
+  const factorySecret = process.env.FACTORY_SECRET;
 
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && authHeader !== `Bearer ${FACTORY_SECRET}`) {
+  const isValidCron = cronSecret && authHeader === `Bearer ${cronSecret}`;
+  const isValidFactory = factorySecret && authHeader === `Bearer ${factorySecret}`;
+
+  if (!isValidCron && !isValidFactory) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
