@@ -1,8 +1,6 @@
 import { onboardUser } from "@/actions/user";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { client as prisma } from "@/lib/prisma";
 
 export default async function MasterDashboardPage() {
   console.log("[AUTH TRACE] MasterDashboardPage: checking auth...");
