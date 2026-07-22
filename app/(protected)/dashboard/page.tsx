@@ -1,118 +1,170 @@
 import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { client as prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Crown, Building2, Compass, ArrowRight } from "lucide-react";
+import { Crown, Compass, ArrowRight, ShieldAlert, LogIn } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function MasterDashboardPage() {
-  const session = await getSession();
+  let session = null;
+  try {
+    session = await getSession();
+  } catch (err) {
+    console.error("[AUTH TRACE] MasterDashboardPage getSession error:", err);
+  }
 
+  // If user is unauthenticated or session cookie is missing/expired
   if (!session || !session.id) {
-    console.log("[AUTH TRACE] MasterDashboardPage: No valid session cookie found. Redirecting to /sign-in");
-    return redirect("/sign-in");
+    return (
+      <div className="min-h-screen bg-[var(--page-bg)] text-[var(--text-primary)] flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-2xl border border-[var(--border-color)] bg-[var(--card-bg)] p-8 shadow-2xl text-center space-y-6">
+          <div className="w-14 h-14 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center mx-auto">
+            <Crown className="w-7 h-7 text-amber-400" />
+          </div>
+
+          <div className="space-y-2">
+            <h1
+              className="text-2xl font-bold text-[var(--text-primary)]"
+              style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+            >
+              Janus AI Command Center
+            </h1>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Please sign in to access your Master Organization workspace and multi-org management.
+            </p>
+          </div>
+
+          <div className="pt-2 space-y-3">
+            <Link
+              href="/sign-in"
+              className="w-full flex items-center justify-center gap-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl py-3 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-md"
+              style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In to Janus AI
+            </Link>
+
+            <Link
+              href="/dashboard/courses"
+              className="w-full flex items-center justify-center gap-x-2 bg-[var(--page-bg)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-xl py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-[var(--card-bg)] transition-all"
+            >
+              Enter Courses Workspace
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const clerkId = session.id;
   const email = session.emailAddresses?.[0]?.emailAddress || `${clerkId}@mindmaxing.com`;
 
-  // Find or create user record in DB
-  let dbUser = await prisma.user.findUnique({
-    where: { clerkId },
-  });
-
-  if (!dbUser) {
-    console.log("[AUTH TRACE] MasterDashboardPage: User record missing in DB. Auto-creating user:", clerkId);
-    dbUser = await prisma.user.create({
-      data: {
-        clerkId,
-        email,
-        firstname: session.firstName || "Creator",
-        lastname: session.lastName || "User",
-      },
+  // Find or create user record in DB safely
+  let dbUser = null;
+  try {
+    dbUser = await prisma.user.findUnique({
+      where: { clerkId },
     });
+
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          clerkId,
+          email,
+          firstname: session.firstName || "Creator",
+          lastname: session.lastName || "User",
+        },
+      });
+    }
+  } catch (dbErr) {
+    console.error("[AUTH TRACE] MasterDashboardPage DB user query error:", dbErr);
   }
 
   // Fetch all org memberships for this user
-  const rawMemberships = await prisma.orgMember.findMany({
-    where: { userId: dbUser.id },
-    include: {
-      org: {
+  let memberships: any[] = [];
+  if (dbUser?.id) {
+    try {
+      const rawMemberships = await prisma.orgMember.findMany({
+        where: { userId: dbUser.id },
         include: {
-          _count: {
-            select: {
-              jobs: true,
-              automations: true,
-              contacts: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  let memberships = rawMemberships.filter((m) => Boolean(m && m.org));
-
-  // If user has NO org memberships, auto-assign them to default orgs
-  if (memberships.length === 0) {
-    console.log("[AUTH TRACE] MasterDashboardPage: User has 0 memberships. Seeding default orgs...");
-    let allOrgs = await prisma.organization.findMany();
-
-    if (allOrgs.length === 0) {
-      const coursesOrg = await prisma.organization.create({
-        data: {
-          name: "Courses Business",
-          slug: "courses",
-          tagline: "Course creation & student lead capture",
-          description: "Automates DMs and student onboarding for digital courses.",
-        },
-      });
-      const hisaabOrg = await prisma.organization.create({
-        data: {
-          name: "Hisaab Finance",
-          slug: "hisaab",
-          tagline: "Automatic expense tracking for freelancers",
-          description: "Auto-imports bank statements and tracks tax write-offs.",
-        },
-      });
-      allOrgs = [coursesOrg, hisaabOrg];
-    }
-
-    for (const org of allOrgs) {
-      await prisma.orgMember.upsert({
-        where: {
-          userId_orgId: {
-            userId: dbUser.id,
-            orgId: org.id,
-          },
-        },
-        create: {
-          userId: dbUser.id,
-          orgId: org.id,
-          role: "OWNER",
-        },
-        update: {},
-      });
-    }
-
-    const refetched = await prisma.orgMember.findMany({
-      where: { userId: dbUser.id },
-      include: {
-        org: {
-          include: {
-            _count: {
-              select: {
-                jobs: true,
-                automations: true,
-                contacts: true,
+          org: {
+            include: {
+              _count: {
+                select: {
+                  jobs: true,
+                  automations: true,
+                  contacts: true,
+                },
               },
             },
           },
         },
-      },
-    });
-    memberships = refetched.filter((m) => Boolean(m && m.org));
+      });
+
+      memberships = rawMemberships.filter((m) => Boolean(m && m.org));
+
+      // If user has NO org memberships, auto-assign them to default orgs
+      if (memberships.length === 0) {
+        let allOrgs = await prisma.organization.findMany();
+
+        if (allOrgs.length === 0) {
+          const coursesOrg = await prisma.organization.create({
+            data: {
+              name: "Courses Business",
+              slug: "courses",
+              tagline: "Course creation & student lead capture",
+              description: "Automates DMs and student onboarding for digital courses.",
+            },
+          });
+          const hisaabOrg = await prisma.organization.create({
+            data: {
+              name: "Hisaab Finance",
+              slug: "hisaab",
+              tagline: "Automatic expense tracking for freelancers",
+              description: "Auto-imports bank statements and tracks tax write-offs.",
+            },
+          });
+          allOrgs = [coursesOrg, hisaabOrg];
+        }
+
+        for (const org of allOrgs) {
+          await prisma.orgMember.upsert({
+            where: {
+              userId_orgId: {
+                userId: dbUser.id,
+                orgId: org.id,
+              },
+            },
+            create: {
+              userId: dbUser.id,
+              orgId: org.id,
+              role: "OWNER",
+            },
+            update: {},
+          });
+        }
+
+        const refetched = await prisma.orgMember.findMany({
+          where: { userId: dbUser.id },
+          include: {
+            org: {
+              include: {
+                _count: {
+                  select: {
+                    jobs: true,
+                    automations: true,
+                    contacts: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+        memberships = refetched.filter((m) => Boolean(m && m.org));
+      }
+    } catch (orgErr) {
+      console.error("[AUTH TRACE] MasterDashboardPage DB org query error:", orgErr);
+    }
   }
 
   return (
@@ -192,8 +244,12 @@ export default async function MasterDashboardPage() {
                 {/* Footer Stats & Access Action */}
                 <div className="pt-4 mt-6 border-t border-[var(--border-color)] space-y-3">
                   <div className="flex justify-between items-center text-xs font-mono">
-                    <span className="text-[var(--text-tertiary)] text-[10px] font-bold uppercase">Automations: <strong>{org._count?.automations || 0}</strong></span>
-                    <span className="text-[var(--text-tertiary)] text-[10px] font-bold uppercase">Contacts: <strong>{org._count?.contacts || 0}</strong></span>
+                    <span className="text-[var(--text-tertiary)] text-[10px] font-bold uppercase">
+                      Automations: <strong>{org._count?.automations || 0}</strong>
+                    </span>
+                    <span className="text-[var(--text-tertiary)] text-[10px] font-bold uppercase">
+                      Contacts: <strong>{org._count?.contacts || 0}</strong>
+                    </span>
                   </div>
 
                   <div className="flex items-center justify-between text-xs font-bold text-[var(--accent-magenta)] group-hover:translate-x-0.5 transition-transform pt-1">
@@ -213,7 +269,10 @@ export default async function MasterDashboardPage() {
             <div className="w-12 h-12 rounded-2xl border border-[var(--border-color)] group-hover:border-[var(--accent-magenta)] flex items-center justify-center mb-3 transition-colors bg-[var(--card-bg)] shadow-sm">
               <Compass className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-[var(--accent-magenta)] transition-colors" />
             </div>
-            <span className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-magenta)] transition-colors" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+            <span
+              className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-magenta)] transition-colors"
+              style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+            >
               Join or Request New Org
             </span>
             <p className="text-[11px] text-[var(--text-secondary)] mt-1 max-w-[25ch]">
