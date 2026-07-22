@@ -182,10 +182,12 @@ export const getDashboardOverview = async () => {
     let memberships = rawMemberships.filter((m) => Boolean(m && m.org));
 
     if (memberships.length === 0) {
-      let allOrgs = await prisma.organization.findMany();
+      let defaultOrg = await prisma.organization.findFirst({
+        where: { slug: "courses" },
+      });
 
-      if (allOrgs.length === 0) {
-        const coursesOrg = await prisma.organization.create({
+      if (!defaultOrg) {
+        defaultOrg = await prisma.organization.create({
           data: {
             name: "Courses Business",
             slug: "courses",
@@ -193,33 +195,22 @@ export const getDashboardOverview = async () => {
             description: "Automates DMs and student onboarding for digital courses.",
           },
         });
-        const hisaabOrg = await prisma.organization.create({
-          data: {
-            name: "Hisaab Finance",
-            slug: "hisaab",
-            tagline: "Automatic expense tracking for freelancers",
-            description: "Auto-imports bank statements and tracks tax write-offs.",
-          },
-        });
-        allOrgs = [coursesOrg, hisaabOrg];
       }
 
-      for (const org of allOrgs) {
-        await prisma.orgMember.upsert({
-          where: {
-            userId_orgId: {
-              userId: dbUser.id,
-              orgId: org.id,
-            },
-          },
-          create: {
+      await prisma.orgMember.upsert({
+        where: {
+          userId_orgId: {
             userId: dbUser.id,
-            orgId: org.id,
-            role: "OWNER",
+            orgId: defaultOrg.id,
           },
-          update: {},
-        });
-      }
+        },
+        create: {
+          userId: dbUser.id,
+          orgId: defaultOrg.id,
+          role: "MEMBER",
+        },
+        update: {},
+      });
 
       const refetched = await prisma.orgMember.findMany({
         where: { userId: dbUser.id },
