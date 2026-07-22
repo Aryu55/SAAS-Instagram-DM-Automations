@@ -8,10 +8,10 @@ import React from "react";
 import ClerkAuthState from "../clerk-auth-state";
 import Items from "./items";
 
-
 import Link from "next/link";
-import { Crown, ArrowLeftRight } from "lucide-react";
+import { Crown, ArrowLeftRight, Sparkles } from "lucide-react";
 import { ThemeToggle } from "../theme-toggle";
+import OrgSwitcher from "../org-switcher";
 
 type Props = {
   slug: string;
@@ -21,53 +21,63 @@ function Sidebar({ slug }: Props) {
   const { page } = usePath();
 
   return (
-    <div className="w-[250px] border-r border-[var(--border-color)] fixed left-0 lg:inline-block bg-[var(--card-bg)] hidden bottom-0 top-0">
+    <div className="w-[250px] border-r border-[var(--border-color)] fixed left-0 lg:inline-block bg-[var(--card-bg)] hidden bottom-0 top-0 z-40">
       <div className="flex flex-col h-full">
         {/* Fixed Header */}
-        <div className="p-6 pb-2 space-y-3">
-          <div className="flex gap-x-2 items-center justify-start px-2">
+        <div className="p-5 pb-3 space-y-3 border-b border-[var(--border-color)]/60">
+          <div className="flex items-center justify-between px-1">
             <LogoSmall />
+            <div className="flex items-center gap-1 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
+              <Sparkles className="w-3 h-3 text-purple-400" />
+              <span className="text-[9px] font-mono font-bold text-purple-300 uppercase">v2.0</span>
+            </div>
           </div>
 
-          {/* Master Org Navigation Card */}
+          {/* Org Switcher in Sidebar Header */}
+          <div className="pt-1">
+            <OrgSwitcher currentSlug={slug} />
+          </div>
+
+          {/* Master Org Platform Control Tower Button */}
           <a
             href="/dashboard"
-            className="flex items-center justify-between p-2.5 rounded-xl border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-indigo-950/20 to-black text-amber-300 hover:border-purple-500/40 transition-all shadow-sm group"
+            className="flex items-center justify-between p-2.5 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-purple-950/40 to-black text-amber-300 hover:border-amber-500/60 transition-all shadow-md group"
+            title="Return to Master Platform Overview"
           >
             <div className="flex items-center gap-2">
-              <Crown className="w-4 h-4 text-amber-400 shrink-0" />
+              <Crown className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
               <div className="flex flex-col">
                 <span className="text-[11px] font-bold leading-none font-mono">Master Org</span>
-                <span className="text-[9px] text-purple-300/80 font-mono">Switch Workspace</span>
+                <span className="text-[9px] text-amber-200/70 font-mono">Control Tower</span>
               </div>
             </div>
-            <ArrowLeftRight className="w-3.5 h-3.5 text-purple-400 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
           </a>
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-2">
-          <div className="flex flex-col gap-y-1.5">
+        {/* Scrollable Navigation Items */}
+        <div className="flex-1 overflow-y-auto px-4 py-3">
+          <div className="flex flex-col gap-y-1">
             <Items page={page} slug={slug} />
           </div>
         </div>
 
-        {/* Fixed Footer */}
-        <div className="p-6 pt-4 mt-auto">
-          <div className="flex flex-col gap-y-5">
-            <Separator orientation="horizontal" className="bg-[var(--border-color)]" />
-            <div className="flex items-center justify-between px-1">
-              <ClerkAuthState />
+        {/* Fixed Footer with Theme Toggle */}
+        <div className="p-4 pt-3 mt-auto border-t border-[var(--border-color)] bg-[var(--page-bg)]/40">
+          <div className="flex flex-col gap-y-3">
+            <div className="flex items-center justify-between px-2">
+              <span className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase font-bold tracking-wider">Appearance</span>
               <ThemeToggle />
             </div>
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new Event("open-janus-onboarding"))}
-              className="flex items-center gap-x-3 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] cursor-pointer transition-colors duration-200 w-full text-left px-1"
-            >
-              <HelpDuoToneWhite />
-              <span>Help & Tour</span>
-            </button>
+
+            <Separator orientation="horizontal" className="bg-[var(--border-color)]" />
+
+            <div className="flex items-center justify-between px-1">
+              <ClerkAuthState />
+              <div className="flex gap-x-2 text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] cursor-pointer transition-colors duration-150 text-xs font-semibold">
+                <HelpDuoToneWhite />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -76,4 +86,3 @@ function Sidebar({ slug }: Props) {
 }
 
 export default Sidebar;
-
