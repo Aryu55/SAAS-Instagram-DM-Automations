@@ -1,5 +1,6 @@
 import NavBar from "@/components/global/navbar";
 import Sidebar from "@/components/global/sidebar";
+import { OnboardingTour } from "@/components/global/onboarding-tour";
 import { Metadata } from "next";
 import React from "react";
 
@@ -25,6 +26,7 @@ async function Layout({ children, params }: Props) {
           {children}
         </main>
       </div>
+      <OnboardingTour />
     </div>
   );
 }

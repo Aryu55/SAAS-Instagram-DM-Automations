@@ -39,10 +39,14 @@ function Sidebar({ slug }: Props) {
             <Separator orientation="horizontal" className="bg-[var(--border-color)]" />
             <div className="flex flex-col gap-y-4 px-1">
               <ClerkAuthState />
-              <div className="flex items-center gap-x-3 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] cursor-pointer transition-colors duration-200">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("open-janus-onboarding"))}
+                className="flex items-center gap-x-3 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] cursor-pointer transition-colors duration-200 w-full text-left"
+              >
                 <HelpDuoToneWhite />
-                <span>Help</span>
-              </div>
+                <span>Help & Tour</span>
+              </button>
             </div>
           </div>
         </div>
