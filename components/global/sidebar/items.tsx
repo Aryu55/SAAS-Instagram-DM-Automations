@@ -51,19 +51,19 @@ function Items({ page, slug: propSlug }: Props) {
           <Link
             href={item.label === "home" ? `/dashboard/${slug}` : `/dashboard/${slug}/${item.label}`}
             className={cn(
-              "capitalize flex items-center gap-x-3 rounded-lg px-4 py-3 text-sm font-medium transition-smooth",
+              "group capitalize flex items-center gap-x-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-150",
               isActive
-                ? "bg-[var(--accent-magenta)]/10 text-[var(--text-primary)] shadow-sm border border-[var(--accent-magenta)]/20"
-                : "text-[var(--text-secondary)] hover:text-[var(--accent-magenta)] hover:bg-[var(--card-bg)]/50"
+                ? "bg-violet-500/10 text-violet-900 dark:text-violet-100 font-semibold border border-violet-500/25 shadow-sm"
+                : "text-slate-600 dark:text-zinc-400 hover:text-violet-700 dark:hover:text-violet-300 hover:bg-slate-100/80 dark:hover:bg-zinc-800/60"
             )}
           >
             <span className={cn(
-              "transition-colors duration-200",
-              isActive ? "text-[var(--accent-magenta)]" : "text-[var(--text-secondary)] group-hover:text-[var(--accent-magenta)]"
+              "transition-colors duration-150 shrink-0",
+              isActive ? "text-violet-600 dark:text-violet-400" : "text-slate-400 dark:text-zinc-500 group-hover:text-violet-600 dark:group-hover:text-violet-400"
             )}>
               {item.icon}
             </span>
-            <span className="font-semibold">{item.label}</span>
+            <span className="text-xs font-semibold tracking-tight">{item.label}</span>
           </Link>
         </TooltipTrigger>
         <TooltipContent side="right" className="bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-lg shadow-xl px-3 py-1.5">
