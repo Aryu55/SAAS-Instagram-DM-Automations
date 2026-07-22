@@ -6,10 +6,10 @@ import {
 import { onUserInfo } from "@/actions/user";
 import { useQuery } from "@tanstack/react-query";
 
-export const useQueryAutomation = () => {
+export const useQueryAutomation = (slug?: string) => {
   return useQuery({
-    queryKey: ["user-automation"],
-    queryFn: getAllAutomation,
+    queryKey: ["user-automation", slug],
+    queryFn: () => getAllAutomation(slug),
   });
 };
 

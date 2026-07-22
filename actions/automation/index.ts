@@ -15,12 +15,12 @@ import {
   createContentEngineAutomationQuery,
 } from "./queries";
 
-export const createAutomations = async (id?: string, template?: string) => {
+export const createAutomations = async (id?: string, template?: string, slug?: string) => {
   const user = await onCurrentUser();
   console.log("[AUTOMATION ACTIONS] createAutomations called for userId:", user.id, "with template:", template || "none");
 
   try {
-    const create = await createAutomation(user.id, id, template);
+    const create = await createAutomation(user.id, id, template, slug);
     console.log("[AUTOMATION ACTIONS] createAutomation query resolved:", create ? "success" : "failure");
 
     if (create) return { status: 200, data: "Automation created" };
@@ -31,12 +31,12 @@ export const createAutomations = async (id?: string, template?: string) => {
   }
 };
 
-export const getAllAutomation = async () => {
+export const getAllAutomation = async (slug?: string) => {
   const user = await onCurrentUser();
-  console.log("[AUTOMATION ACTIONS] getAllAutomation called for userId:", user.id);
+  console.log("[AUTOMATION ACTIONS] getAllAutomation called for userId:", user.id, "slug:", slug);
 
   try {
-    const getAll = await getAutomation(user.id);
+    const getAll = await getAutomation(user.id, slug);
     console.log("[AUTOMATION ACTIONS] getAutomation resolved. Total automations count:", getAll?.automations?.length || 0);
 
     if (getAll) return { status: 200, data: getAll.automations || [] };

@@ -2,7 +2,7 @@
 
 import { client } from "@/lib/prisma";
 
-export const createAutomation = async (clerkId: string, id?: string, template?: string) => {
+export const createAutomation = async (clerkId: string, id?: string, template?: string, slug?: string) => {
   let automationData: any = {};
 
   if (template === "say-hi") {
@@ -131,6 +131,16 @@ export const createAutomation = async (clerkId: string, id?: string, template?: 
     automationData.id = id;
   }
 
+  if (slug) {
+    const org = await client.organization.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+    if (org) {
+      automationData.orgId = org.id;
+    }
+  }
+
   return await client.user.update({
     where: {
       clerkId,
@@ -143,23 +153,38 @@ export const createAutomation = async (clerkId: string, id?: string, template?: 
   });
 };
 
-export const getAutomation = async (clerkId: string) => {
-  return await client.user.findUnique({
+export const getAutomation = async (clerkId: string, slug?: string) => {
+  const dbUser = await client.user.findUnique({
+    where: { clerkId },
+    select: { id: true },
+  });
+
+  if (!dbUser) return null;
+
+  let orgId: string | undefined = undefined;
+  if (slug) {
+    const org = await client.organization.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+    if (org) orgId = org.id;
+  }
+
+  const automations = await client.automation.findMany({
     where: {
-      clerkId,
+      userId: dbUser.id,
+      ...(orgId ? { orgId } : {}),
     },
-    select: {
-      automations: {
-        orderBy: {
-          createdAt: "asc",
-        },
-        include: {
-          keywords: true,
-          listener: true,
-        },
-      },
+    orderBy: {
+      createdAt: "asc",
+    },
+    include: {
+      keywords: true,
+      listener: true,
     },
   });
+
+  return { automations };
 };
 
 export const findAutomation = async (id: string) => {

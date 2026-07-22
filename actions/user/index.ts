@@ -39,10 +39,9 @@ export const onboardUser = async () => {
         integrationsCount: found.integrations.length
       });
 
-      if (found.integrations.length > 0) {
+      if (found.integrations.length > 0 && found.integrations[0].expiresAt) {
         const today = new Date();
-        const time_left =
-          found.integrations[0].expiresAt?.getTime()! - today.getTime();
+        const time_left = found.integrations[0].expiresAt.getTime() - today.getTime();
 
         const days = Math.round(time_left / (1000 * 3600 * 24));
         console.log("[AUTH TRACE] onboardUser: integration token expiresAt:", found.integrations[0].expiresAt, "days remaining:", days);

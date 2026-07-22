@@ -41,7 +41,8 @@ export async function setSession(user: {
   const sessionStr = Buffer.from(JSON.stringify(sessionData)).toString("base64");
 
   cookieStore.set("user_session", sessionStr, {
-    httpOnly: false,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30, // 30 days

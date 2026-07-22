@@ -31,8 +31,8 @@ function Page({ params: { slug } }: Props) {
   const [timeRange, setTimeRange] = useState<"24h" | "7d" | "30d">("7d");
 
   const { data: contactsData } = useQuery({
-    queryKey: ["contacts-list"],
-    queryFn: () => getContacts(),
+    queryKey: ["contacts-list", slug],
+    queryFn: () => getContacts(slug),
   });
 
   const contacts = contactsData?.status === 200 ? (contactsData.data as any[]) : [];
