@@ -114,6 +114,7 @@ model Organization {
   winningPatterns String?
   isPublic        Boolean  @default(true)
   joinCode        String?
+  createdAt       DateTime @default(now())
 
   // Relationships
   members         OrgMember[]
