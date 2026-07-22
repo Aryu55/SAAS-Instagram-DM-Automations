@@ -79,19 +79,30 @@ function Page({ params: { slug } }: Props) {
   return (
     <div className="flex flex-col gap-y-10 pb-12 pr-2 lg:pr-6">
       {/* Welcome & Overview Header */}
-      <div className="flex flex-col gap-y-2 mt-4 animate-fade-in-up">
-        <span className="inline-flex items-center gap-x-1.5 px-3 py-1 bg-[var(--accent-whisper)] border border-[var(--accent-veil)] text-[var(--accent-magenta)] text-[9px] font-bold tracking-wider uppercase rounded-full w-fit" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
-          System Core
-        </span>
-        <div className="flex items-center gap-x-2">
-          <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] leading-none tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
-            Dashboard Overview
-          </h1>
-          <ContextHelpTooltip content="Central control tower displaying metrics, automations overview, and live activity." />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-y-4 mt-4 animate-fade-in-up border-b border-[var(--border-color)] pb-6">
+        <div className="flex flex-col gap-y-2">
+          <span className="inline-flex items-center gap-x-1.5 px-3 py-1 bg-[var(--accent-whisper)] border border-[var(--accent-veil)] text-[var(--accent-magenta)] text-[9px] font-bold tracking-wider uppercase rounded-full w-fit" style={{ fontFamily: "var(--font-space-grotesk), monospace" }}>
+            System Core
+          </span>
+          <div className="flex items-center gap-x-2">
+            <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] leading-none tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+              Dashboard Overview
+            </h1>
+            <ContextHelpTooltip content="Central control tower displaying metrics, automations overview, and live activity." />
+          </div>
+          <p className="text-[var(--text-secondary)] text-sm max-w-[65ch] leading-relaxed">
+            Monitor your Instagram DM automations, track AI engagement, and connect integrations.
+          </p>
         </div>
-        <p className="text-[var(--text-secondary)] text-sm max-w-[65ch] leading-relaxed">
-          Monitor your Instagram DM automations, track AI engagement, and connect integrations.
-        </p>
+
+        <button
+          onClick={() => window.dispatchEvent(new Event("open-janus-onboarding"))}
+          className="flex items-center gap-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-smooth shadow-md shrink-0 w-fit"
+          style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+        >
+          <Sparkles className="w-4 h-4 text-purple-200" />
+          Take Interactive Tour
+        </button>
       </div>
 
       {/* Quick Action Navigation Cards — Asymmetric Bento Layout */}

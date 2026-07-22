@@ -69,17 +69,21 @@ export function OnboardingTour() {
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    // Check if user has already completed/skipped the tour
-    const completed = localStorage.getItem("janus_onboarding_completed");
-    if (!completed) {
-      // Small delay for smooth entry
-      const timer = setTimeout(() => setIsOpen(true), 800);
-      return () => clearTimeout(timer);
+    // Check if URL contains ?tour=true or if first time user
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceTour = urlParams.get("tour") === "true";
+      const completed = localStorage.getItem("janus_onboarding_completed");
+
+      if (forceTour || !completed) {
+        const timer = setTimeout(() => setIsOpen(true), 300);
+        return () => clearTimeout(timer);
+      }
     }
   }, []);
 
   useEffect(() => {
-    // Global event listener to manual trigger onboarding anytime (e.g. Help button)
+    // Global event listener to manual trigger onboarding anytime (e.g. Help button or Start Tour button)
     const handleReopen = () => {
       setCurrentStep(0);
       setIsOpen(true);
@@ -89,7 +93,9 @@ export function OnboardingTour() {
   }, []);
 
   const handleDismiss = () => {
-    localStorage.setItem("janus_onboarding_completed", "true");
+    if (typeof window !== "undefined") {
+      localStorage.setItem("janus_onboarding_completed", "true");
+    }
     setIsOpen(false);
   };
 
