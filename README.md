@@ -76,6 +76,15 @@ Slide utilizes **Prisma** to model relations on a PostgreSQL database hosted via
 - **Post**: Represents the list of specific user reels or images associated with the automation.
 - **Contact**: Stores lead details (Instagram ID, Username) captured automatically when a follower interacts with any active automation.
 
+- **Organization & Multi-Tenancy**:
+  - `Organization`: Workspace entity with custom `slug`, posts per day target, brand tagline, and content settings.
+  - `OrgMember`: Maps users to organizations with `OWNER`, `ADMIN`, or `MEMBER` roles.
+  - `OrgJoinRequest` & `OrgInvite`: Manages Discord-style public access requests and email invitations.
+- **Content Factory Engine**:
+  - `ContentIdea`: Stores LLM-generated topic ideas, content pillars, and usage status.
+  - `ContentJob`: Tracks video production status (`IDEA` → `SCRIPTED` → `RENDERING` → `REVIEW` → `PUBLISHED`).
+  - `DocumentaryLog`: Event ledger capturing onboarding milestones, renders, publishes, and weekly metrics analysis.
+
 ---
 
 ## 3. Folder Structure & Core Modules
@@ -85,28 +94,38 @@ The codebase is organized as follows:
 ```
 ├── actions/                  # Server Actions for Database Mutations
 │   ├── automation/          # Creating, updating, and triggering automations
-│   ├── integrations/        # Connecting & removing Instagram OAuth tokens
-│   └── user/                # Fetching user profile information & Stripe portal sessions
+│   ├── contacts/            # Scoped contact querying and lead exports
+│   ├── factory/             # Content pipeline controllers & documentary log generators
+│   ├── integration/         # Connecting & removing Instagram OAuth tokens
+│   ├── team/                # Organization management, discovery, and join requests
+│   └── user/                # Profile management, sessions, and dashboard overview
 ├── app/                      # Next.js App Router (14.2.7)
-│   ├── (auth)/              # Clerk Authentication Layouts
+│   ├── (auth)/              # Authentication Layouts (Sign In / Sign Up)
 │   ├── (protected)/         # Dashboard routes guarded by middleware auth check
 │   │   └── dashboard/
 │   │       └── [slug]/
+│   │           ├── activity/        # Real-time event activity feed
 │   │           ├── analytics/       # Performance charts and AI strategic blueprints
-│   │           ├── automation/      # Specific step-builder checklists
-│   │           ├── contacts/        # Collected leads and CSV export engine
-│   │           ├── content-engine/  # 4-Agent content scraper & writer console
+│   │           ├── automation/      # Specific step-builder checklists & live previews
+│   │           ├── contacts/        # Collected leads directory
+│   │           ├── content-engine/  # 7-Tab Content Factory & review queue
+│   │           ├── discover/        # Public organization discovery & join requests
+│   │           ├── inbox/           # Unified DM inbox interface
 │   │           ├── integrations/    # API integrations dashboard
-│   │           ├── settings/        # Clerk settings and billing status page
+│   │           ├── intelligence/    # Structural viral post analyzer (/analyzer)
+│   │           ├── research/        # Content research & competitor tracking
+│   │           ├── settings/        # Organization settings & member management
+│   │           ├── skills/          # AI Skills library with specimen caching
+│   │           ├── studio/          # Video studio & pipeline editor
 │   │           └── virality/        # Voice analyzer & script score checker
-│   ├── api/                 # API Routes (Webhooks, predictions, content pipeline)
+│   ├── api/                 # API Routes (Webhooks, predictions, content pipeline, factory crons)
 │   ├── callback/            # OAuth Callback redirect targets
 │   └── layout.tsx           # Main application wrapper with providers
 ├── components/               # Reusable React components
-│   ├── global/              # Navigation, sidebars, alerts, buttons, dialogs
+│   ├── global/              # Navigation, sidebars, theme toggles, search, alerts
 │   └── ui/                  # Raw Shadcn components
-├── hooks/                    # Reusable React hooks (automations, navigation)
-├── lib/                      # Base configurations (prisma, stripe, AI helper functions)
+├── hooks/                    # Reusable React hooks (automations, queries, navigation)
+├── lib/                      # Base configurations (auth HMAC signing, prisma, stripe, AI helper functions)
 ├── providers/                # Client state, Theme (Next-Themes) & Query Client wrappers
 ├── prisma/                   # Schema specification & DB Migration files
 └── tailwind.config.ts        # Tailwind Design System customization file
@@ -119,9 +138,9 @@ The codebase is organized as follows:
 ### OAuth 2.0 Integration
 
 1. The user navigates to `/dashboard/[slug]/integrations` and triggers the Instagram connection.
-2. Slide redirects the user to the Instagram Embedded OAuth screen.
+2. Janus redirects the user to the Instagram Embedded OAuth screen.
 3. Upon approval, Instagram redirects to `/callback/instagram` with an access code.
-4. The Slide backend exchanges this code for a **Long-Lived Access Token** using `INSTAGRAM_TOKEN_URL`.
+4. The Janus backend exchanges this code for a **Long-Lived Access Token** using `INSTAGRAM_TOKEN_URL`.
 5. The token is encrypted and stored in the database's `Integrations` model associated with the user's account.
 
 ### Inbound Webhook Processing Loop
@@ -132,23 +151,23 @@ When a follower comments on a post or DMs the connected profile:
 3. **Keyword Matching Logic**:
    - Evaluates direct string equivalency (case-insensitive).
    - If a match is found, the listener type is parsed:
-     - **Static Message (`MESSAGE`)**: Slide fires a payload containing the template reply to the follower via the Instagram Send API.
-     - **Smart AI (`SMARTAI`)**: Slide builds a context window utilizing the user's defined system prompts (configured inside the automation details card). Slide calls OpenAI's GPT models to draft a responsive Hindlish/English answer tailored to the question, then dispatches the text response.
+     - **Static Message (`MESSAGE`)**: Janus fires a payload containing the template reply to the follower via the Instagram Send API.
+     - **Smart AI (`SMARTAI`)**: Janus builds a context window utilizing the user's defined system prompts (configured inside the automation details card). Janus calls OpenAI's GPT models to draft a responsive Hinglish/English answer tailored to the question, then dispatches the text response.
 4. The system logs the contact details under `Contact` to ensure the lead is saved in the dashboard directory.
 
 ### Meta API Limits & Broadcast Compliance (Inviting Followers)
 
 Unlike WhatsApp, Meta's Instagram Platform Policy enforces strict restrictions on message initiation:
-- **No Unsolicited DMs**: slide cannot initiate a cold DM to a follower who has not messaged the business profile first.
+- **No Unsolicited DMs**: Janus cannot initiate a cold DM to a follower who has not messaged the business profile first.
 - **24-Hour Message Window**: Standard API messages can only be sent within 24 hours of the follower's last interaction (DM, story mention, or comment).
-- **Organic Keyword Broadcast Pattern**: To broadcast an invitation to all followers (e.g., inviting them to an event), creators should publish a Post/Reel asking followers to comment a specific keyword (e.g., `"INVITE"`). The user's comment triggers the webhook loop, allowing slide to send a compliant automated DM response containing the link.
+- **Organic Keyword Broadcast Pattern**: To broadcast an invitation to all followers (e.g., inviting them to an event), creators should publish a Post/Reel asking followers to comment a specific keyword (e.g., `"INVITE"`). The user's comment triggers the webhook loop, allowing Janus to send a compliant automated DM response containing the link.
 
 ### AI Content Pipeline (4-Agent System)
 
 Accessible via `/dashboard/[slug]/content-engine`, the engine coordinates four separate LLM sub-routines (agents) processing information sequentially:
 1. **Agent 01 (Scraper)**: Extracts trends, hashtags, competitor references, and raw captions.
 2. **Agent 02 (Validator)**: Computes a relevance check, filtering out noise and grouping validation indicators into thematic semantic clusters.
-3. **Agent 03 (Writer)**: Drafts voice scripts tailored to defined Hindlish ratios, sentence lengths, and energy profiles.
+3. **Agent 03 (Writer)**: Drafts voice scripts tailored to defined Hinglish ratios, sentence lengths, and energy profiles.
 4. **Agent 04 (Hooks)**: Designs 5 retention-optimized hooks, assigning confidence scores based on engagement metrics.
 
 ### Stripe Checkout & Billing Lifecycle
@@ -161,7 +180,7 @@ Accessible via `/dashboard/[slug]/content-engine`, the engine coordinates four s
 
 ## 5. Theme Architecture (Neo-Glassmorphic Tech Sanctuary)
 
-Slide implements a responsive, highly premium **Neo-Glassmorphic Tech Sanctuary** theme system configured inside `globals.css`:
+Janus implements a responsive, highly premium **Neo-Glassmorphic Tech Sanctuary** theme system configured inside `globals.css`:
 
 ```css
 :root {
@@ -238,6 +257,17 @@ To implement a complete, autonomous, multi-business Content Factory:
   - *Settings*: Automated brand configuration details, language/voice presets, toggle controls, and asset checklists.
 - **Server Actions & Database Controllers**: Built dedicated server actions for scraping integrations (`scraper.ts`), metrics aggregation (`metrics.ts`), timeline export (`documentary.ts`), and pipeline triggers.
 - **Vercel Cron & Webhooks**: Configured automated daily creation pipeline cron (`/api/factory/cron`) and weekly feedback analysis cron (`/api/factory/weekly`).
+
+### [Revision 04] — Premium UX & Intelligence Suite Expansion
+- **Premium UX / Skeleton Loading**: Implemented true skeleton loading states to replace generic spinners across the dashboard, reducing perceived wait times and stopping layout shifts.
+- **Interactive Live Previews**: Added a real-time `iPhone Mockup` component inside the automation builder (`ThenActions`), allowing users to live-preview their DM responses exactly as they will appear on Instagram while typing.
+- **Advanced Skills Engine & AI Auto-Categorization**: 
+  - Added a **Bulk AI Import** feature that allows users to paste raw text of skills and uses Gemini 2.0 to auto-categorize them (e.g., `EDITING_STYLE`, `CAPTION_STYLE`, `BROLL_GENERATION`, `VOICE`).
+  - Added **Style Reference Links**: Users can attach `/watch` video links specifically for editing style skills.
+  - **Dynamic Specimen Caching**: The system permanently generates and caches visual UI specimens (e.g., dynamic subtitles, fake waveforms) in the DB for non-editing skills to save LLM tokens.
+- **Viral Analyzer Intelligence Feature (`/analyze`)**: 
+  - Expanded `ScrapedPost` schema to support structural deep dives.
+  - Built a batch-analysis dashboard where users can paste video links to automatically extract transcripts and have the LLM reverse-engineer the exact **Hook**, **Format**, and **Storytelling Structure** that made the video go viral.
 
 ### [Revision 05] — Multi-Tenancy Architecture, Security Hardening & Master Org Suite
 - **Multi-Tenancy Query Isolation**:
