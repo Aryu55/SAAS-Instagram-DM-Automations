@@ -1,10 +1,68 @@
-# Slide: Instagram Automation SaaS — Technical Reference Manual
+# Janus AI — Autonomous Instagram Content & DM Lead Engine
 
-Welcome to the official technical manual and system documentation for **Slide**, a premium, production-ready Instagram DM and comment automation SaaS platform designed to enable creators, marketers, and businesses to scale their organic engagement, capture leads, and automate conversational sales.
+Welcome to the official technical manual and system documentation for **Janus AI**, an enterprise-grade, autonomous Instagram content intelligence, DM automation, and organic lead capture SaaS platform designed for software founders, creators, app developers, and marketing teams.
 
 ---
 
-## :notebook_with_decorative_cover: Table of Contents
+## 🏛️ Why "Janus AI"?
+
+Named after **Janus**, the ancient Roman god of dual doorways, transitions, and time — portrayed with two faces looking in opposite directions:
+
+- **Face 1 (Retrospective / Data Analyst)**: Looks backward at historical performance metrics, competitor reels, viral video structures, and engagement signals to discover winning hooks, formats, and high-retention storytelling patterns.
+- **Face 2 (Forward-Facing / Content Creator & Automator)**: Looks forward to generate 4-agent video scripts, automate short-form content pipelines, and capture inbound lead DMs 24/7 on Instagram without manual effort.
+
+Janus AI bridges the gap between **organic content creation** and **direct-response conversion**, turning Instagram feeds into automated sales pipelines for software applications and digital products.
+
+---
+
+## 🎯 Platform Capabilities: What Janus AI CAN & CANNOT Do for Software/App Marketing
+
+### ✅ What Janus AI CAN Do
+
+1. **Automate Organic Lead Capture (Comment-to-DM Engine)**
+   - Automatically detect comments on your posts/reels containing trigger keywords (e.g. `"BUILD"`, `"DEMO"`, `"LINK"`, `"CODE"`).
+   - Instantly deliver personalized Direct Messages containing download links, documentation, or discount codes.
+   - Deploy `SMARTAI` listeners powered by GPT-4o to answer user questions contextually in natural Hinglish or English before sending the call-to-action link.
+   - Automatically log lead profile details (Instagram Username, User ID, Timestamp) into a searchable directory (`/contacts`) with CSV export for CRM sync.
+
+2. **Run Autonomous 4-Agent Content Pipelines (`/content-engine`)**
+   - **Agent 01 (Scraper)**: Mimes competitor reels, trending short-form content, and viral transcripts in software, SaaS, or productivity niches.
+   - **Agent 02 (Validator)**: Applies rule-based and engagement heuristics to filter out low-performing noise and group viral signals into semantic topic clusters.
+   - **Agent 03 (Writer)**: Drafts short-form video screenplays tailored to customizable creator voice profiles (Hinglish/English vocabulary mix, sentence length economy, high-energy tone).
+   - **Agent 04 (Hook Generator)**: Generates 5 scroll-stopping hooks with predicted virality confidence ratings.
+
+3. **Reverse-Engineer Viral Video Formats (`/analyzer`)**
+   - Paste any Instagram Reel or YouTube Short link to automatically extract spoken transcripts and reverse-engineer the exact **Hook**, **Body Structure**, and **CTA Trigger** that drove its viral reach.
+
+4. **Multi-Tenant Master Organization Management (`/discover`, `/settings`)**
+   - Support multiple brand workspaces (e.g. `Course Business`, `Dev Tool SaaS`, `Growth Agency`) under one account.
+   - Manage Discord-style public organization discovery (`/discover`) allowing team members to submit join requests and assign role-based access control (`OWNER`, `ADMIN`, `MEMBER`).
+
+5. **Hardened Production Security**
+   - Cryptographically signed HMAC-SHA256 session cookies (`lib/auth.ts`) preventing session forgery.
+   - `bcrypt` password hashing (12 salt rounds) with automatic legacy SHA-256 hash upgrade.
+   - Strict organization-level database query scoping (`orgId` filtering) preventing cross-tenant data leakage.
+
+---
+
+### ❌ What Janus AI CANNOT Do (Meta Restrictions & Boundaries)
+
+1. **CANNOT Send Cold or Unsolicited Direct Messages**
+   - Meta's Instagram Platform Policy strictly prohibits initiating DMs to followers who have not messaged or commented on your profile first.
+   - **Compliant Growth Strategy**: Software creators publish organic reels asking viewers to comment a specific keyword (e.g. *"Comment 'APP' for early access"*), triggering Janus AI's compliant webhook response.
+
+2. **CANNOT Message Past Meta's 24-Hour Window**
+   - Meta restricts automated API responses to within 24 hours of a follower's last comment or DM. Janus AI cannot send arbitrary re-engagement broadcasts weeks later unless the user interacts again.
+
+3. **CANNOT Auto-Publish Videos Without Direct Meta App Review**
+   - Automated video posting directly to an Instagram feed requires approved Meta Content Publishing API permissions. Janus AI builds video assets, renders scripts/audio, and queues them in a Review Queue (`/content-engine`) with interactive 9:16 mockups for one-click creator approval.
+
+4. **CANNOT Replace Full CRM or Email Automation**
+   - Janus AI is optimized for top-of-funnel organic engagement, viral short-form scripting, and initial Instagram lead capture. It is not an email newsletter provider (like ConvertKit) or a complex CRM (like HubSpot), though leads export cleanly via CSV.
+
+---
+
+## 📋 Table of Contents
 
 1. [System Overview & Architecture](#1-system-overview--architecture)
 2. [Data Model & Schema Deep-Dive](#2-data-model--schema-deep-dive)
@@ -22,7 +80,7 @@ Welcome to the official technical manual and system documentation for **Slide**,
 
 ## 1. System Overview & Architecture
 
-Slide bridges user traffic on Instagram with automated backends through secure API integrations. Below is the high-level operational flowchart showing how events are routed through the system:
+Janus AI bridges user traffic on Instagram with automated backends through secure API integrations. Below is the high-level operational flowchart showing how events are routed through the system:
 
 ```mermaid
 flowchart TD
@@ -30,7 +88,7 @@ flowchart TD
         A[Follower leaves comment or sends DM] -->|Webhook Event| B[Facebook/Instagram Graph API]
     end
 
-    subgraph Slide Backend (Next.js Edge Runtime)
+    subgraph Janus AI Backend (Next.js Edge Runtime)
         B -->|POST request| C[app/api/webhook/instagram/route.ts]
         C --> D{Verify Webhook Signature}
         D -->|Valid| E[Extract Message/Comment & Sender ID]
@@ -59,7 +117,7 @@ flowchart TD
 
 ## 2. Data Model & Schema Deep-Dive
 
-Slide utilizes **Prisma** to model relations on a PostgreSQL database hosted via **Neon serverless**. Below is the entity relationship detail:
+Janus AI utilizes **Prisma** to model relations on a PostgreSQL database hosted via **Neon serverless**. Below is the entity relationship detail:
 
 ### Schema Overview
 
