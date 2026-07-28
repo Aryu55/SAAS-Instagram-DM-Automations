@@ -327,19 +327,18 @@ To implement a complete, autonomous, multi-business Content Factory:
   - Expanded `ScrapedPost` schema to support structural deep dives.
   - Built a batch-analysis dashboard where users can paste video links to automatically extract transcripts and have the LLM reverse-engineer the exact **Hook**, **Format**, and **Storytelling Structure** that made the video go viral.
 
-### [Revision 05] — Multi-Tenancy Architecture, Security Hardening & Master Org Suite
-- **Multi-Tenancy Query Isolation**:
-  - Scoped database queries across `getContacts`, `getAutomation`, and `createAutomation` to enforce strict organization-level data boundaries via `orgId` / `slug`.
-- **Master Org & Discord-Style Join Requests**:
-  - Implemented public Organization Discovery page (`/dashboard/[slug]/discover`), member status badges (`[ OWNER ]`, `[ MEMBER ]`), and streamlined join request server actions (`requestOrgAccess`).
-- **Session Security & HMAC Signing**:
-  - Hardened session cookies (`user_session`) with HMAC-SHA256 cryptographic signatures (`lib/auth.ts`) to prevent cookie forgery and session impersonation attacks.
-- **Bcrypt Password Security & Transparent Migration**:
-  - Replaced legacy SHA-256 hashes with `bcrypt` (12 rounds) on user signup and login (`app/api/auth/*`), featuring transparent automatic password hash upgrades for existing users upon login.
-- **API Protection & Error Sanitization**:
-  - Guarded AI routes (`/api/predict-virality`, `/api/run-pipeline`, `/api/analytics/*`) with `getSession()` authentication checks, length validation (5,000 char max limit), and expanded middleware matcher protection.
-  - Sanitized internal error logging to prevent stack traces, query details, or database metadata leaks to clients.
-  - Moved `GEMINI_API_KEY` from URL query strings to secure HTTP headers (`x-goog-api-key`).
+### [Revision 06] — Multi-Skill Long-Video Engine, Suno Bark Voices & Cloudflare R2 Storage
+- **Cloudflare R2 Direct Upload Stream (`PUT /upload`)**:
+  - Implemented ultra-fast Cloudflare Worker storage endpoints supporting direct video uploads up to 5GB with zero egress fees and full CORS support (`GET /assets/*`).
+- **Suno Bark Voice Generator Integration**:
+  - Integrated Suno Bark multi-speaker audio synthesis into the Studio voice picker (`v2/hi_speaker_2`, `v2/en_speaker_6`, `v2/es_speaker_3`, etc.) for rich AI commentary narration.
+- **Context-Aware Workspace & Pipeline Identification**:
+  - Transformed the `Ideas` tab into a dedicated **Long-Form Video Processing Studio** dropzone whenever a podcast or raw-footage clipping pipeline is selected.
+- **Multi-Skill Feasibility Check & Pre-Flight Analysis Studio**:
+  - Multi-select Skills checkboxes directly integrated with the user's **Skills Hub** (`/dashboard/courses/skills`).
+  - Cloudflare Worker AI transcribes long-form audio (3–5 hr videos) and tests transcript feasibility against all target skills.
+  - Generates a **Pre-Flight Feasibility Report Modal** showing clip allocations per skill before dispatching VPS video rendering jobs.
+  - Automatically tags all candidate clips in the **Review Queue** with their matched Skill badge.
 
 ---
 
