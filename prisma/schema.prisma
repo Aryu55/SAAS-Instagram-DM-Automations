@@ -345,8 +345,13 @@ model ContentJob {
   script       Json?
   caption      String?
   audioKey     String?
-  videoKey     String?
-  renderLog    String?
+  videoKey            String?
+  sourceVideoKey      String?
+  commentaryVoiceKey  String?
+  commentaryPersona    String?
+  clipStartTime       Float?
+  clipEndTime         Float?
+  renderLog           String?
   postizPostId String?
   scheduledAt  DateTime?
   publishedAt  DateTime?

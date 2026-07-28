@@ -7,7 +7,8 @@ import {
   RotateCw, AlertTriangle, TrendingUp, BarChart3, BookOpen,
   ExternalLink, ChevronDown, ChevronRight, Search, Filter,
   Download, Play, Pause, Zap, Target, Eye, Heart, MessageSquare,
-  Share2, Bookmark, ArrowUpRight, Layers, Activity, Trash2
+  Share2, Bookmark, ArrowUpRight, Layers, Activity, Trash2,
+  UploadCloud, Film, Sliders
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +20,7 @@ import {
   getContentIdeas,
   getContentJobs,
   runPipelineForIdea,
+  runLongVideoClipping,
   approveAndPublishJob,
   rejectJob,
   createManualIdea,
@@ -191,6 +193,68 @@ export default function ContentEnginePage({ params }: Props) {
 
   // Manual Idea Form
   const [manualIdea, setManualIdea] = useState({ topic: "", angle: "", pillar: "" });
+
+  // Long Video Upload & Clipping State
+  const [quickUploadOpen, setQuickUploadOpen] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [batchSize, setBatchSize] = useState<number>(5);
+  const [commentaryPersona, setCommentaryPersona] = useState<string>("marvel-storyteller");
+  const [uploadedVideoKey, setUploadedVideoKey] = useState<string | null>(null);
+
+  const handleUploadAndStartClipping = async (file: File, overridePipelineId?: string) => {
+    if (!business) return;
+    const targetPipelineId = overridePipelineId || selectedPipelineId;
+    if (!targetPipelineId) {
+      toast.error("Select a pipeline first!");
+      return;
+    }
+
+    setActionLoading("long_video_upload");
+    setUploadProgress(10);
+    try {
+      const key = `${business.slug}/raw-uploads/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const uploadUrl = `${WORKER_BASE}/upload?key=${encodeURIComponent(key)}`;
+
+      setUploadProgress(30);
+      const res = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type || "video/mp4" },
+        body: file
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to upload video file to storage");
+      }
+      setUploadProgress(70);
+      setUploadedVideoKey(key);
+
+      toast.loading("Analyzing narrative arc & synthesizing commentary...", { id: "clip_toast" });
+      const clipRes = await runLongVideoClipping(business.id, key, targetPipelineId, batchSize, commentaryPersona);
+      logServerTraces(clipRes);
+
+      setUploadProgress(100);
+      toast.dismiss("clip_toast");
+
+      if (clipRes.status === 200 && clipRes.data) {
+        toast.success(`Successfully queued ${clipRes.data.count} short clips in Review Queue!`);
+        setConfirmingIdea(null);
+        setQuickUploadOpen(false);
+        setUploadingFile(null);
+        setUploadProgress(0);
+        loadAllData();
+        setActiveTab("jobs");
+      } else {
+        toast.error(clipRes.error || "Clipping pipeline failed");
+      }
+    } catch (e: any) {
+      toast.dismiss("clip_toast");
+      toast.error(e.message);
+    } finally {
+      setActionLoading(null);
+      setUploadProgress(0);
+    }
+  };
 
   // Rejection State
   const [rejectingJobId, setRejectingJobId] = useState<string | null>(null);
@@ -1174,7 +1238,7 @@ export default function ContentEnginePage({ params }: Props) {
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { name: "logo.png", desc: "Brand logo (transparent PNG)", status: "missing" },
-                    { name: "B-roll clips", desc: "10-15 vertical video clips", status: "missing" },
+                { name: "B-roll clips", desc: "10-15 vertical video clips", status: "missing" },
                     { name: "Background music", desc: "Loop-friendly audio", status: "found" },
                   ].map(asset => (
                     <div key={asset.name} className={`border rounded-md p-3 ${asset.status === "found" ? "border-emerald-500/20 bg-emerald-500/5" : "border-white/[0.06] bg-white/[0.02]"}`}>
@@ -1197,6 +1261,124 @@ export default function ContentEnginePage({ params }: Props) {
         )}
 
       </div>
+
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
+        <div className="flex-1">
+          <PipelineSelector
+            pipelines={pipelines}
+            selectedId={selectedPipelineId}
+            onSelect={setSelectedPipelineId}
+          />
+        </div>
+        <button
+          onClick={() => {
+            if (!selectedPipelineId) {
+              toast.error("Select a pipeline first!");
+              return;
+            }
+            setQuickUploadOpen(true);
+          }}
+          className="px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 shrink-0 self-start sm:self-auto mb-6 sm:mb-0"
+        >
+          <UploadCloud className="w-4 h-4" />
+          ⚡ Quick Upload & Clip
+        </button>
+      </div>
+
+      {/* ── Quick Upload Modal ── */}
+      {quickUploadOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#18181b] border border-purple-500/20 rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <div className="flex items-center gap-2">
+                <Film className="w-5 h-5 text-purple-400" />
+                <h3 className="text-sm font-bold text-white">Upload Long-Form Video for Creative AI Clipping</h3>
+              </div>
+              <button onClick={() => setQuickUploadOpen(false)} className="text-[#71717a] hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Drag & Drop Upload Zone */}
+            <div className="border-2 border-dashed border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10 rounded-xl p-6 text-center transition-all cursor-pointer relative">
+              <input
+                type="file"
+                accept="video/mp4,video/quicktime,video/x-matroska"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) setUploadingFile(e.target.files[0]);
+                }}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              />
+              <UploadCloud className="w-8 h-8 text-purple-400 mx-auto mb-2 animate-bounce" />
+              <p className="text-xs font-bold text-white mb-1">
+                {uploadingFile ? uploadingFile.name : "Drop long video file here or click to browse"}
+              </p>
+              <p className="text-[10px] text-[#71717a]">Supports MP4, MOV up to 5GB (Tutorials, Masterclasses, Podcasts)</p>
+            </div>
+
+            {/* Upload Progress Bar */}
+            {actionLoading === "long_video_upload" && (
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] font-bold text-purple-400">
+                  <span>Uploading to R2 Storage & Analyzing Narrative Arc...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-white/[0.06] h-2 rounded-full overflow-hidden">
+                  <div className="bg-gradient-to-r from-purple-500 to-blue-500 h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                </div>
+              </div>
+            )}
+
+            {/* Clip Batch Size Slider */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-xs font-bold text-white">
+                <span>Output Clip Batch Size</span>
+                <span className="text-purple-400">{batchSize} short clips</span>
+              </div>
+              <input
+                type="range"
+                min={3}
+                max={10}
+                value={batchSize}
+                onChange={(e) => setBatchSize(Number(e.target.value))}
+                className="w-full accent-purple-500 cursor-pointer"
+              />
+            </div>
+
+            {/* Persona Selector */}
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-white block">AI Commentary Persona</label>
+              <select
+                value={commentaryPersona}
+                onChange={(e) => setCommentaryPersona(e.target.value)}
+                className="w-full bg-[#27272a] border border-white/[0.1] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+              >
+                <option value="marvel-storyteller">🎬 Marvel Storyteller (&quot;You missed this key moment...&quot;)</option>
+                <option value="educational-breakdown">🎓 Educational Breakdown (&quot;Here is the step-by-step...&quot;)</option>
+                <option value="hype-marketer">🔥 Hype Marketer (&quot;Why this changes everything in 2026...&quot;)</option>
+                <option value="sarcastic-reviewer">😏 Sarcastic Reviewer (&quot;Stop doing this rookie mistake...&quot;)</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                onClick={() => setQuickUploadOpen(false)}
+                className="flex-1 py-2.5 bg-white/[0.05] hover:bg-white/[0.1] text-[#a1a1aa] text-[12px] font-medium rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={!uploadingFile || actionLoading === "long_video_upload"}
+                onClick={() => uploadingFile && handleUploadAndStartClipping(uploadingFile)}
+                className="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-[12px] font-bold rounded-lg transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-1.5 disabled:opacity-40"
+              >
+                {actionLoading === "long_video_upload" ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+                Process Video & Create Clips
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Confirm Pipeline Run Modal ── */}
       {confirmingIdea && (

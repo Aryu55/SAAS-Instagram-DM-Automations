@@ -248,22 +248,130 @@ export async function runPipelineForIdea(orgId: string, ideaId: string, pipeline
 
     if (!renderRes.ok) {
       const err = await renderRes.text();
-      tracer.error("VPS dispatch failed at Worker endpoint. Error:", err);
-      await client.contentJob.update({ where: { id: job.id }, data: { status: "FAILED", renderLog: `VPS dispatch failed: ${err}` } });
-      return { status: 500, error: `VPS render dispatch failed: ${err}`, logs: tracer.getTraces() };
+      tracer.error("Render dispatch failed at Worker endpoint. Status:", renderRes.status, "Error:", err);
+      await client.contentJob.update({ where: { id: job.id }, data: { status: "FAILED", renderLog: `Render dispatch failed: ${err}` } });
+      return { status: 500, error: `Render dispatch failed: ${err}`, logs: tracer.getTraces() };
     }
 
-    tracer.log("Pipeline successfully initiated. Rendering video on VPS box...");
+    const renderData = await renderRes.json();
+    tracer.log("Render task successfully dispatched to VPS agent. Status:", renderData);
 
-    // Mark idea as used
-    await client.contentIdea.update({
-      where: { id: ideaId },
-      data: { used: true }
+    return { status: 200, data: { jobId: job.id }, logs: tracer.getTraces() };
+  } catch (err: any) {
+    tracer.error("runPipelineForIdea threw an unhandled exception:", err.message);
+    return { status: 500, error: err.message, logs: tracer.getTraces() };
+  }
+}
+
+/**
+ * Run long-video creative AI clipping engine
+ */
+export async function runLongVideoClipping(
+  orgId: string,
+  sourceVideoKey: string,
+  pipelineId?: string,
+  batchSize: number = 5,
+  commentaryPersona: string = "marvel-storyteller"
+) {
+  const tracer = new ActionTracer();
+  tracer.log("runLongVideoClipping called:", { orgId, sourceVideoKey, pipelineId, batchSize, commentaryPersona });
+  try {
+    checkSecret(tracer);
+    const org = await client.organization.findUnique({ where: { id: orgId } });
+    if (!org) return { status: 404, error: "Organization not found", logs: tracer.getTraces() };
+
+    // 1. Ask Worker to analyze long video & extract segment concepts
+    const clipRes = await fetch(`${WORKER_BASE}/clip-long-video`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${FACTORY_SECRET}`
+      },
+      body: JSON.stringify({
+        business: org,
+        sourceVideoKey,
+        batchSize,
+        commentaryPersona
+      })
     });
 
-    return { status: 200, data: job, logs: tracer.getTraces() };
+    if (!clipRes.ok) {
+      const err = await clipRes.text();
+      return { status: 500, error: `Long video analysis failed: ${err}`, logs: tracer.getTraces() };
+    }
+
+    const clipData = await clipRes.json();
+    const segments = clipData.segments || [];
+    tracer.log(`Received ${segments.length} segment concepts from Worker.`);
+
+    // 2. Create ContentJob for each segment and trigger commentary TTS + render
+    const createdJobs = [];
+    for (const seg of segments) {
+      const job = await client.contentJob.create({
+        data: {
+          orgId,
+          pipelineId: pipelineId || null,
+          status: "RENDERING",
+          sourceVideoKey,
+          commentaryPersona,
+          clipStartTime: Number(seg.clipStartTime) || 0,
+          clipEndTime: Number(seg.clipEndTime) || 45,
+          caption: `${seg.topic}\n\n${seg.commentaryScript}\n\n${org.hashtags || ""}`,
+          script: {
+            hook: seg.topic,
+            body: [seg.commentaryScript],
+            cta: org.cta || ""
+          }
+        }
+      });
+
+      // Request commentary TTS for this clip
+      try {
+        const ttsRes = await fetch(`${WORKER_BASE}/tts`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${FACTORY_SECRET}`
+          },
+          body: JSON.stringify({
+            business: org,
+            jobId: job.id,
+            scriptText: seg.commentaryScript
+          })
+        });
+        if (ttsRes.ok) {
+          const ttsData = await ttsRes.json();
+          await client.contentJob.update({
+            where: { id: job.id },
+            data: { commentaryVoiceKey: ttsData.audioKey }
+          });
+        }
+      } catch (e: any) {
+        console.warn("Commentary TTS failed for clip:", e.message);
+      }
+
+      // Dispatch to VPS for 9:16 rendering + 15% audio ducking
+      try {
+        await fetch(`${WORKER_BASE}/render`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${FACTORY_SECRET}`
+          },
+          body: JSON.stringify({
+            businessSlug: org.slug,
+            jobId: job.id
+          })
+        });
+      } catch (e: any) {
+        console.warn("VPS dispatch failed for clip:", e.message);
+      }
+
+      createdJobs.push(job.id);
+    }
+
+    return { status: 200, data: { jobIds: createdJobs, count: createdJobs.length }, logs: tracer.getTraces() };
   } catch (err: any) {
-    tracer.error("Fatal error during pipeline run:", err.message);
     return { status: 500, error: err.message, logs: tracer.getTraces() };
   }
 }
