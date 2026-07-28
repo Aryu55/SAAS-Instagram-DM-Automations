@@ -150,7 +150,7 @@ export async function runPipelineForIdea(orgId: string, ideaId: string) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${FACTORY_SECRET}`
       },
-      body: JSON.stringify({ business: org, idea })
+      body: JSON.stringify({ business: org, idea, jobId: job.id })
     });
 
     if (!scriptRes.ok) {
