@@ -327,18 +327,20 @@ To implement a complete, autonomous, multi-business Content Factory:
   - Expanded `ScrapedPost` schema to support structural deep dives.
   - Built a batch-analysis dashboard where users can paste video links to automatically extract transcripts and have the LLM reverse-engineer the exact **Hook**, **Format**, and **Storytelling Structure** that made the video go viral.
 
-### [Revision 06] — Multi-Skill Long-Video Engine, Suno Bark Voices & Cloudflare R2 Storage
-- **Cloudflare R2 Direct Upload Stream (`PUT /upload`)**:
-  - Implemented ultra-fast Cloudflare Worker storage endpoints supporting direct video uploads up to 5GB with zero egress fees and full CORS support (`GET /assets/*`).
-- **Suno Bark Voice Generator Integration**:
-  - Integrated Suno Bark multi-speaker audio synthesis into the Studio voice picker (`v2/hi_speaker_2`, `v2/en_speaker_6`, `v2/es_speaker_3`, etc.) for rich AI commentary narration.
-- **Context-Aware Workspace & Pipeline Identification**:
-  - Transformed the `Ideas` tab into a dedicated **Long-Form Video Processing Studio** dropzone whenever a podcast or raw-footage clipping pipeline is selected.
-- **Multi-Skill Feasibility Check & Pre-Flight Analysis Studio**:
-  - Multi-select Skills checkboxes directly integrated with the user's **Skills Hub** (`/dashboard/courses/skills`).
-  - Cloudflare Worker AI transcribes long-form audio (3–5 hr videos) and tests transcript feasibility against all target skills.
-  - Generates a **Pre-Flight Feasibility Report Modal** showing clip allocations per skill before dispatching VPS video rendering jobs.
-  - Automatically tags all candidate clips in the **Review Queue** with their matched Skill badge.
+### [Revision 07] — Dynamic Pipeline Step Execution, Hybrid Real Transcription & Multi-Mode VPS Renderer
+- **Dynamic Step Execution Engine (`actions/factory/index.ts`)**:
+  - Factory server actions (`runPipelineForIdea` and `confirmAndDispatchClips`) now dynamically inspect pipeline step definitions in Prisma DB.
+  - Pipelines without TTS steps (e.g. **Podcast Clipper** and **Raw Footage Edit**) completely skip TTS voice synthesis without forcing artificial commentary.
+- **Hybrid Real Transcription Engine**:
+  - Added `POST /extract-audio` endpoint to the VPS render agent (`webhook-server.js`) to extract 16kHz audio chunks using FFmpeg and upload them to R2.
+  - Cloudflare Worker `/clip-long-video` transcribes each chunk buffer via **Cloudflare Workers AI Whisper** (`@cf/openai/whisper`).
+  - Verbatim timestamped transcript is passed to Llama 3.1 8B to derive exact viral clip timestamps and topics from real audio content.
+- **Multi-Mode VPS Render Agent (`render.js`)**:
+  - Enhanced `render.js` with **Clip Extraction Mode**: timestamp trimming, 9:16 vertical 1080x1920 cropping, Whisper karaoke ASS captions, and optional commentary overlay.
+  - Retained **Faceless Explainer Mode**: script + TTS + B-roll/Pexels + logo + background music mix.
+  - Added graceful fallback rendering for hosts missing `faster-whisper` or `libass` FFmpeg filters.
+- **Unified Test Inputs Hub (`test_inputs/`)**:
+  - Created standardized input directories (`1_faceless_explainer/`, `2_podcast_clipper/`, `3_raw_footage_edit/`) with README instructions for user-driven stress testing.
 
 ---
 
