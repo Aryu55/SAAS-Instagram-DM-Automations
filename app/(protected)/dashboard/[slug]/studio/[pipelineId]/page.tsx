@@ -9,10 +9,24 @@ import { getOrganizationConfig } from "@/actions/factory";
 import { toast } from "sonner";
 import Link from "next/link";
 import {
-  ArrowLeft, Play, Loader2, Power, PowerOff, X,
+  ArrowLeft, Play, Pause, Loader2, Power, PowerOff, X,
   Zap, FileText, Mic, Video, Scissors, Layers,
   Image as ImageIcon, CheckCircle2, ChevronRight, Settings
 } from "lucide-react";
+
+const SUNO_VOICE_PRESETS = [
+  { id: "v2/hi_speaker_2", label: "🇮🇳 Hindi Speaker 2 (Male, Warm & Authoritative)", lang: "hi-IN", sampleText: "Suno dosto, agar aap exit dues wait kar rahe ho, toh yeh warning dhyan se suno." },
+  { id: "v2/hi_speaker_0", label: "🇮🇳 Hindi Speaker 0 (Female, Professional)", lang: "hi-IN", sampleText: "Namaste! Yeh video aapke business ko next level pe le jayegi." },
+  { id: "v2/hi_speaker_5", label: "🇮🇳 Hindi Speaker 5 (Male, Energetic Creator)", lang: "hi-IN", sampleText: "Kya aapne kabhi socha hai ki AI viral videos kaise bante hain?" },
+  { id: "v2/en_speaker_0", label: "🇺🇸 English Speaker 0 (Female, Neutral & Clear)", lang: "en-US", sampleText: "Welcome! Today we are looking at 3 incredible AI shortcuts." },
+  { id: "v2/en_speaker_3", label: "🇺🇸 English Speaker 3 (Male, Professional Tech)", lang: "en-US", sampleText: "Here is how top creators automate their content pipeline in under 5 minutes." },
+  { id: "v2/en_speaker_6", label: "🇺🇸 English Speaker 6 (Male, Deep & Storytelling)", lang: "en-US", sampleText: "Every single brand is making this exact mistake in 2026." },
+  { id: "v2/en_speaker_9", label: "🇺🇸 English Speaker 9 (Female, High Energy)", lang: "en-US", sampleText: "Stop asking basic prompts to ChatGPT and learn real AI automation." },
+  { id: "v2/de_speaker_0", label: "🇩🇪 German Speaker 0 (Male, Standard)", lang: "de-DE", sampleText: "Hallo und willkommen zu diesem KI-Marketing-Tutorial." },
+  { id: "v2/fr_speaker_1", label: "🇫🇷 French Speaker 1 (Female, Expressive)", lang: "fr-FR", sampleText: "Bonjour! Découvrez comment automatiser vos contenus facilement." },
+  { id: "v2/ja_speaker_0", label: "🇯🇵 Japanese Speaker 0 (Male, Calm)", lang: "ja-JP", sampleText: "こんにちは。AIコンテンツ生成の新しい方法をご紹介します。" },
+  { id: "v2/ko_speaker_0", label: "🇰🇷 Korean Speaker 0 (Female, Bright)", lang: "ko-KR", sampleText: "안녕하세요! AI 비디오 제작 파이프라인을 확인해 보세요." }
+];
 
 const STEP_META: Record<string, { icon: React.ReactNode; color: string; label: string; description: string }> = {
   IDEATION:        { icon: <Zap className="w-5 h-5" />, color: "text-amber-400", label: "Ideation", description: "Generate content ideas using brand pillars" },
@@ -34,6 +48,21 @@ export default function PipelineDetailPage() {
   const pipelineId = Array.isArray(params.pipelineId) ? params.pipelineId[0] : params.pipelineId;
 
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
+  const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
+
+  const handlePlayVoiceSample = (preset: typeof SUNO_VOICE_PRESETS[0]) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      toast.error("Speech preview not supported in this browser");
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(preset.sampleText);
+    utterance.lang = preset.lang;
+    utterance.onstart = () => setPlayingVoiceId(preset.id);
+    utterance.onend = () => setPlayingVoiceId(null);
+    utterance.onerror = () => setPlayingVoiceId(null);
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Fetch org
   const { data: orgData } = useQuery({
@@ -255,6 +284,62 @@ export default function PipelineDetailPage() {
                   src={selectedStep.skill.styleReference.referenceVideoUrl}
                   className="w-full aspect-video bg-black max-h-[300px]"
                 />
+              </div>
+            )}
+
+            {/* Voice Picker for AUDIO_TTS step */}
+            {selectedStep.stepType === "AUDIO_TTS" && (
+              <div className="p-4 rounded-xl border border-[var(--accent-magenta)]/20 bg-[var(--accent-magenta)]/5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-[var(--accent-magenta)] uppercase tracking-wider block" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+                    🎙️ Suno Bark AI Voice Selection
+                  </label>
+                  <span className="text-[10px] text-[var(--text-tertiary)] bg-[var(--page-bg)] px-2 py-0.5 rounded border border-[var(--border-color)]">
+                    Suno Bark Engine
+                  </span>
+                </div>
+                <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+                  Select the voice profile used during AI TTS audio synthesis for this pipeline.
+                </p>
+
+                {(() => {
+                  const currentVoiceId = selectedStep.config?.ttsVoiceId || "v2/hi_speaker_2";
+                  const currentPreset = SUNO_VOICE_PRESETS.find(p => p.id === currentVoiceId) || SUNO_VOICE_PRESETS[0];
+                  const isPlaying = playingVoiceId === currentPreset.id;
+
+                  return (
+                    <div className="flex items-center gap-x-2">
+                      <select
+                        value={currentVoiceId}
+                        onChange={(e) => {
+                          const newVoiceId = e.target.value;
+                          const existingConfig = selectedStep.config && typeof selectedStep.config === "object" ? selectedStep.config : {};
+                          updateMut.mutate({
+                            stepId: selectedStep.id,
+                            data: { config: { ...existingConfig, ttsVoiceId: newVoiceId, ttsProvider: "bark" } }
+                          });
+                        }}
+                        className="flex-1 bg-[var(--page-bg)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-magenta)] transition-smooth font-medium"
+                      >
+                        {SUNO_VOICE_PRESETS.map((preset) => (
+                          <option key={preset.id} value={preset.id}>
+                            {preset.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      <button
+                        type="button"
+                        onClick={() => handlePlayVoiceSample(currentPreset)}
+                        className="px-3 py-2.5 bg-[var(--accent-magenta)] hover:bg-[var(--accent-magenta)]/80 text-white rounded-lg text-xs font-bold transition-all duration-150 flex items-center gap-1.5 shrink-0"
+                        title="Audition voice sample"
+                      >
+                        {isPlaying ? <Pause className="w-3.5 h-3.5 animate-pulse" /> : <Play className="w-3.5 h-3.5" />}
+                        {isPlaying ? "Playing..." : "Audition"}
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 

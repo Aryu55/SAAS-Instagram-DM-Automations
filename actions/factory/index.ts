@@ -119,9 +119,9 @@ export async function getContentJobs(orgId: string) {
 /**
  * Run content pipeline manually for a specific idea
  */
-export async function runPipelineForIdea(orgId: string, ideaId: string) {
+export async function runPipelineForIdea(orgId: string, ideaId: string, pipelineId?: string) {
   const tracer = new ActionTracer();
-  tracer.log("runPipelineForIdea called:", { orgId, ideaId });
+  tracer.log("runPipelineForIdea called:", { orgId, ideaId, pipelineId });
   try {
     checkSecret(tracer);
     const org = await client.organization.findUnique({ where: { id: orgId } });
@@ -132,15 +132,37 @@ export async function runPipelineForIdea(orgId: string, ideaId: string) {
       return { status: 404, error: "Organization or Idea not found", logs: tracer.getTraces() };
     }
 
+    // Determine target TTS voice from selected pipeline if available
+    let targetBusiness: any = { ...org };
+    if (pipelineId) {
+      const pipeline = await client.pipelineConfig.findUnique({
+        where: { id: pipelineId },
+        include: { steps: true }
+      });
+      if (pipeline) {
+        const ttsStep = pipeline.steps.find((s) => s.stepType === "AUDIO_TTS" && s.isEnabled);
+        if (ttsStep && ttsStep.config && typeof ttsStep.config === "object") {
+          const stepConfig = ttsStep.config as Record<string, any>;
+          if (stepConfig.ttsVoiceId) {
+            targetBusiness.ttsVoiceId = stepConfig.ttsVoiceId;
+          }
+          if (stepConfig.ttsProvider) {
+            targetBusiness.ttsProvider = stepConfig.ttsProvider;
+          }
+        }
+      }
+    }
+
     // Create rendering job in DB
     const job = await client.contentJob.create({
       data: {
         orgId,
         ideaId,
+        pipelineId: pipelineId || null,
         status: "IDEA"
       }
     });
-    tracer.log("Created ContentJob record with status 'IDEA'. Job ID:", job.id);
+    tracer.log("Created ContentJob record with status 'IDEA'. Job ID:", job.id, "Pipeline ID:", pipelineId);
 
     // 1. Fetch script from Worker
     tracer.log("Step 1: Requesting script from Worker at /script endpoint...");
@@ -150,7 +172,7 @@ export async function runPipelineForIdea(orgId: string, ideaId: string) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${FACTORY_SECRET}`
       },
-      body: JSON.stringify({ business: org, idea, jobId: job.id })
+      body: JSON.stringify({ business: targetBusiness, idea, jobId: job.id })
     });
 
     if (!scriptRes.ok) {
@@ -184,7 +206,7 @@ export async function runPipelineForIdea(orgId: string, ideaId: string) {
         "Authorization": `Bearer ${FACTORY_SECRET}`
       },
       body: JSON.stringify({
-        business: org,
+        business: targetBusiness,
         jobId: job.id,
         scriptText: script.scriptText
       })

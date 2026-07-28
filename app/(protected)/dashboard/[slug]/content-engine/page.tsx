@@ -365,13 +365,21 @@ export default function ContentEnginePage({ params }: Props) {
     finally { setActionLoading(null); }
   };
 
-  const triggerRender = async (ideaId: string) => {
+  const [confirmingIdea, setConfirmingIdea] = useState<any | null>(null);
+
+  const triggerRender = async (ideaId: string, overridePipelineId?: string) => {
     if (!business) return;
+    const targetPipelineId = overridePipelineId || selectedPipelineId;
+    if (!targetPipelineId) {
+      toast.error("Select a pipeline first!");
+      return;
+    }
+
     setActionLoading(`render_${ideaId}`);
-    console.log("🎬 [Janus UI Engine] Dispatching script idea ID:", ideaId, "to video production pipeline (Script ➔ TTS ➔ VPS Render)...");
+    console.log("🎬 [Janus UI Engine] Dispatching script idea ID:", ideaId, "with pipeline ID:", targetPipelineId);
     const toastId = toast.loading("Running pipeline: Script → TTS → Render...");
     try {
-      const res = await runPipelineForIdea(business.id, ideaId);
+      const res = await runPipelineForIdea(business.id, ideaId, targetPipelineId);
       logServerTraces(res);
       console.log("🎬 [Janus UI Engine] runPipelineForIdea response:", res);
       toast.dismiss(toastId);
@@ -673,8 +681,22 @@ export default function ContentEnginePage({ params }: Props) {
                         <h4 className="text-[14px] font-medium text-[#fafafa] leading-snug mb-1.5">{idea.topic}</h4>
                         <p className="text-[12px] text-[#71717a] leading-relaxed line-clamp-2">{idea.angle}</p>
                       </div>
-                      <button onClick={() => triggerRender(idea.id)} disabled={actionLoading === `render_${idea.id}`}
-                        className="mt-3 w-full py-2 bg-transparent border border-white/[0.08] hover:bg-[#3b82f6] hover:border-[#3b82f6] text-[#a1a1aa] hover:text-white rounded-md text-[12px] font-medium transition-all duration-150 flex items-center justify-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          if (!selectedPipelineId) {
+                            toast.error("Select a pipeline first!");
+                            return;
+                          }
+                          const targetPipeline = pipelines.find((p: any) => p.id === selectedPipelineId);
+                          setConfirmingIdea({ idea, pipeline: targetPipeline });
+                        }}
+                        disabled={actionLoading === `render_${idea.id}`}
+                        className={`mt-3 w-full py-2 border rounded-md text-[12px] font-medium transition-all duration-150 flex items-center justify-center gap-1.5 ${
+                          selectedPipelineId
+                            ? "bg-transparent border-white/[0.08] hover:bg-[#3b82f6] hover:border-[#3b82f6] text-[#a1a1aa] hover:text-white"
+                            : "bg-white/[0.02] border-white/[0.04] text-[#52525b] cursor-not-allowed"
+                        }`}
+                      >
                         {actionLoading === `render_${idea.id}` ? <RotateCw className="w-3 h-3 animate-spin" /> : <Video className="w-3 h-3" />}
                         Render Video
                       </button>
@@ -1175,6 +1197,73 @@ export default function ContentEnginePage({ params }: Props) {
         )}
 
       </div>
+
+      {/* ── Confirm Pipeline Run Modal ── */}
+      {confirmingIdea && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#18181b] border border-white/[0.1] rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <div className="flex items-center gap-2">
+                <Video className="w-5 h-5 text-[#3b82f6]" />
+                <h3 className="text-sm font-bold text-white">Confirm Pipeline Run</h3>
+              </div>
+              <button onClick={() => setConfirmingIdea(null)} className="text-[#71717a] hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-[13px]">
+              <div className="bg-white/[0.03] border border-white/[0.06] p-3 rounded-lg space-y-1">
+                <p className="text-[10px] uppercase font-bold text-[#52525b]">Selected Topic</p>
+                <p className="text-white font-medium">{confirmingIdea.idea.topic}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/[0.03] border border-white/[0.06] p-3 rounded-lg space-y-1">
+                  <p className="text-[10px] uppercase font-bold text-[#52525b]">Target Pipeline</p>
+                  <p className="text-[#3b82f6] font-bold">{confirmingIdea.pipeline?.name || "Standard Pipeline"}</p>
+                </div>
+                <div className="bg-white/[0.03] border border-white/[0.06] p-3 rounded-lg space-y-1">
+                  <p className="text-[10px] uppercase font-bold text-[#52525b]">AI Voice Profile</p>
+                  <p className="text-orange-400 font-bold">
+                    {(() => {
+                      const ttsStep = confirmingIdea.pipeline?.steps?.find((s: any) => s.stepType === "AUDIO_TTS" && s.isEnabled);
+                      if (!ttsStep) return "No AI Voice (Raw/Original Audio)";
+                      const voiceId = ttsStep.config?.ttsVoiceId || "v2/hi_speaker_2";
+                      return voiceId;
+                    })()}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-[#71717a] leading-relaxed">
+                Dispatching this script will execute the pipeline steps in sequence: Scripting ➔ Voice Synthesis ➔ VPS Video Rendering.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                onClick={() => setConfirmingIdea(null)}
+                className="flex-1 py-2.5 bg-white/[0.05] hover:bg-white/[0.1] text-[#a1a1aa] text-[12px] font-medium rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const ideaId = confirmingIdea.idea.id;
+                  const pId = confirmingIdea.pipeline?.id;
+                  setConfirmingIdea(null);
+                  triggerRender(ideaId, pId);
+                }}
+                className="flex-1 py-2.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-[12px] font-bold rounded-lg transition-colors shadow-lg shadow-[#3b82f6]/20 flex items-center justify-center gap-1.5"
+              >
+                <Play className="w-3.5 h-3.5" />
+                Proceed & Queue Render
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

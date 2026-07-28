@@ -2,11 +2,102 @@
 
 import { client } from "@/lib/prisma";
 
+export async function seedDefaultPipelines(orgId: string) {
+  try {
+    const count = await client.pipelineConfig.count({ where: { orgId } });
+    if (count > 0) return;
+
+    // 1. Faceless Explainer
+    await client.pipelineConfig.create({
+      data: {
+        orgId,
+        name: "Faceless Explainer",
+        templateId: "faceless-explainer",
+        description: "Script ➔ AI Voice TTS ➔ B-Roll Injection ➔ Captions ➔ Render",
+        isActive: true,
+        steps: {
+          create: [
+            { stepType: "IDEATION", orderIndex: 0, isEnabled: true, config: { hookStyle: "question" } },
+            { stepType: "SCRIPT", orderIndex: 1, isEnabled: true, config: { tone: "fast-paced" } },
+            { stepType: "AUDIO_TTS", orderIndex: 2, isEnabled: true, config: { ttsProvider: "bark", ttsVoiceId: "v2/hi_speaker_2" } },
+            { stepType: "BROLL_INJECTION", orderIndex: 3, isEnabled: true, config: { style: "dynamic" } },
+            { stepType: "CAPTION_OVERLAY", orderIndex: 4, isEnabled: true, config: { font: "Inter" } },
+            { stepType: "REVIEW", orderIndex: 5, isEnabled: true }
+          ]
+        }
+      }
+    });
+
+    // 2. AI Avatar Talking Head
+    await client.pipelineConfig.create({
+      data: {
+        orgId,
+        name: "AI Avatar Talking Head",
+        templateId: "ai-avatar",
+        description: "Script ➔ AI Voice TTS ➔ Avatar Synthesis ➔ Captions ➔ Render",
+        isActive: true,
+        steps: {
+          create: [
+            { stepType: "IDEATION", orderIndex: 0, isEnabled: true },
+            { stepType: "SCRIPT", orderIndex: 1, isEnabled: true },
+            { stepType: "AUDIO_TTS", orderIndex: 2, isEnabled: true, config: { ttsProvider: "bark", ttsVoiceId: "v2/en_speaker_3" } },
+            { stepType: "FOOTAGE_PREP", orderIndex: 3, isEnabled: true },
+            { stepType: "CAPTION_OVERLAY", orderIndex: 4, isEnabled: true },
+            { stepType: "REVIEW", orderIndex: 5, isEnabled: true }
+          ]
+        }
+      }
+    });
+
+    // 3. Podcast Clipper (Opus Style) - NO TTS STEP
+    await client.pipelineConfig.create({
+      data: {
+        orgId,
+        name: "Podcast Clipper (Opus Style)",
+        templateId: "podcast-clipper",
+        description: "2hr+ Podcast Audio/Video ➔ AI Transcript & Viral Segmentation ➔ Auto 9:16 Crop ➔ Captions (No Voice Synth)",
+        isActive: true,
+        steps: {
+          create: [
+            { stepType: "FOOTAGE_PREP", orderIndex: 0, isEnabled: true, config: { inputType: "long-form" } },
+            { stepType: "SCRIPT", orderIndex: 1, isEnabled: true, config: { task: "transcribe-and-find-viral-clips" } },
+            { stepType: "VIDEO_EDIT", orderIndex: 2, isEnabled: true, config: { cropRatio: "9:16" } },
+            { stepType: "CAPTION_OVERLAY", orderIndex: 3, isEnabled: true, config: { wordByWord: true } },
+            { stepType: "REVIEW", orderIndex: 4, isEnabled: true }
+          ]
+        }
+      }
+    });
+
+    // 4. Raw Footage Edit - NO TTS STEP
+    await client.pipelineConfig.create({
+      data: {
+        orgId,
+        name: "Raw Footage Edit",
+        templateId: "raw-footage-edit",
+        description: "User Uploaded Video + Audio ➔ Trim ➔ Captions ➔ Render (No Voice Synth)",
+        isActive: true,
+        steps: {
+          create: [
+            { stepType: "FOOTAGE_PREP", orderIndex: 0, isEnabled: true },
+            { stepType: "VIDEO_EDIT", orderIndex: 1, isEnabled: true },
+            { stepType: "CAPTION_OVERLAY", orderIndex: 2, isEnabled: true },
+            { stepType: "REVIEW", orderIndex: 3, isEnabled: true }
+          ]
+        }
+      }
+    });
+  } catch (e: any) {
+    console.error("Failed to seed default pipelines:", e.message);
+  }
+}
+
 /**
  * Get all pipeline configs for an organization
  */
 export async function getPipelines(orgId: string) {
   try {
+    await seedDefaultPipelines(orgId);
     const pipelines = await client.pipelineConfig.findMany({
       where: { orgId },
       include: {
