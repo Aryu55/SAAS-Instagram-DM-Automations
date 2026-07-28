@@ -182,6 +182,8 @@ export default function ContentEnginePage({ params }: Props) {
     enabled: !!business?.id,
   });
   const pipelines = pipelinesData?.status === 200 ? (pipelinesData.data as any[]) : [];
+  const selectedPipeline = pipelines.find((p: any) => p.id === selectedPipelineId);
+  const isLongFormPipeline = selectedPipeline?.templateId === "podcast-clipper" || selectedPipeline?.templateId === "raw-footage-edit";
 
   // Settings Form
   const [settingsForm, setSettingsForm] = useState({
@@ -733,92 +735,179 @@ export default function ContentEnginePage({ params }: Props) {
 
         {/* ═══════════ IDEAS CALENDAR ═══════════ */}
         {activeTab === "ideas" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-8">
-              <SectionHeader title="Unused Video Concepts" subtitle={`${unusedIdeas.length} ideas ready to render`} />
-              {unusedIdeas.length === 0 ? (
-                <EmptyState icon={Sparkles} title="No ideas yet"
-                  description="Generate a batch of AI-powered video concepts based on your brand profile."
-                  action="Generate 10 Ideas" onAction={triggerBatchGenerate} loading={actionLoading === "generate_ideas"} />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {unusedIdeas.map((idea, idx) => (
-                    <div key={idea.id}
-                      className="bg-[#18181b] border border-white/[0.06] rounded-lg p-4 flex flex-col justify-between transition-all duration-200 hover:border-white/[0.1] hover:-translate-y-px group"
-                      style={{ animationDelay: `${idx * 50}ms` }}>
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[10px] font-medium text-[#52525b] bg-white/[0.04] px-2 py-0.5 rounded">{idea.contentPillar}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-medium text-[#3b82f6]">{idea.hookStyle}</span>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleDeleteIdea(idea.id); }}
-                              disabled={actionLoading === `delete_${idea.id}`}
-                              className="text-[#52525b] hover:text-red-400 p-1 rounded transition-colors"
-                              title="Delete Idea"
-                            >
-                              {actionLoading === `delete_${idea.id}` ? <RotateCw className="w-3.5 h-3.5 animate-spin text-red-400" /> : <Trash2 className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                        </div>
-                        <h4 className="text-[14px] font-medium text-[#fafafa] leading-snug mb-1.5">{idea.topic}</h4>
-                        <p className="text-[12px] text-[#71717a] leading-relaxed line-clamp-2">{idea.angle}</p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          if (!selectedPipelineId) {
-                            toast.error("Select a pipeline first!");
-                            return;
-                          }
-                          const targetPipeline = pipelines.find((p: any) => p.id === selectedPipelineId);
-                          setConfirmingIdea({ idea, pipeline: targetPipeline });
-                        }}
-                        disabled={actionLoading === `render_${idea.id}`}
-                        className={`mt-3 w-full py-2 border rounded-md text-[12px] font-medium transition-all duration-150 flex items-center justify-center gap-1.5 ${
-                          selectedPipelineId
-                            ? "bg-transparent border-white/[0.08] hover:bg-[#3b82f6] hover:border-[#3b82f6] text-[#a1a1aa] hover:text-white"
-                            : "bg-white/[0.02] border-white/[0.04] text-[#52525b] cursor-not-allowed"
-                        }`}
-                      >
-                        {actionLoading === `render_${idea.id}` ? <RotateCw className="w-3 h-3 animate-spin" /> : <Video className="w-3 h-3" />}
-                        Render Video
-                      </button>
-                    </div>
-                  ))}
+          isLongFormPipeline ? (
+            <div className="bg-[#18181b] border border-purple-500/20 rounded-xl p-8 max-w-3xl mx-auto my-6 space-y-6 shadow-2xl">
+              <div className="text-center space-y-2">
+                <span className="p-3 rounded-full bg-purple-500/10 text-purple-400 inline-block border border-purple-500/20">
+                  <Film className="w-6 h-6" />
+                </span>
+                <h3 className="text-lg font-bold text-white">Long-Form Video Processing Studio</h3>
+                <p className="text-xs text-[#71717a] max-w-md mx-auto">
+                  Upload your podcast, masterclass, or tutorial ({selectedPipeline?.name || "Long-Form Clipping"}). Janus AI will transcribe the audio, detect narrative arcs, write creative commentary scripts, duck audio to 15%, and crop short clips into your Review Queue.
+                </p>
+              </div>
+
+              {/* Dropzone */}
+              <div className="border-2 border-dashed border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10 rounded-xl p-8 text-center transition-all cursor-pointer relative">
+                <input
+                  type="file"
+                  accept="video/mp4,video/quicktime,video/x-matroska"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) setUploadingFile(e.target.files[0]);
+                  }}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                />
+                <UploadCloud className="w-10 h-10 text-purple-400 mx-auto mb-3 animate-bounce" />
+                <p className="text-sm font-bold text-white mb-1">
+                  {uploadingFile ? uploadingFile.name : "Drop your long-form video file here (MP4, MOV up to 5GB)"}
+                </p>
+                <p className="text-[11px] text-[#71717a]">
+                  {uploadingFile ? `${(uploadingFile.size / (1024 * 1024)).toFixed(1)} MB selected` : "Click or drag to select file from your computer"}
+                </p>
+              </div>
+
+              {/* Upload Progress Bar */}
+              {actionLoading === "long_video_upload" && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-bold text-purple-400">
+                    <span>Uploading to Cloudflare R2 & Analyzing Narrative Arc...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full bg-white/[0.06] h-2.5 rounded-full overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-500 to-blue-500 h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                  </div>
                 </div>
               )}
-            </div>
+              {/* Controls Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs font-bold text-white">
+                    <span>Output Clip Batch Size</span>
+                    <span className="text-purple-400">{batchSize} short clips</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={3}
+                    max={10}
+                    value={batchSize}
+                    onChange={(e) => setBatchSize(Number(e.target.value))}
+                    className="w-full accent-purple-500 cursor-pointer mt-2"
+                  />
+                </div>
 
-            {/* Sidebar: Manual Idea */}
-            <div className="lg:col-span-4">
-              <div className="bg-[#18181b] border border-white/[0.06] rounded-lg p-5 sticky top-6">
-                <SectionHeader title="Add Manual Idea" subtitle="Custom topic injection" />
-                <form onSubmit={handleCreateManualIdea} className="space-y-3">
-                  <FormField label="Topic">
-                    <input type="text" required placeholder="e.g. 3 HR lies about notice periods"
-                      value={manualIdea.topic} onChange={e => setManualIdea(prev => ({ ...prev, topic: e.target.value }))}
-                      className="form-input" />
-                  </FormField>
-                  <FormField label="Angle / Thesis">
-                    <textarea required placeholder="The core argument or revelation"
-                      value={manualIdea.angle} onChange={e => setManualIdea(prev => ({ ...prev, angle: e.target.value }))}
-                      className="form-input h-20 resize-none" />
-                  </FormField>
-                  <FormField label="Content Pillar">
-                    <select required value={manualIdea.pillar} onChange={e => setManualIdea(prev => ({ ...prev, pillar: e.target.value }))}
-                      className="form-input">
-                      <option value="">Select pillar</option>
-                      {business.contentPillars?.map((p: string) => <option key={p} value={p}>{p}</option>)}
-                    </select>
-                  </FormField>
-                  <button type="submit" disabled={actionLoading === "create_manual_idea"}
-                    className="w-full py-2 bg-white/[0.06] hover:bg-[#3b82f6] text-[#a1a1aa] hover:text-white rounded-md text-[12px] font-medium transition-all duration-150">
-                    Add to Calendar
-                  </button>
-                </form>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-white block">AI Commentary Persona</label>
+                  <select
+                    value={commentaryPersona}
+                    onChange={(e) => setCommentaryPersona(e.target.value)}
+                    className="w-full bg-[#27272a] border border-white/[0.1] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                  >
+                    <option value="marvel-storyteller">🎬 Marvel Storyteller (&quot;You missed this key moment...&quot;)</option>
+                    <option value="educational-breakdown">🎓 Educational Breakdown (&quot;Here is the step-by-step...&quot;)</option>
+                    <option value="hype-marketer">🔥 Hype Marketer (&quot;Why this changes everything in 2026...&quot;)</option>
+                    <option value="sarcastic-reviewer">😏 Sarcastic Reviewer (&quot;Stop doing this rookie mistake...&quot;)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Process Button */}
+              <button
+                disabled={!uploadingFile || actionLoading === "long_video_upload"}
+                onClick={() => uploadingFile && handleUploadAndStartClipping(uploadingFile)}
+                className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 disabled:opacity-40"
+              >
+                {actionLoading === "long_video_upload" ? <RotateCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                Process Video & Queue Short Clips
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-8">
+                <SectionHeader title="Unused Video Concepts" subtitle={`${unusedIdeas.length} ideas ready to render`} />
+                {unusedIdeas.length === 0 ? (
+                  <EmptyState icon={Sparkles} title="No ideas yet"
+                    description="Generate a batch of AI-powered video concepts based on your brand profile."
+                    action="Generate 10 Ideas" onAction={triggerBatchGenerate} loading={actionLoading === "generate_ideas"} />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {unusedIdeas.map((idea, idx) => (
+                      <div key={idea.id}
+                        className="bg-[#18181b] border border-white/[0.06] rounded-lg p-4 flex flex-col justify-between transition-all duration-200 hover:border-white/[0.1] hover:-translate-y-px group"
+                        style={{ animationDelay: `${idx * 50}ms` }}>
+                        <div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-[10px] font-medium text-[#52525b] bg-white/[0.04] px-2 py-0.5 rounded">{idea.contentPillar}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-medium text-[#3b82f6]">{idea.hookStyle}</span>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleDeleteIdea(idea.id); }}
+                                disabled={actionLoading === `delete_${idea.id}`}
+                                className="text-[#52525b] hover:text-red-400 p-1 rounded transition-colors"
+                                title="Delete Idea"
+                              >
+                                {actionLoading === `delete_${idea.id}` ? <RotateCw className="w-3.5 h-3.5 animate-spin text-red-400" /> : <Trash2 className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+                          </div>
+                          <h4 className="text-[14px] font-medium text-[#fafafa] leading-snug mb-1.5">{idea.topic}</h4>
+                          <p className="text-[12px] text-[#71717a] leading-relaxed line-clamp-2">{idea.angle}</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (!selectedPipelineId) {
+                              toast.error("Select a pipeline first!");
+                              return;
+                            }
+                            const targetPipeline = pipelines.find((p: any) => p.id === selectedPipelineId);
+                            setConfirmingIdea({ idea, pipeline: targetPipeline });
+                          }}
+                          disabled={actionLoading === `render_${idea.id}`}
+                          className={`mt-3 w-full py-2 border rounded-md text-[12px] font-medium transition-all duration-150 flex items-center justify-center gap-1.5 ${
+                            selectedPipelineId
+                              ? "bg-transparent border-white/[0.08] hover:bg-[#3b82f6] hover:border-[#3b82f6] text-[#a1a1aa] hover:text-white"
+                              : "bg-white/[0.02] border-white/[0.04] text-[#52525b] cursor-not-allowed"
+                          }`}
+                        >
+                          {actionLoading === `render_${idea.id}` ? <RotateCw className="w-3 h-3 animate-spin" /> : <Video className="w-3 h-3" />}
+                          Render Video
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sidebar: Manual Idea */}
+              <div className="lg:col-span-4">
+                <div className="bg-[#18181b] border border-white/[0.06] rounded-lg p-5 sticky top-6">
+                  <SectionHeader title="Add Manual Idea" subtitle="Custom topic injection" />
+                  <form onSubmit={handleCreateManualIdea} className="space-y-3">
+                    <FormField label="Topic">
+                      <input type="text" required placeholder="e.g. 3 HR lies about notice periods"
+                        value={manualIdea.topic} onChange={e => setManualIdea(prev => ({ ...prev, topic: e.target.value }))}
+                        className="form-input" />
+                    </FormField>
+                    <FormField label="Angle / Thesis">
+                      <textarea required placeholder="The core argument or revelation"
+                        value={manualIdea.angle} onChange={e => setManualIdea(prev => ({ ...prev, angle: e.target.value }))}
+                        className="form-input h-20 resize-none" />
+                    </FormField>
+                    <FormField label="Content Pillar">
+                      <select required value={manualIdea.pillar} onChange={e => setManualIdea(prev => ({ ...prev, pillar: e.target.value }))}
+                        className="form-input">
+                        <option value="">Select pillar</option>
+                        {business?.contentPillars?.map((p: string) => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </FormField>
+                    <button type="submit" disabled={actionLoading === "create_manual_idea"}
+                      className="w-full py-2 bg-white/[0.06] hover:bg-[#3b82f6] text-[#a1a1aa] hover:text-white rounded-md text-[12px] font-medium transition-all duration-150">
+                      Add to Calendar
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
-          </div>
+          )
         )}
 
         {/* ═══════════ REVIEW QUEUE (THE HEART) ═══════════ */}
