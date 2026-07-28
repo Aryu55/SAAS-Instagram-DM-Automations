@@ -683,11 +683,30 @@ export default function ContentEnginePage({ params }: Props) {
         </div>
       </div>
 
-      <PipelineSelector
-        pipelines={pipelines}
-        selectedId={selectedPipelineId}
-        onSelect={setSelectedPipelineId}
-      />
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-2">
+        <div className="flex-1">
+          <PipelineSelector
+            pipelines={pipelines}
+            selectedId={selectedPipelineId}
+            onSelect={setSelectedPipelineId}
+          />
+        </div>
+        <div className="flex items-center gap-3 mb-6 md:mb-0">
+          <button
+            onClick={() => {
+              if (!selectedPipelineId) {
+                toast.error("Select a pipeline first!");
+                return;
+              }
+              setQuickUploadOpen(true);
+            }}
+            className="px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
+          >
+            <UploadCloud className="w-4 h-4" />
+            ⚡ Quick Upload & Clip
+          </button>
+        </div>
+      </div>
 
       {/* ── Tab Navigation ── */}
       <div className="flex gap-1 border-b border-white/[0.06] overflow-x-auto pb-px -mb-px">
@@ -1260,29 +1279,6 @@ export default function ContentEnginePage({ params }: Props) {
           </div>
         )}
 
-      </div>
-
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
-        <div className="flex-1">
-          <PipelineSelector
-            pipelines={pipelines}
-            selectedId={selectedPipelineId}
-            onSelect={setSelectedPipelineId}
-          />
-        </div>
-        <button
-          onClick={() => {
-            if (!selectedPipelineId) {
-              toast.error("Select a pipeline first!");
-              return;
-            }
-            setQuickUploadOpen(true);
-          }}
-          className="px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 shrink-0 self-start sm:self-auto mb-6 sm:mb-0"
-        >
-          <UploadCloud className="w-4 h-4" />
-          ⚡ Quick Upload & Clip
-        </button>
       </div>
 
       {/* ── Quick Upload Modal ── */}
