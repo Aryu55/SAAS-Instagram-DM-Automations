@@ -76,6 +76,27 @@ export async function getContentIdeas(orgId: string) {
 }
 
 /**
+ * Delete a content idea
+ */
+export async function deleteContentIdea(ideaId: string) {
+  const tracer = new ActionTracer();
+  tracer.log("deleteContentIdea called for ideaId:", ideaId);
+  try {
+    const user = await onCurrentUser();
+    if (!user) return { status: 401, error: "Unauthorized", logs: tracer.getTraces() };
+
+    await client.contentIdea.delete({
+      where: { id: ideaId }
+    });
+    tracer.log("deleteContentIdea success for ideaId:", ideaId);
+    return { status: 200, success: true, logs: tracer.getTraces() };
+  } catch (err: any) {
+    tracer.error("deleteContentIdea failed:", err.message);
+    return { status: 500, error: err.message, logs: tracer.getTraces() };
+  }
+}
+
+/**
  * Get content jobs
  */
 export async function getContentJobs(orgId: string) {

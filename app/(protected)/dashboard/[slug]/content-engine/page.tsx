@@ -7,7 +7,7 @@ import {
   RotateCw, AlertTriangle, TrendingUp, BarChart3, BookOpen,
   ExternalLink, ChevronDown, ChevronRight, Search, Filter,
   Download, Play, Pause, Zap, Target, Eye, Heart, MessageSquare,
-  Share2, Bookmark, ArrowUpRight, Layers, Activity
+  Share2, Bookmark, ArrowUpRight, Layers, Activity, Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +22,8 @@ import {
   approveAndPublishJob,
   rejectJob,
   createManualIdea,
-  generateIdeaBatch
+  generateIdeaBatch,
+  deleteContentIdea
 } from "@/actions/factory";
 
 type TabId = "ideas" | "review" | "jobs" | "trends" | "analytics" | "documentary" | "settings";
@@ -407,6 +408,24 @@ export default function ContentEnginePage({ params }: Props) {
     finally { setActionLoading(null); }
   };
 
+  const handleDeleteIdea = async (ideaId: string) => {
+    setActionLoading(`delete_${ideaId}`);
+    try {
+      const res = await deleteContentIdea(ideaId);
+      logServerTraces(res);
+      if (res.status === 200) {
+        toast.success("Idea deleted");
+        setIdeas(prev => prev.filter(i => i.id !== ideaId));
+      } else {
+        toast.error(res.error || "Failed to delete idea");
+      }
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Load trend data dynamically
   const loadTrendData = async () => {
     if (!business) return;
@@ -639,7 +658,17 @@ export default function ContentEnginePage({ params }: Props) {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-[10px] font-medium text-[#52525b] bg-white/[0.04] px-2 py-0.5 rounded">{idea.contentPillar}</span>
-                          <span className="text-[10px] font-medium text-[#3b82f6]">{idea.hookStyle}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-medium text-[#3b82f6]">{idea.hookStyle}</span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeleteIdea(idea.id); }}
+                              disabled={actionLoading === `delete_${idea.id}`}
+                              className="text-[#52525b] hover:text-red-400 p-1 rounded transition-colors"
+                              title="Delete Idea"
+                            >
+                              {actionLoading === `delete_${idea.id}` ? <RotateCw className="w-3.5 h-3.5 animate-spin text-red-400" /> : <Trash2 className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
                         </div>
                         <h4 className="text-[14px] font-medium text-[#fafafa] leading-snug mb-1.5">{idea.topic}</h4>
                         <p className="text-[12px] text-[#71717a] leading-relaxed line-clamp-2">{idea.angle}</p>
