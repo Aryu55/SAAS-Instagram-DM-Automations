@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { getPipelines } from "@/actions/pipelines";
+import { getSkills } from "@/actions/skills";
 import PipelineSelector from "./_components/pipeline-selector";
 import {
   getOrganizationConfig,
@@ -21,6 +22,8 @@ import {
   getContentJobs,
   runPipelineForIdea,
   runLongVideoClipping,
+  analyzeLongVideoSkills,
+  confirmAndDispatchClips,
   approveAndPublishJob,
   rejectJob,
   createManualIdea,
@@ -182,8 +185,23 @@ export default function ContentEnginePage({ params }: Props) {
     enabled: !!business?.id,
   });
   const pipelines = pipelinesData?.status === 200 ? (pipelinesData.data as any[]) : [];
+  const { data: skillsData } = useQuery({
+    queryKey: ["skills", business?.id],
+    queryFn: () => getSkills(business?.id),
+    enabled: !!business?.id,
+  });
+  const skillsList = skillsData?.status === 200 ? (skillsData.data as any[]) : [];
+
+  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
+  const [preFlightReport, setPreFlightReport] = useState<any | null>(null);
   const selectedPipeline = pipelines.find((p: any) => p.id === selectedPipelineId);
-  const isLongFormPipeline = selectedPipeline?.templateId === "podcast-clipper" || selectedPipeline?.templateId === "raw-footage-edit";
+  const isLongFormPipeline = 
+    selectedPipeline?.templateId?.toLowerCase()?.includes("podcast") ||
+    selectedPipeline?.templateId?.toLowerCase()?.includes("footage") ||
+    selectedPipeline?.templateId?.toLowerCase()?.includes("clip") ||
+    selectedPipeline?.name?.toLowerCase()?.includes("podcast") ||
+    selectedPipeline?.name?.toLowerCase()?.includes("footage") ||
+    selectedPipeline?.name?.toLowerCase()?.includes("clip");
 
   // Settings Form
   const [settingsForm, setSettingsForm] = useState({
@@ -204,7 +222,7 @@ export default function ContentEnginePage({ params }: Props) {
   const [commentaryPersona, setCommentaryPersona] = useState<string>("marvel-storyteller");
   const [uploadedVideoKey, setUploadedVideoKey] = useState<string | null>(null);
 
-  const handleUploadAndStartClipping = async (file: File, overridePipelineId?: string) => {
+  const handleUploadAndAnalyze = async (file: File, overridePipelineId?: string) => {
     if (!business) return;
     const targetPipelineId = overridePipelineId || selectedPipelineId;
     if (!targetPipelineId) {
@@ -228,33 +246,76 @@ export default function ContentEnginePage({ params }: Props) {
       if (!res.ok) {
         throw new Error("Failed to upload video file to storage");
       }
-      setUploadProgress(70);
+      setUploadProgress(60);
       setUploadedVideoKey(key);
 
-      toast.loading("Analyzing narrative arc & synthesizing commentary...", { id: "clip_toast" });
-      const clipRes = await runLongVideoClipping(business.id, key, targetPipelineId, batchSize, commentaryPersona);
-      logServerTraces(clipRes);
+      const activeSkills = skillsList.filter((s: any) => selectedSkillIds.includes(s.id));
+      if (activeSkills.length === 0 && skillsList.length > 0) {
+        // Default to first skill if none selected
+        activeSkills.push(skillsList[0]);
+      }
+
+      toast.loading("Analyzing transcript & checking feasibility for selected Skills...", { id: "analysis_toast" });
+      const analysisRes = await analyzeLongVideoSkills(
+        business.id,
+        key,
+        batchSize,
+        activeSkills.map((s: any) => ({ id: s.id, name: s.name, description: s.description }))
+      );
+      logServerTraces(analysisRes);
 
       setUploadProgress(100);
-      toast.dismiss("clip_toast");
+      toast.dismiss("analysis_toast");
 
-      if (clipRes.status === 200 && clipRes.data) {
-        toast.success(`Successfully queued ${clipRes.data.count} short clips in Review Queue!`);
-        setConfirmingIdea(null);
-        setQuickUploadOpen(false);
-        setUploadingFile(null);
-        setUploadProgress(0);
-        loadAllData();
-        setActiveTab("jobs");
+      if (analysisRes.status === 200 && analysisRes.data) {
+        setPreFlightReport({
+          sourceVideoKey: key,
+          pipelineId: targetPipelineId,
+          report: analysisRes.data.preFlightReport,
+          segments: analysisRes.data.segments
+        });
+        toast.success("Pre-flight transcript analysis complete!");
       } else {
-        toast.error(clipRes.error || "Clipping pipeline failed");
+        toast.error(analysisRes.error || "Pre-flight skill analysis failed");
       }
     } catch (e: any) {
-      toast.dismiss("clip_toast");
+      toast.dismiss("analysis_toast");
       toast.error(e.message);
     } finally {
       setActionLoading(null);
       setUploadProgress(0);
+    }
+  };
+
+  const handleConfirmAndRender = async () => {
+    if (!business || !preFlightReport) return;
+    setActionLoading("confirm_render");
+    try {
+      toast.loading("Dispatching video render tasks to VPS...", { id: "dispatch_toast" });
+      const dispatchRes = await confirmAndDispatchClips(
+        business.id,
+        preFlightReport.sourceVideoKey,
+        preFlightReport.pipelineId,
+        preFlightReport.segments
+      );
+      logServerTraces(dispatchRes);
+      toast.dismiss("dispatch_toast");
+
+      if (dispatchRes.status === 200 && dispatchRes.data) {
+        toast.success(`Successfully queued ${dispatchRes.data.count} skill-tagged clips in Review Queue!`);
+        setPreFlightReport(null);
+        setUploadingFile(null);
+        setQuickUploadOpen(false);
+        loadAllData();
+        setActiveTab("jobs");
+      } else {
+        toast.error(dispatchRes.error || "Render dispatch failed");
+      }
+    } catch (e: any) {
+      toast.dismiss("dispatch_toast");
+      toast.error(e.message);
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -778,46 +839,84 @@ export default function ContentEnginePage({ params }: Props) {
                   </div>
                 </div>
               )}
-              {/* Controls Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-xs font-bold text-white">
-                    <span>Output Clip Batch Size</span>
-                    <span className="text-purple-400">{batchSize} short clips</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={3}
-                    max={10}
-                    value={batchSize}
-                    onChange={(e) => setBatchSize(Number(e.target.value))}
-                    className="w-full accent-purple-500 cursor-pointer mt-2"
-                  />
+              {/* Multi-Select Skills Section */}
+              <div className="space-y-3 pt-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Zap className="w-4 h-4 text-purple-400" />
+                    Target Skills Hub Instructions ({selectedSkillIds.length} selected)
+                  </label>
+                  <span className="text-[10px] text-[#71717a]">AI will test transcript feasibility for each skill</span>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-white block">AI Commentary Persona</label>
-                  <select
-                    value={commentaryPersona}
-                    onChange={(e) => setCommentaryPersona(e.target.value)}
-                    className="w-full bg-[#27272a] border border-white/[0.1] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
-                  >
-                    <option value="marvel-storyteller">🎬 Marvel Storyteller (&quot;You missed this key moment...&quot;)</option>
-                    <option value="educational-breakdown">🎓 Educational Breakdown (&quot;Here is the step-by-step...&quot;)</option>
-                    <option value="hype-marketer">🔥 Hype Marketer (&quot;Why this changes everything in 2026...&quot;)</option>
-                    <option value="sarcastic-reviewer">😏 Sarcastic Reviewer (&quot;Stop doing this rookie mistake...&quot;)</option>
-                  </select>
+                {skillsList.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.06] text-center text-xs text-[#71717a]">
+                    No Skills created yet. Add skills in <span className="text-purple-400 font-bold">Skills Hub</span> to customize clipping instructions.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-48 overflow-y-auto pr-1">
+                    {skillsList.map((skill: any) => {
+                      const isSelected = selectedSkillIds.includes(skill.id);
+                      return (
+                        <div
+                          key={skill.id}
+                          onClick={() => {
+                            setSelectedSkillIds(prev =>
+                              isSelected ? prev.filter(id => id !== skill.id) : [...prev, skill.id]
+                            );
+                          }}
+                          className={`p-3 rounded-xl border text-left cursor-pointer transition-all flex items-start gap-3 ${
+                            isSelected
+                              ? "bg-purple-500/15 border-purple-500/50 text-white"
+                              : "bg-white/[0.02] border-white/[0.06] text-[#a1a1aa] hover:border-white/[0.15]"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            className="mt-0.5 accent-purple-500 rounded cursor-pointer"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1 mb-0.5">
+                              <span className="text-xs font-bold text-white truncate">{skill.name}</span>
+                              <span className="text-[9px] uppercase tracking-wider px-1.5 py-px rounded bg-purple-500/20 text-purple-300 font-mono">
+                                {skill.type}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-[#71717a] line-clamp-1">{skill.description || "Custom skill rules"}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Clip Batch Size Slider */}
+              <div className="space-y-2 pt-2">
+                <div className="flex justify-between items-center text-xs font-bold text-white">
+                  <span>Output Clip Batch Size</span>
+                  <span className="text-purple-400">{batchSize} short clips</span>
                 </div>
+                <input
+                  type="range"
+                  min={3}
+                  max={10}
+                  value={batchSize}
+                  onChange={(e) => setBatchSize(Number(e.target.value))}
+                  className="w-full accent-purple-500 cursor-pointer mt-1"
+                />
               </div>
 
               {/* Process Button */}
               <button
                 disabled={!uploadingFile || actionLoading === "long_video_upload"}
-                onClick={() => uploadingFile && handleUploadAndStartClipping(uploadingFile)}
+                onClick={() => uploadingFile && handleUploadAndAnalyze(uploadingFile)}
                 className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 disabled:opacity-40"
               >
-                {actionLoading === "long_video_upload" ? <RotateCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-                Process Video & Queue Short Clips
+                {actionLoading === "long_video_upload" ? <RotateCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                ⚡ Analyze Transcript & Fit Skills
               </button>
             </div>
           ) : (
@@ -1414,6 +1513,52 @@ export default function ContentEnginePage({ params }: Props) {
               </div>
             )}
 
+            {/* Multi-Select Skills Section */}
+            <div className="space-y-2 pt-1">
+              <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-purple-400" />
+                Target Skills ({selectedSkillIds.length} selected)
+              </label>
+
+              {skillsList.length === 0 ? (
+                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] text-center text-xs text-[#71717a]">
+                  No Skills added in Skills Hub yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
+                  {skillsList.map((skill: any) => {
+                    const isSelected = selectedSkillIds.includes(skill.id);
+                    return (
+                      <div
+                        key={skill.id}
+                        onClick={() => {
+                          setSelectedSkillIds(prev =>
+                            isSelected ? prev.filter(id => id !== skill.id) : [...prev, skill.id]
+                          );
+                        }}
+                        className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all flex items-start gap-2 ${
+                          isSelected
+                            ? "bg-purple-500/15 border-purple-500/50 text-white"
+                            : "bg-white/[0.02] border-white/[0.06] text-[#a1a1aa] hover:border-white/[0.15]"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {}}
+                          className="mt-0.5 accent-purple-500 rounded cursor-pointer"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-bold text-white truncate block">{skill.name}</span>
+                          <span className="text-[9px] text-[#71717a] line-clamp-1">{skill.description || "Custom rules"}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             {/* Clip Batch Size Slider */}
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs font-bold text-white">
@@ -1430,21 +1575,6 @@ export default function ContentEnginePage({ params }: Props) {
               />
             </div>
 
-            {/* Persona Selector */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-white block">AI Commentary Persona</label>
-              <select
-                value={commentaryPersona}
-                onChange={(e) => setCommentaryPersona(e.target.value)}
-                className="w-full bg-[#27272a] border border-white/[0.1] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
-              >
-                <option value="marvel-storyteller">🎬 Marvel Storyteller (&quot;You missed this key moment...&quot;)</option>
-                <option value="educational-breakdown">🎓 Educational Breakdown (&quot;Here is the step-by-step...&quot;)</option>
-                <option value="hype-marketer">🔥 Hype Marketer (&quot;Why this changes everything in 2026...&quot;)</option>
-                <option value="sarcastic-reviewer">😏 Sarcastic Reviewer (&quot;Stop doing this rookie mistake...&quot;)</option>
-              </select>
-            </div>
-
             <div className="flex items-center gap-2 pt-2">
               <button
                 onClick={() => setQuickUploadOpen(false)}
@@ -1454,11 +1584,11 @@ export default function ContentEnginePage({ params }: Props) {
               </button>
               <button
                 disabled={!uploadingFile || actionLoading === "long_video_upload"}
-                onClick={() => uploadingFile && handleUploadAndStartClipping(uploadingFile)}
+                onClick={() => uploadingFile && handleUploadAndAnalyze(uploadingFile)}
                 className="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-[12px] font-bold rounded-lg transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-1.5 disabled:opacity-40"
               >
-                {actionLoading === "long_video_upload" ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-                Process Video & Create Clips
+                {actionLoading === "long_video_upload" ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                Analyze & Fit Skills
               </button>
             </div>
           </div>
@@ -1526,6 +1656,94 @@ export default function ContentEnginePage({ params }: Props) {
               >
                 <Play className="w-3.5 h-3.5" />
                 Proceed & Queue Render
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Pre-Flight Analysis Report Modal ── */}
+      {preFlightReport && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#18181b] border border-purple-500/30 rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+                <h3 className="text-sm font-bold text-white">Pre-Flight Skill Feasibility Report</h3>
+              </div>
+              <button onClick={() => setPreFlightReport(null)} className="text-[#71717a] hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Pre-Flight Skills Breakdown */}
+            <div className="space-y-3">
+              <p className="text-xs text-[#a1a1aa]">
+                Janus AI evaluated the long-video transcript against your target Skills. Here is the clip allocation breakdown:
+              </p>
+
+              <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
+                {preFlightReport.report?.map((r: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className={`p-3 rounded-lg border flex items-center justify-between ${
+                      r.clipsFound > 0
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-white"
+                        : "bg-rose-500/10 border-rose-500/20 text-[#a1a1aa]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      {r.clipsFound > 0 ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                      )}
+                      <div>
+                        <span className="text-xs font-bold text-white block">{r.skillName}</span>
+                        <span className="text-[10px] text-[#71717a]">
+                          {r.clipsFound > 0 ? `${r.clipsFound} clip segments matched transcript` : r.reason || "No matching moments found"}
+                        </span>
+                      </div>
+                    </div>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                      r.clipsFound > 0 ? "bg-emerald-500/20 text-emerald-300" : "bg-rose-500/20 text-rose-300"
+                    }`}>
+                      {r.clipsFound} clips
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Segments Preview */}
+            <div className="space-y-2 pt-1 border-t border-white/[0.06]">
+              <span className="text-[11px] font-bold text-white uppercase tracking-wider block">Candidate Clip Previews ({preFlightReport.segments?.length || 0})</span>
+              <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                {preFlightReport.segments?.map((seg: any, idx: number) => (
+                  <div key={idx} className="p-2.5 bg-white/[0.02] border border-white/[0.06] rounded-lg flex items-center justify-between text-xs">
+                    <div className="min-w-0 pr-2">
+                      <span className="font-bold text-white truncate block">{seg.topic}</span>
+                      <span className="text-[10px] text-[#71717a]">{seg.matchedSkillName || "Custom Skill"} • {seg.clipStartTime}s - {seg.clipEndTime}s</span>
+                    </div>
+                    <span className="text-[9px] px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded font-mono shrink-0">Ready</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={() => setPreFlightReport(null)}
+                className="flex-1 py-2.5 bg-white/[0.05] hover:bg-white/[0.1] text-[#a1a1aa] text-xs font-medium rounded-xl transition-colors"
+              >
+                Back to Studio
+              </button>
+              <button
+                disabled={actionLoading === "confirm_render"}
+                onClick={handleConfirmAndRender}
+                className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-1.5"
+              >
+                {actionLoading === "confirm_render" ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+                Confirm & Render VPS Videos
               </button>
             </div>
           </div>

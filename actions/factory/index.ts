@@ -377,6 +377,145 @@ export async function runLongVideoClipping(
 }
 
 /**
+ * Analyze transcript against selected skills & return Pre-Flight Analysis Report
+ */
+export async function analyzeLongVideoSkills(
+  orgId: string,
+  sourceVideoKey: string,
+  batchSize: number = 5,
+  selectedSkills: { id: string; name: string; description?: string }[] = []
+) {
+  const tracer = new ActionTracer();
+  tracer.log("analyzeLongVideoSkills called:", { orgId, sourceVideoKey, batchSize, skillsCount: selectedSkills.length });
+  try {
+    checkSecret(tracer);
+    const org = await client.organization.findUnique({ where: { id: orgId } });
+    if (!org) return { status: 404, error: "Organization not found", logs: tracer.getTraces() };
+
+    const clipRes = await fetch(`${WORKER_BASE}/clip-long-video`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${FACTORY_SECRET}`
+      },
+      body: JSON.stringify({
+        business: org,
+        sourceVideoKey,
+        batchSize,
+        selectedSkills
+      })
+    });
+
+    if (!clipRes.ok) {
+      const err = await clipRes.text();
+      return { status: 500, error: `Pre-flight analysis failed: ${err}`, logs: tracer.getTraces() };
+    }
+
+    const clipData = await clipRes.json();
+    return {
+      status: 200,
+      data: {
+        preFlightReport: clipData.preFlightReport || [],
+        segments: clipData.segments || []
+      },
+      logs: tracer.getTraces()
+    };
+  } catch (err: any) {
+    return { status: 500, error: err.message, logs: tracer.getTraces() };
+  }
+}
+
+/**
+ * Confirm pre-flight analysis & dispatch VPS video rendering jobs
+ */
+export async function confirmAndDispatchClips(
+  orgId: string,
+  sourceVideoKey: string,
+  pipelineId?: string,
+  confirmedSegments: any[] = []
+) {
+  const tracer = new ActionTracer();
+  tracer.log("confirmAndDispatchClips called:", { orgId, sourceVideoKey, pipelineId, count: confirmedSegments.length });
+  try {
+    checkSecret(tracer);
+    const org = await client.organization.findUnique({ where: { id: orgId } });
+    if (!org) return { status: 404, error: "Organization not found", logs: tracer.getTraces() };
+
+    const createdJobs = [];
+    for (const seg of confirmedSegments) {
+      const skillTag = seg.matchedSkillName ? `[${seg.matchedSkillName}] ` : "";
+      const job = await client.contentJob.create({
+        data: {
+          orgId,
+          pipelineId: pipelineId || null,
+          status: "RENDERING",
+          sourceVideoKey,
+          commentaryPersona: seg.matchedSkillName || "Custom Skill",
+          clipStartTime: Number(seg.clipStartTime) || 0,
+          clipEndTime: Number(seg.clipEndTime) || 45,
+          caption: `${skillTag}${seg.topic}\n\n${seg.commentaryScript || ""}\n\n${org.hashtags || ""}`,
+          script: {
+            hook: `${skillTag}${seg.topic}`,
+            body: [seg.commentaryScript || ""],
+            cta: org.cta || ""
+          }
+        }
+      });
+
+      // Request TTS commentary if script exists
+      if (seg.commentaryScript) {
+        try {
+          const ttsRes = await fetch(`${WORKER_BASE}/tts`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${FACTORY_SECRET}`
+            },
+            body: JSON.stringify({
+              business: org,
+              jobId: job.id,
+              scriptText: seg.commentaryScript
+            })
+          });
+          if (ttsRes.ok) {
+            const ttsData = await ttsRes.json();
+            await client.contentJob.update({
+              where: { id: job.id },
+              data: { commentaryVoiceKey: ttsData.audioKey }
+            });
+          }
+        } catch (e: any) {
+          console.warn("TTS failed for clip:", e.message);
+        }
+      }
+
+      // Dispatch to VPS box
+      try {
+        await fetch(`${WORKER_BASE}/render`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${FACTORY_SECRET}`
+          },
+          body: JSON.stringify({
+            businessSlug: org.slug,
+            jobId: job.id
+          })
+        });
+      } catch (e: any) {
+        console.warn("VPS dispatch failed for clip:", e.message);
+      }
+
+      createdJobs.push(job.id);
+    }
+
+    return { status: 200, data: { jobIds: createdJobs, count: createdJobs.length }, logs: tracer.getTraces() };
+  } catch (err: any) {
+    return { status: 500, error: err.message, logs: tracer.getTraces() };
+  }
+}
+
+/**
  * Approve a job and publish it directly via Postiz on the VPS
  */
 export async function approveAndPublishJob(jobId: string, customCaption: string) {
