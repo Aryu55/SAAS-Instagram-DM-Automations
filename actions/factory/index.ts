@@ -132,15 +132,20 @@ export async function runPipelineForIdea(orgId: string, ideaId: string, pipeline
       return { status: 404, error: "Organization or Idea not found", logs: tracer.getTraces() };
     }
 
-    // Determine target TTS voice from selected pipeline if available
+    // Determine target TTS voice and enabled steps from selected pipeline
     let targetBusiness: any = { ...org };
+    let hasTtsStep = true; // Default to true if no pipeline specified
+    let pipelineSteps: any[] = [];
+
     if (pipelineId) {
       const pipeline = await client.pipelineConfig.findUnique({
         where: { id: pipelineId },
-        include: { steps: true }
+        include: { steps: { orderBy: { orderIndex: "asc" } } }
       });
       if (pipeline) {
+        pipelineSteps = pipeline.steps;
         const ttsStep = pipeline.steps.find((s) => s.stepType === "AUDIO_TTS" && s.isEnabled);
+        hasTtsStep = !!ttsStep;
         if (ttsStep && ttsStep.config && typeof ttsStep.config === "object") {
           const stepConfig = ttsStep.config as Record<string, any>;
           if (stepConfig.ttsVoiceId) {
@@ -164,8 +169,8 @@ export async function runPipelineForIdea(orgId: string, ideaId: string, pipeline
     });
     tracer.log("Created ContentJob record with status 'IDEA'. Job ID:", job.id, "Pipeline ID:", pipelineId);
 
-    // 1. Fetch script from Worker
-    tracer.log("Step 1: Requesting script from Worker at /script endpoint...");
+    // 1. Script Generation Step
+    tracer.log("Step: Requesting script from Worker at /script endpoint...");
     const scriptRes = await fetch(`${WORKER_BASE}/script`, {
       method: "POST",
       headers: {
@@ -186,7 +191,6 @@ export async function runPipelineForIdea(orgId: string, ideaId: string, pipeline
     const script = scriptData.script;
     tracer.log("Received script details from Worker. Hook preview:", script.hook);
 
-    // Update job to SCRIPTED
     await client.contentJob.update({
       where: { id: job.id },
       data: {
@@ -197,43 +201,49 @@ export async function runPipelineForIdea(orgId: string, ideaId: string, pipeline
     });
     tracer.log("Job status updated to 'SCRIPTED' in DB.");
 
-    // 2. Fetch TTS audio from Worker (saves voice.mp3 to R2)
-    tracer.log("Step 2: Requesting TTS voice synthesis from Worker at /tts endpoint...");
-    const ttsRes = await fetch(`${WORKER_BASE}/tts`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${FACTORY_SECRET}`
-      },
-      body: JSON.stringify({
-        business: targetBusiness,
-        jobId: job.id,
-        scriptText: script.scriptText
-      })
-    });
+    let audioKey: string | null = null;
 
-    if (!ttsRes.ok) {
-      const err = await ttsRes.text();
-      tracer.error("TTS generation failed at Worker endpoint. Error:", err);
-      await client.contentJob.update({ where: { id: job.id }, data: { status: "FAILED", renderLog: `TTS gen failed: ${err}` } });
-      return { status: 500, error: `TTS generation failed: ${err}`, logs: tracer.getTraces() };
+    // 2. Audio TTS Step (Dynamic — only run if AUDIO_TTS step is enabled in pipeline)
+    if (hasTtsStep) {
+      tracer.log("Step: Requesting TTS voice synthesis from Worker at /tts endpoint...");
+      const ttsRes = await fetch(`${WORKER_BASE}/tts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${FACTORY_SECRET}`
+        },
+        body: JSON.stringify({
+          business: targetBusiness,
+          jobId: job.id,
+          scriptText: script.scriptText
+        })
+      });
+
+      if (!ttsRes.ok) {
+        const err = await ttsRes.text();
+        tracer.error("TTS generation failed at Worker endpoint. Error:", err);
+        await client.contentJob.update({ where: { id: job.id }, data: { status: "FAILED", renderLog: `TTS gen failed: ${err}` } });
+        return { status: 500, error: `TTS generation failed: ${err}`, logs: tracer.getTraces() };
+      }
+
+      const ttsData = await ttsRes.json();
+      audioKey = ttsData.audioKey;
+      tracer.log("TTS synthesis completed. Saved to key:", audioKey);
+    } else {
+      tracer.log("Skipping TTS synthesis as AUDIO_TTS step is not enabled in this pipeline config.");
     }
-
-    const ttsData = await ttsRes.json();
-    const audioKey = ttsData.audioKey;
-    tracer.log("TTS synthesis completed. Saved to key:", audioKey);
 
     await client.contentJob.update({
       where: { id: job.id },
       data: {
         status: "RENDERING",
-        audioKey
+        ...(audioKey ? { audioKey } : {})
       }
     });
-    tracer.log("Job status updated to 'RENDERING' status in DB.");
+    tracer.log("Job status updated to 'RENDERING' in DB.");
 
     // 3. Dispatch render job to VPS Webhook Agent
-    tracer.log("Step 3: Dispatching render task to VPS Webhook Render Box...");
+    tracer.log("Step: Dispatching render task to VPS Webhook Render Box...");
     const renderRes = await fetch(`${WORKER_BASE}/render`, {
       method: "POST",
       headers: {
@@ -441,6 +451,17 @@ export async function confirmAndDispatchClips(
     const org = await client.organization.findUnique({ where: { id: orgId } });
     if (!org) return { status: 404, error: "Organization not found", logs: tracer.getTraces() };
 
+    let hasTtsStep = false;
+    if (pipelineId) {
+      const pipeline = await client.pipelineConfig.findUnique({
+        where: { id: pipelineId },
+        include: { steps: true }
+      });
+      if (pipeline) {
+        hasTtsStep = pipeline.steps.some((s) => s.stepType === "AUDIO_TTS" && s.isEnabled);
+      }
+    }
+
     const createdJobs = [];
     for (const seg of confirmedSegments) {
       const skillTag = seg.matchedSkillName ? `[${seg.matchedSkillName}] ` : "";
@@ -462,8 +483,8 @@ export async function confirmAndDispatchClips(
         }
       });
 
-      // Request TTS commentary if script exists
-      if (seg.commentaryScript) {
+      // Request TTS commentary ONLY if script exists AND pipeline step AUDIO_TTS is enabled
+      if (seg.commentaryScript && hasTtsStep) {
         try {
           const ttsRes = await fetch(`${WORKER_BASE}/tts`, {
             method: "POST",
