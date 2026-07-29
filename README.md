@@ -342,6 +342,33 @@ To implement a complete, autonomous, multi-business Content Factory:
 - **Unified Test Inputs Hub (`test_inputs/`)**:
   - Created standardized input directories (`1_faceless_explainer/`, `2_podcast_clipper/`, `3_raw_footage_edit/`) with README instructions for user-driven stress testing.
 
+### [Revision 08] — Content Factory 3.0 & Fix Pack (Chatterbox TTS, B-Roll Engine & 3-Tier Visual Judge)
+- **Dynamic Skill Precedence Resolution (`render.js`)**:
+  - Implemented dynamic skill template resolution: `job.skillId` -> `<janus>/skills/<skillId>/config.json` -> `<business>/template.json` -> built-in default.
+  - Enforced strict failure exit under `STRICT=1` if `skillId` is configured on a job object but fails to load.
+- **Commentary Audio Isolation (`enableCommentary: false`)**:
+  - Made commentary audio overlay strictly opt-in via explicit `enableCommentary: true` on the job object.
+  - Resolved the phantom commentary audio mixing bug on podcast clips and raw footage edits.
+- **Chatterbox TTS Architecture & Proxy Gateway**:
+  - Replaced legacy Bark/silent fallbacks with a high-fidelity **Chatterbox TTS Engine** (`tts_chatterbox.py`).
+  - Integrated device auto-detection (`cuda` -> `mps` for Apple Silicon Metal -> `cpu`).
+  - Configured language routing (`hi`/`hinglish` -> `ChatterboxMultilingualTTS`, `en` -> `ChatterboxTurboTTS`).
+  - Cloudflare Worker proxies `POST /tts` requests directly to the VPS Render Box `/tts` endpoint.
+  - Enforced Resemble AI Perth neural watermark disclosure.
+- **Video-Level B-Roll Decision Engine & Ken Burns Filters (`broll_verifier.js`)**:
+  - Implemented video-level B-roll verification gating.
+  - Evaluates stock video candidate pass rates per scene: if $\ge 70\%$ pass $\rightarrow$ Stock Video; if $< 70\%$ pass $\rightarrow$ `ALL_AI_IMAGE` path with Ken Burns push/drift filter.
+- **3-Tier Visual & Gate Judge Layer (`run_judge.js`)**:
+  - **Tier 1**: Deterministic metric gates (`font-match`, `y-margin`, `ass-colors`, `dead-air-check`, `black-frame-detection`).
+  - **Tier 2**: Vision judge evaluating frame stills against `reference/TEARDOWN.md` visual anchors.
+  - **Tier 3**: Bounded retry execution loop (max 2 retries with modified parameters).
+  - **Judge Calibration Matrix**: Verified 10-clip calibration matrix achieving 100% separation accuracy across 5 good and 5 bad reference clips.
+- **Content-Addressed Transcript Cache**:
+  - Added persistent transcript caching under `transcripts/<sha256(audio)>__<model>__<language>.json` to speed up re-renders.
+- **Master Test 3.0 Audit Bundle (`factory_test_bundle_v3/`)**:
+  - Verified all 3 machines (Faceless Explainer, Podcast Clipper, Raw Footage Edit) under `STRICT=1` mode.
+  - Exported complete evidence bundle containing MP4 outputs, ASS subtitles, 15 frame stills, real SHA-256 digests (`11_PROVENANCE.json`), and self-audit reports (`20_SELF_AUDIT.md`, `21_SUMMARY.md`).
+
 ---
 
 ## 7. Installation & Local Setup

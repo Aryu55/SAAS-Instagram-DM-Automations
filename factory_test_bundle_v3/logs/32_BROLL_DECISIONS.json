@@ -1,0 +1,39 @@
+{
+  "machine1": {
+    "totalScenes": 3,
+    "stockCandidates": [
+      {
+        "sceneIndex": 0,
+        "prompt": "person saving money in piggy bank",
+        "candidatesConsidered": [],
+        "verified": false,
+        "chosenSource": "NONE",
+        "reason": "No Pexels API key provided. Stock verification skipped."
+      },
+      {
+        "sceneIndex": 1,
+        "prompt": "finance application on smartphone",
+        "candidatesConsidered": [],
+        "verified": false,
+        "chosenSource": "NONE",
+        "reason": "No Pexels API key provided. Stock verification skipped."
+      },
+      {
+        "sceneIndex": 2,
+        "prompt": "person celebrating financial victory",
+        "candidatesConsidered": [],
+        "verified": false,
+        "chosenSource": "NONE",
+        "reason": "No Pexels API key provided. Stock verification skipped."
+      }
+    ],
+    "verifiedScenesCount": 0,
+    "passRate": 0,
+    "chosenPath": "ALL_AI_IMAGE",
+    "visualClips": [
+      "/Users/aryupanchal/Downloads/organic content/marketing-machine/gpu-render-box/temp/m1_1785299015342/ai_images/scene_0_kenburns.mp4",
+      "/Users/aryupanchal/Downloads/organic content/marketing-machine/gpu-render-box/temp/m1_1785299015342/ai_images/scene_1_kenburns.mp4",
+      "/Users/aryupanchal/Downloads/organic content/marketing-machine/gpu-render-box/temp/m1_1785299015342/ai_images/scene_2_kenburns.mp4"
+    ]
+  }
+}

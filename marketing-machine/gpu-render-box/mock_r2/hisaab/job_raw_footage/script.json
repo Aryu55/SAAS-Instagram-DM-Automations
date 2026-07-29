@@ -1,0 +1,9 @@
+{
+  "sourceVideoKey": "hisaab/raw/raw_footage.mp4",
+  "clipStartTime": 10,
+  "clipEndTime": 40,
+  "skillId": "telusko-tech-announcement",
+  "subtitleY": 0.22,
+  "maxWordsPerLine": 4,
+  "desaturationLevel": "heavy-slate-teal"
+}

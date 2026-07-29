@@ -1,0 +1,41 @@
+[Script Info]
+Title: Content Factory Karaoke Subtitles
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Montserrat-ExtraBold,80,&H00FFFFFF,&H008A8A8A,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,6,0,2,40,40,960,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:01.42,Default,,0,0,0,,{\k5}up {\k42}in {\k14}this {\k28}video. {\k14}Now {\k18}what
+Dialogue: 0,0:00:01.42,0:00:02.44,Default,,0,0,0,,{\k16}we {\k10}need {\k12}to {\k14}do {\k28}is {\k22}come
+Dialogue: 0,0:00:02.44,0:00:04.80,Default,,0,0,0,,{\k24}in {\k50}select {\k34}a {\k56}specific {\k42}folder {\k30}that
+Dialogue: 0,0:00:04.80,0:00:05.64,Default,,0,0,0,,{\k12}we {\k8}are {\k10}going {\k6}to {\k20}work {\k28}directly
+Dialogue: 0,0:00:05.64,0:00:06.88,Default,,0,0,0,,{\k38}inside {\k16}of {\k32}Clawed. {\k10}If {\k10}you've {\k12}never
+Dialogue: 0,0:00:06.88,0:00:08.24,Default,,0,0,0,,{\k30}used {\k20}Cawork {\k20}before {\k28}let {\k10}me {\k28}explain
+Dialogue: 0,0:00:08.24,0:00:09.80,Default,,0,0,0,,{\k40}simply {\k22}how {\k12}it {\k22}works. {\k10}Now {\k18}if
+Dialogue: 0,0:00:09.80,0:00:10.72,Default,,0,0,0,,{\k8}you {\k10}don't {\k10}know {\k10}the {\k22}difference {\k32}between
+Dialogue: 0,0:00:10.72,0:00:12.70,Default,,0,0,0,,{\k42}normal {\k48}Clawed {\k18}mode {\k34}and {\k36}Cawork {\k20}mode
+Dialogue: 0,0:00:12.70,0:00:13.90,Default,,0,0,0,,{\k28}let's {\k16}talk {\k22}about {\k14}that {\k18}right {\k22}now.
+Dialogue: 0,0:00:14.12,0:00:16.26,Default,,0,0,0,,{\k12}So {\k44}normal {\k62}Clawed {\k36}.ai {\k34}is {\k26}basically
+Dialogue: 0,0:00:16.26,0:00:17.14,Default,,0,0,0,,{\k18}like {\k12}the {\k20}web {\k10}app {\k16}that {\k12}we'll
+Dialogue: 0,0:00:17.14,0:00:18.42,Default,,0,0,0,,{\k26}use {\k24}or {\k12}the {\k22}normal {\k28}chat {\k16}mode
+Dialogue: 0,0:00:18.42,0:00:20.04,Default,,0,0,0,,{\k34}inside {\k24}of {\k16}the {\k30}Cawork {\k26}desktop {\k32}app.
+Dialogue: 0,0:00:20.20,0:00:22.02,Default,,0,0,0,,{\k8}We {\k46}basically {\k30}just {\k46}interact {\k22}with {\k30}this
+Dialogue: 0,0:00:22.02,0:00:23.70,Default,,0,0,0,,{\k28}like {\k14}a {\k44}conversation {\k40}we {\k24}chat {\k18}back
+Dialogue: 0,0:00:23.70,0:00:24.82,Default,,0,0,0,,{\k20}and {\k18}forth {\k24}and {\k8}it {\k16}gives {\k26}us
+Dialogue: 0,0:00:24.82,0:00:26.86,Default,,0,0,0,,{\k50}specific {\k42}text {\k46}responses {\k24}and {\k20}that's {\k22}really
+Dialogue: 0,0:00:26.86,0:00:28.38,Default,,0,0,0,,{\k30}all. {\k12}Well {\k34}inside {\k16}of {\k30}Cawork {\k20}we're
+Dialogue: 0,0:00:28.38,0:00:29.74,Default,,0,0,0,,{\k30}working {\k30}inside {\k18}of {\k24}folders {\k24}on {\k10}our
+Dialogue: 0,0:00:29.74,0:00:31.42,Default,,0,0,0,,{\k42}actual {\k44}computer {\k24}that {\k14}it's {\k18}able {\k26}to
+Dialogue: 0,0:00:31.42,0:00:33.54,Default,,0,0,0,,{\k48}read, {\k22}edit {\k28}and {\k42}manipulate. {\k8}So {\k14}it's
+Dialogue: 0,0:00:33.54,0:00:35.36,Default,,0,0,0,,{\k38}essentially {\k34}doing {\k34}real {\k40}work {\k24}on {\k12}your
+Dialogue: 0,0:00:35.36,0:00:37.64,Default,,0,0,0,,{\k46}computer {\k30}and {\k36}creating {\k48}files {\k46}using {\k22}your
+Dialogue: 0,0:00:37.64,0:00:39.80,Default,,0,0,0,,{\k36}files {\k46}across {\k32}your {\k28}different {\k36}folders {\k38}etc.
+Dialogue: 0,0:00:40.20,0:00:41.08,Default,,0,0,0,,{\k8}So {\k16}with {\k10}that {\k14}being {\k22}said {\k18}it's
+Dialogue: 0,0:00:41.08,0:00:42.08,Default,,0,0,0,,{\k26}important {\k22}that {\k12}we {\k14}set {\k12}this {\k14}up
+Dialogue: 0,0:00:42.08,0:00:44.22,Default,,0,0,0,,{\k44}properly {\k44}and {\k44}understand {\k38}how {\k14}this {\k30}works.
+Dialogue: 0,0:00:44.46,0:00:44.92,Default,,0,0,0,,{\k12}So {\k34}inside

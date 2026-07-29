@@ -1,0 +1,18 @@
+[Unit]
+Description=Render Agent Webhook Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/marketing-machine/gpu-render-box
+EnvironmentFile=/root/marketing-machine/gpu-render-box/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node webhook-server.js
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=render-agent
+
+[Install]
+WantedBy=multi-user.target

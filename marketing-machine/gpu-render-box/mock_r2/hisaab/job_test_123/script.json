@@ -1,0 +1,16 @@
+{
+  "hook": "Managing spreadsheets for your freelance expenses is literally burning your time.",
+  "body": [
+    "You spend hours copying bank statements manually into Excel.",
+    "Half of your tax write-offs get lost in your emails and notes.",
+    "Hisaab auto-imports everything, calculates your write-offs, and handles quarterly taxes."
+  ],
+  "cta": "Try Hisaab today. Stop wasting time on accounting. Link in bio.",
+  "scriptText": "Managing spreadsheets for your freelance expenses is literally burning your time. You spend hours copying bank statements manually into Excel. Half of your tax write-offs get lost in your emails and notes. Hisaab auto-imports everything, calculates your write-offs, and handles quarterly taxes. Try Hisaab today. Stop wasting time on accounting. Link in bio.",
+  "brollPrompts": [
+    "Sad freelancer staring at Excel spreadsheets",
+    "Typing receipt numbers onto a calculator",
+    "Invoice emails accumulating in inbox",
+    "Clean Hisaab dashboard loading on a phone screen"
+  ]
+}

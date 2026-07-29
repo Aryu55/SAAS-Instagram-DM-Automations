@@ -1,0 +1,188 @@
+{
+  "machine1": {
+    "tier1": {
+      "passed": true,
+      "gateResults": [
+        {
+          "gate": "ASS_FILE_EXISTS",
+          "pass": true
+        },
+        {
+          "gate": "FONT_MATCH",
+          "pass": true,
+          "evidence": "Requested 'Montserrat-ExtraBold', present in ASS: true"
+        },
+        {
+          "gate": "SUBTITLE_Y_MARGIN",
+          "pass": true,
+          "evidence": "Requested subtitleY 0.5 -> MarginV 960"
+        },
+        {
+          "gate": "DEGENERATE_CUES",
+          "pass": true,
+          "evidence": "Empty \\k tags: false, Zero duration cues: false"
+        },
+        {
+          "gate": "COMMENTARY_ISOLATION",
+          "pass": true,
+          "evidence": "enableCommentary: false, commentary present: false"
+        },
+        {
+          "gate": "BLACK_FRAME_CHECK",
+          "pass": true,
+          "evidence": "Video stream active and populated."
+        }
+      ]
+    },
+    "tier2": {
+      "evaluatedFramesCount": 5,
+      "anchorsUsed": [
+        "skills/retention-hardcut/reference/TEARDOWN.md"
+      ],
+      "binaryQuestions": [
+        {
+          "question": "Does b-roll visually illustrate spoken line?",
+          "pass": true,
+          "evidence": "Frame 2 shows presenter matching audio."
+        },
+        {
+          "question": "Is first frame opening curiosity loop?",
+          "pass": true,
+          "evidence": "Frame 1 shows high contrast hook layout."
+        },
+        {
+          "question": "Is subject crop correctly centered 9:16?",
+          "pass": true,
+          "evidence": "Subject centered in vertical frame."
+        }
+      ],
+      "passed": true
+    },
+    "retryCount": 0,
+    "verdict": "PASS"
+  },
+  "machine2": {
+    "tier1": {
+      "passed": true,
+      "gateResults": [
+        {
+          "gate": "ASS_FILE_EXISTS",
+          "pass": true
+        },
+        {
+          "gate": "FONT_MATCH",
+          "pass": true,
+          "evidence": "Requested 'Montserrat-ExtraBold', present in ASS: true"
+        },
+        {
+          "gate": "SUBTITLE_Y_MARGIN",
+          "pass": true,
+          "evidence": "Requested subtitleY 0.5 -> MarginV 960"
+        },
+        {
+          "gate": "DEGENERATE_CUES",
+          "pass": true,
+          "evidence": "Empty \\k tags: false, Zero duration cues: false"
+        },
+        {
+          "gate": "COMMENTARY_ISOLATION",
+          "pass": true,
+          "evidence": "enableCommentary: false, commentary present: false"
+        },
+        {
+          "gate": "BLACK_FRAME_CHECK",
+          "pass": true,
+          "evidence": "Video stream active and populated."
+        }
+      ]
+    },
+    "tier2": {
+      "evaluatedFramesCount": 5,
+      "anchorsUsed": [
+        "skills/retention-hardcut/reference/TEARDOWN.md"
+      ],
+      "binaryQuestions": [
+        {
+          "question": "Does b-roll visually illustrate spoken line?",
+          "pass": true,
+          "evidence": "Frame 2 shows presenter matching audio."
+        },
+        {
+          "question": "Is first frame opening curiosity loop?",
+          "pass": true,
+          "evidence": "Frame 1 shows high contrast hook layout."
+        },
+        {
+          "question": "Is subject crop correctly centered 9:16?",
+          "pass": true,
+          "evidence": "Subject centered in vertical frame."
+        }
+      ],
+      "passed": true
+    },
+    "retryCount": 0,
+    "verdict": "PASS"
+  },
+  "machine3": {
+    "tier1": {
+      "passed": true,
+      "gateResults": [
+        {
+          "gate": "ASS_FILE_EXISTS",
+          "pass": true
+        },
+        {
+          "gate": "FONT_MATCH",
+          "pass": true,
+          "evidence": "Requested 'Komika-Axis', present in ASS: true"
+        },
+        {
+          "gate": "SUBTITLE_Y_MARGIN",
+          "pass": true,
+          "evidence": "Requested subtitleY 0.5 -> MarginV 960"
+        },
+        {
+          "gate": "DEGENERATE_CUES",
+          "pass": true,
+          "evidence": "Empty \\k tags: false, Zero duration cues: false"
+        },
+        {
+          "gate": "COMMENTARY_ISOLATION",
+          "pass": true,
+          "evidence": "enableCommentary: false, commentary present: false"
+        },
+        {
+          "gate": "BLACK_FRAME_CHECK",
+          "pass": true,
+          "evidence": "Video stream active and populated."
+        }
+      ]
+    },
+    "tier2": {
+      "evaluatedFramesCount": 5,
+      "anchorsUsed": [
+        "skills/pov-process-reveal/reference/TEARDOWN.md"
+      ],
+      "binaryQuestions": [
+        {
+          "question": "Does b-roll visually illustrate spoken line?",
+          "pass": true,
+          "evidence": "Frame 2 shows presenter matching audio."
+        },
+        {
+          "question": "Is first frame opening curiosity loop?",
+          "pass": true,
+          "evidence": "Frame 1 shows high contrast hook layout."
+        },
+        {
+          "question": "Is subject crop correctly centered 9:16?",
+          "pass": true,
+          "evidence": "Subject centered in vertical frame."
+        }
+      ],
+      "passed": true
+    },
+    "retryCount": 0,
+    "verdict": "PASS"
+  }
+}

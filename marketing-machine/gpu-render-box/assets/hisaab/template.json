@@ -1,0 +1,27 @@
+{
+  "resolution": "1080x1920",
+  "fps": 30,
+  "font": "Montserrat-ExtraBold",
+  "subtitleStyle": "karaoke-word",
+  "subtitlePrimaryColor": "#FFFFFF",
+  "subtitleHighlightColor": "#FFD400",
+  "subtitleY": 0.62,
+  "maxWordsPerLine": 4,
+  "background": {
+    "type": "broll-or-color",
+    "color": "#101014"
+  },
+  "logo": {
+    "path": "logo.png",
+    "position": "top-right",
+    "opacity": 0.85
+  },
+  "music": {
+    "path": "background_music.mp3",
+    "volume": 0.12
+  },
+  "hookCard": {
+    "enabled": true,
+    "durationSec": 2.2
+  }
+}

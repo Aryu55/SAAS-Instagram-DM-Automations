@@ -1,0 +1,9 @@
+{
+  "name": "marketing-machine-orchestrator",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker orchestrating marketing scripts and voice generation",
+  "main": "src/index.js",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

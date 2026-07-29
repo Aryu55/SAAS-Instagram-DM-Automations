@@ -1,0 +1,17 @@
+[Script Info]
+Title: Content Factory Karaoke Subtitles
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Montserrat-ExtraBold,80,&H00FFFFFF,&H008A8A8A,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,6,0,2,40,40,960,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:01.78,Default,,0,0,0,,{\k22}Are {\k20}you {\k44}struggling {\k30}to {\k28}save {\k34}money
+Dialogue: 0,0:00:01.78,0:00:04.30,Default,,0,0,0,,{\k42}every {\k42}month? {\k26}Here {\k22}is {\k16}the {\k44}exact
+Dialogue: 0,0:00:04.30,0:00:07.62,Default,,0,0,0,,{\k56}formula {\k36}top {\k60}investors {\k48}use {\k34}daily. {\k36}Start
+Dialogue: 0,0:00:07.62,0:00:10.10,Default,,0,0,0,,{\k52}tracking {\k26}your {\k30}daily {\k60}expenses {\k58}today {\k22}in
+Dialogue: 0,0:00:10.10,0:00:10.32,Default,,0,0,0,,{\k22}win.

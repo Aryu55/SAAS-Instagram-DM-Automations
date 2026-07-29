@@ -1,0 +1,17 @@
+name = "marketing-machine-orchestrator"
+main = "src/index.js"
+compatibility_date = "2026-07-19"
+
+[ai]
+binding = "AI"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "marketing-machine-assets"
+preview_bucket_name = "marketing-machine-assets-preview"
+
+[vars]
+# Target freellmapi proxy endpoint. Defaults to public or self-hosted endpoint.
+FREE_LLM_API_URL = "http://srv1371866.hstgr.cloud:3001/v1"
+
+

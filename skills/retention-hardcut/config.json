@@ -1,0 +1,63 @@
+{
+  "_comment": "retention-hardcut EDITING_STYLE — drop-in template.json for render.js + whisper_align.py. See SKILL.md §6. NOTE: subtitleHighlightColor maps to ASS SecondaryColour = the colour of words BEFORE they are spoken, not an accent.",
+  "resolution": "1080x1920",
+  "fps": 30,
+  "font": "Montserrat-ExtraBold",
+  "subtitleStyle": "karaoke-word",
+  "subtitlePrimaryColor": "#FFFFFF",
+  "subtitleHighlightColor": "#8A8A8A",
+  "subtitleY": 0.50,
+  "subtitleFontSize": 80,
+  "maxWordsPerLine": 6,
+  "background": {
+    "type": "source",
+    "color": "#000000"
+  },
+  "logo": {
+    "enabled": false
+  },
+  "music": {
+    "volume": 0.0
+  },
+  "hookCard": {
+    "enabled": false
+  },
+  "grade": {
+    "enabled": true,
+    "filter": "eq=brightness=0.04:contrast=1.12:saturation=0.72"
+  },
+  "cutRhythm": {
+    "medianShotSec": 1.93,
+    "targetBandSec": [1.8, 2.2],
+    "minShotSec": 0.7,
+    "maxShotSec": 5.5,
+    "cutsPerMin": 31,
+    "transition": "hard",
+    "dipToBlackMax": 1
+  },
+  "profiles": {
+    "podcast": {
+      "medianShotSec": 1.93,
+      "punchInScales": [1.0, 1.15, 1.3],
+      "brollPolicy": "concrete-nouns-only",
+      "cropFollowsSpeaker": true
+    },
+    "tutorial": {
+      "medianShotSec": 2.5,
+      "punchInScales": [1.0, 1.4, 1.8],
+      "brollPolicy": "zoom-to-region",
+      "cropFollowsSpeaker": false
+    }
+  },
+  "audio": {
+    "removeSilence": true,
+    "targetLufs": -14,
+    "transitionSfx": false
+  },
+  "openClose": {
+    "captionDelaySec": 0.35,
+    "titleCard": false,
+    "outroCard": false,
+    "cta": false
+  }
+}
