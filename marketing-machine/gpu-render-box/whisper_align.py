@@ -6,15 +6,13 @@ import hashlib
 import argparse
 
 def hex_to_ass(hex_str):
-    # Converts #RRGGBB to &H00BBGGRR
-    hex_str = hex_str.strip().lstrip('#')
+    hex_str = str(hex_str).strip().lstrip('#')
     if len(hex_str) == 6:
         r, g, b = hex_str[0:2], hex_str[2:4], hex_str[4:6]
         return f"&H00{b}{g}{r}"
     return "&H00FFFFFF"
 
 def format_time(seconds):
-    # Formats seconds to ASS time format: H:MM:SS.cs
     hours = int(seconds // 3600)
     minutes = int((seconds % 3600) // 60)
     secs = int(seconds % 60)
@@ -31,32 +29,42 @@ def compute_file_sha256(filepath):
             h.update(chunk)
     return h.hexdigest()
 
+def is_arabic_script(text):
+    for char in text:
+        if '\u0600' <= char <= '\u06FF':
+            return True
+    return False
+
 def generate_ass(words, output_ass, template):
-    font_name = template.get("font", "Montserrat-ExtraBold")
+    font_name = template.get("subtitleFont") or template.get("font", "Montserrat-ExtraBold")
     primary_color = hex_to_ass(template.get("subtitlePrimaryColor", "#FFFFFF"))
     highlight_color = hex_to_ass(template.get("subtitleHighlightColor", "#FFD400"))
     subtitle_y = template.get("subtitleY", 0.50)
     max_words_per_line = template.get("maxWordsPerLine", 4)
-    font_size = template.get("subtitleFontSize", 80)
+    font_size = template.get("subtitleFontSize") or template.get("fontSizePx", 80)
     outline = template.get("subtitleOutline", 6)
     shadow = template.get("subtitleShadow", 0)
-    uppercase = template.get("subtitleUppercase", False)
+    uppercase = template.get("subtitleUppercase", False) or (template.get("textTransform") == "uppercase")
     subtitle_style = template.get("subtitleStyle", "karaoke-word")
+
+    overlay_style = template.get("overlayStyle")
+    border_style = 4 if overlay_style == "dark-translucent-card" else 1
+    back_color = "&H80000000" if overlay_style == "dark-translucent-card" else "&H00000000"
 
     margin_v = int(1920 * (1.0 - subtitle_y))
 
     header = f"""[Script Info]
 Title: Content Factory Karaoke Subtitles
 ScriptType: v4.00+
+WrapStyle: 2
 PlayResX: 1080
 PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{font_name},{font_size},{primary_color},{highlight_color},&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{outline},{shadow},2,40,40,{margin_v},1
+Style: Default,{font_name},{font_size},{primary_color},{highlight_color},&H00000000,{back_color},-1,0,0,0,100,100,0,0,{border_style},{outline},{shadow},2,40,40,{margin_v},1
 """
 
-    # Filter out degenerate cues where end <= start
     clean_words = []
     for w in words:
         if w["end"] > w["start"]:
@@ -71,7 +79,6 @@ Style: Default,{font_name},{font_size},{primary_color},{highlight_color},&H00000
     dialogues = []
 
     if subtitle_style == "one-word" or max_words_per_line == 1:
-        # Each word is its own dialogue event
         for w in clean_words:
             w_start = w["start"]
             w_end = w["end"]
@@ -84,7 +91,6 @@ Style: Default,{font_name},{font_size},{primary_color},{highlight_color},&H00000
                 f"Dialogue: 0,{format_time(w_start)},{format_time(w_end)},Default,,0,0,0,,{ass_line}"
             )
     else:
-        # Group words into lines of max_words_per_line
         lines = []
         current_line = []
         for w in clean_words:
@@ -109,11 +115,8 @@ Style: Default,{font_name},{font_size},{primary_color},{highlight_color},&H00000
 
                 w_start = w["start"]
                 w_end = w["end"]
-
                 duration = max(0.05, w_end - w_start)
                 duration_cs = int(round(duration * 100))
-
-                # Never emit an empty {\k} tag. Attach text directly to \k tag
                 text_parts.append(f"{{\\k{duration_cs}}}{word_str} ")
 
             ass_line = "".join(text_parts).strip()
@@ -132,7 +135,7 @@ def main():
     parser.add_argument("audio_path", help="Path to audio file")
     parser.add_argument("template_path", help="Path to template.json or config.json")
     parser.add_argument("output_ass", help="Path to output ASS file")
-    parser.add_argument("--model", default="large-v3", help="Whisper model name (default: large-v3)")
+    parser.add_argument("--model", default="base", help="Whisper model name (default: base)")
     parser.add_argument("--language", default=None, help="Language code hint (e.g. hi, en)")
     parser.add_argument("--cache-dir", default=os.path.join(os.path.dirname(__file__), "transcripts"), help="Cache directory")
 
@@ -157,10 +160,9 @@ def main():
         except Exception as e:
             print(f"Warning: failed to read template config, using defaults. Error: {e}")
 
-    # Check transcript cache
     os.makedirs(cache_dir, exist_ok=True)
     audio_sha256 = compute_file_sha256(audio_path)
-    lang_str = lang_hint or "auto"
+    lang_str = lang_hint or template.get("language") or "auto"
     cache_filename = f"{audio_sha256}__{model_name}__{lang_str}.json"
     cache_filepath = os.path.join(cache_dir, cache_filename)
 
@@ -182,7 +184,6 @@ def main():
             if strict:
                 print("ERROR: [STRICT MODE] faster-whisper package is not installed. Aborting alignment.")
                 sys.exit(1)
-            print("FALLBACK_USED: dummy_subtitles — reason: faster-whisper package not installed")
             words = [
                 {"word": "Content", "start": 0.5, "end": 1.5},
                 {"word": "Factory", "start": 1.5, "end": 2.5},
@@ -191,7 +192,7 @@ def main():
             ]
         else:
             loaded_model = None
-            for try_model in [model_name, "medium", "base"]:
+            for try_model in [model_name, "base"]:
                 try:
                     print(f"Attempting to load WhisperModel('{try_model}') on CPU...")
                     loaded_model = WhisperModel(try_model, device="cpu", compute_type="float32")
@@ -205,8 +206,8 @@ def main():
                     sys.exit(1)
 
             transcribe_kwargs = {"word_timestamps": True}
-            if lang_hint and lang_hint not in ("auto", "hinglish"):
-                transcribe_kwargs["language"] = lang_hint
+            if lang_str and lang_str not in ("auto", "hinglish"):
+                transcribe_kwargs["language"] = lang_str
 
             segments, info = loaded_model.transcribe(audio_path, **transcribe_kwargs)
             for segment in segments:
@@ -216,6 +217,14 @@ def main():
                         "start": w.start,
                         "end": w.end
                     })
+
+            # Check for invalid Arabic/Urdu script output on Hindi jobs
+            has_arabic = any(is_arabic_script(w["word"]) for w in words)
+            if has_arabic and lang_str in ("hi", "hinglish"):
+                err_msg = f"ERROR: [STRICT MODE] Spoken Hindi transcribed into Urdu script (U+0600-U+06FF). Explicit language='hi' required."
+                print(err_msg)
+                if strict:
+                    sys.exit(1)
 
             if words:
                 try:

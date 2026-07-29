@@ -1,0 +1,27 @@
+{
+  "test": "Content Factory Test 4.0",
+  "verdict": "GO",
+  "timestamp": "2026-07-29T04:50:26.482Z",
+  "ffmpeg": {
+    "version": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers",
+    "libass": true,
+    "libfreetype": true
+  },
+  "whisper": {
+    "package": "faster-whisper",
+    "version": "1.2.1"
+  },
+  "fonts": {
+    "montserrat": "Montserrat-ExtraBold.ttf: \"Montserrat\" \"ExtraBold\"",
+    "komika": "KOMIKAX_.ttf: \"Komika Axis\" \"Regular\"",
+    "inter": "Verdana.ttf: \"Verdana\" \"Regular\""
+  },
+  "r2": {
+    "bucket": "marketing-machine-assets",
+    "r2Roundtrip": "PASS"
+  },
+  "pexelsKeyConfigured": true,
+  "calibration": {
+    "accuracy": 1
+  }
+}

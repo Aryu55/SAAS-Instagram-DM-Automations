@@ -1,0 +1,45 @@
+{
+  "machine1": {
+    "totalScenes": 3,
+    "stockCandidates": [
+      {
+        "sceneIndex": 0,
+        "prompt": "piggy bank money savings",
+        "candidatesConsidered": [
+          "https://videos.pexels.com/video-files/8369976/8369976-hd_720_1280_30fps.mp4"
+        ],
+        "verified": true,
+        "chosenSource": "/Users/aryupanchal/Downloads/organic content/marketing-machine/gpu-render-box/temp/m1_1785300627020/broll/scene_0.mp4",
+        "reason": "Pexels API PASS: Downloaded HD stock video clip (720x1280)."
+      },
+      {
+        "sceneIndex": 1,
+        "prompt": "smartphone finance app graph",
+        "candidatesConsidered": [
+          "https://videos.pexels.com/video-files/7247871/7247871-hd_720_1280_30fps.mp4"
+        ],
+        "verified": true,
+        "chosenSource": "/Users/aryupanchal/Downloads/organic content/marketing-machine/gpu-render-box/temp/m1_1785300627020/broll/scene_1.mp4",
+        "reason": "Pexels API PASS: Downloaded HD stock video clip (720x1280)."
+      },
+      {
+        "sceneIndex": 2,
+        "prompt": "happy financial victory",
+        "candidatesConsidered": [
+          "https://videos.pexels.com/video-files/6806111/6806111-hd_1080_2048_25fps.mp4"
+        ],
+        "verified": true,
+        "chosenSource": "/Users/aryupanchal/Downloads/organic content/marketing-machine/gpu-render-box/temp/m1_1785300627020/broll/scene_2.mp4",
+        "reason": "Pexels API PASS: Downloaded HD stock video clip (1080x2048)."
+      }
+    ],
+    "verifiedScenesCount": 3,
+    "passRate": 1,
+    "chosenPath": "STOCK_VIDEO",
+    "visualClips": [
+      "/Users/aryupanchal/Downloads/organic content/marketing-machine/gpu-render-box/temp/m1_1785300627020/broll/scene_0.mp4",
+      "/Users/aryupanchal/Downloads/organic content/marketing-machine/gpu-render-box/temp/m1_1785300627020/broll/scene_1.mp4",
+      "/Users/aryupanchal/Downloads/organic content/marketing-machine/gpu-render-box/temp/m1_1785300627020/broll/scene_2.mp4"
+    ]
+  }
+}

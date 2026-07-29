@@ -1,0 +1,39 @@
+[Script Info]
+Title: Content Factory Karaoke Subtitles
+ScriptType: v4.00+
+WrapStyle: 2
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Inter-Bold,42,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,4,6,0,2,40,40,1497,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:02.06,0:00:02.90,Default,,0,0,0,,{\k44}قل {\k24}رات {\k8}میں {\k8}آپ
+Dialogue: 0,0:00:02.90,0:00:03.66,Default,,0,0,0,,{\k10}نے {\k22}پھر {\k16}سے {\k28}پون
+Dialogue: 0,0:00:03.66,0:00:05.94,Default,,0,0,0,,{\k46}دیکھاں {\k44}AND {\k44}SUBOUT {\k26}کے
+Dialogue: 0,0:00:05.94,0:00:07.06,Default,,0,0,0,,{\k34}آپ {\k22}بہت {\k26}زیادہ {\k30}طائد
+Dialogue: 0,0:00:07.06,0:00:07.94,Default,,0,0,0,,{\k22}فیل {\k18}کر {\k34}رہاں {\k14}آپ
+Dialogue: 0,0:00:07.94,0:00:08.54,Default,,0,0,0,,{\k14}کو {\k22}کام {\k12}پے {\k12}بھی
+Dialogue: 0,0:00:08.54,0:00:09.24,Default,,0,0,0,,{\k20}جانے {\k10}کا {\k24}کوئی {\k16}مان
+Dialogue: 0,0:00:09.24,0:00:10.10,Default,,0,0,0,,{\k18}نہیں {\k14}ہے {\k36}آپ {\k18}نے
+Dialogue: 0,0:00:10.10,0:00:10.86,Default,,0,0,0,,{\k34}قل {\k22}رات {\k10}میں {\k10}جو
+Dialogue: 0,0:00:10.86,0:00:11.96,Default,,0,0,0,,{\k36}چیزے {\k16}کی {\k48}اس {\k10}کے
+Dialogue: 0,0:00:11.96,0:00:12.36,Default,,0,0,0,,{\k12}بہت {\k10}زیادہ {\k8}آپ {\k10}کو
+Dialogue: 0,0:00:12.36,0:00:13.56,Default,,0,0,0,,{\k20}بہت {\k18}زیادہ {\k48}شیم {\k34}اور
+Dialogue: 0,0:00:13.56,0:00:15.02,Default,,0,0,0,,{\k42}گلٹ {\k32}اور {\k62}انڈر {\k10}سے
+Dialogue: 0,0:00:15.02,0:00:15.94,Default,,0,0,0,,{\k14}بس {\k38}بورہی {\k20}لگ {\k20}رہے
+Dialogue: 0,0:00:15.94,0:00:17.70,Default,,0,0,0,,{\k54}اور {\k64}ساتی {\k52}ساتھ {\k6}تھے
+Dialogue: 0,0:00:17.70,0:00:18.98,Default,,0,0,0,,{\k28}تھے {\k22}تھے {\k38}پر {\k40}نے
+Dialogue: 0,0:00:18.98,0:00:19.96,Default,,0,0,0,,{\k20}کوئی {\k10}ار {\k8}میں {\k60}جانتاں
+Dialogue: 0,0:00:19.96,0:00:21.04,Default,,0,0,0,,{\k26}کہ {\k52}آپ {\k16}کو {\k14}بھی
+Dialogue: 0,0:00:21.04,0:00:22.14,Default,,0,0,0,,{\k16}یہی {\k18}لگ {\k26}رہاں {\k50}جب
+Dialogue: 0,0:00:22.14,0:00:22.86,Default,,0,0,0,,{\k16}آپ {\k16}کر {\k28}رہے {\k12}گے
+Dialogue: 0,0:00:22.86,0:00:24.48,Default,,0,0,0,,{\k32}پہلے {\k38}کہ {\k54}آج {\k38}LAST
+Dialogue: 0,0:00:24.48,0:00:25.26,Default,,0,0,0,,{\k26}BAAR {\k10}میں {\k18}کر {\k24}رہاں
+Dialogue: 0,0:00:25.26,0:00:26.12,Default,,0,0,0,,{\k28}کل {\k12}سے {\k12}میں {\k34}پکھا
+Dialogue: 0,0:00:26.12,0:00:27.68,Default,,0,0,0,,{\k32}چیج {\k16}ہو {\k42}رہاں {\k66}اور
+Dialogue: 0,0:00:27.68,0:00:28.70,Default,,0,0,0,,{\k12}ایک {\k16}بات {\k30}بولا {\k44}اپنے
+Dialogue: 0,0:00:28.70,0:00:29.46,Default,,0,0,0,,{\k50}کتنی {\k26}بار

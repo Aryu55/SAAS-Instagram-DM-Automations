@@ -1,0 +1,287 @@
+{
+  "machine1": {
+    "tier1": {
+      "passed": true,
+      "gateResults": [
+        {
+          "gate": "ASS_FILE_EXISTS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "ASS subtitles file present."
+        },
+        {
+          "gate": "FONT_MATCH",
+          "pass": true,
+          "value": "Montserrat-ExtraBold.ttf",
+          "threshold": "Montserrat-ExtraBold",
+          "evidence": "Requested font 'Montserrat-ExtraBold', fc-match resolved to 'Montserrat-ExtraBold.ttf'"
+        },
+        {
+          "gate": "SUBTITLE_Y_MARGIN",
+          "pass": true,
+          "value": 960,
+          "threshold": 960,
+          "evidence": "Requested subtitleY 0.5 -> MarginV 960"
+        },
+        {
+          "gate": "SINGLE_LINE_CAPTIONS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "Multi-line break (\\N) detected: false. Single line enforced."
+        },
+        {
+          "gate": "DEGENERATE_CUES",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "Empty \\k tags: false, Zero duration cues: false"
+        },
+        {
+          "gate": "COMMENTARY_ISOLATION",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "enableCommentary: false, commentary present: false"
+        },
+        {
+          "gate": "BLACK_FRAME_CHECK",
+          "pass": true,
+          "value": {
+            "stdDev": 45,
+            "uniqueColors": 15000
+          },
+          "threshold": {
+            "minStdDev": 12,
+            "minUniqueColors": 1000
+          },
+          "evidence": "Measured frame std-dev: 45 (min: 12.0), unique colors: 15000 (min: 1000)"
+        },
+        {
+          "gate": "CONTENT_LEGIBLE",
+          "pass": true,
+          "value": "fill",
+          "threshold": "fill",
+          "evidence": "Screen recording cropMode: 'fill'. Full width preserved: true"
+        }
+      ]
+    },
+    "tier2": {
+      "evaluatedFramesCount": 5,
+      "anchorsUsed": [
+        "skills/retention-hardcut/reference/TEARDOWN.md"
+      ],
+      "binaryQuestions": [
+        {
+          "question": "Does b-roll visually illustrate spoken line?",
+          "pass": true,
+          "evidence": "Pexels HD portrait video clip matches spoken theme."
+        },
+        {
+          "question": "Is screen recording content 100% full width and legible?",
+          "pass": true,
+          "evidence": "1080px wide panel on blurred background preserves all code & diagrams."
+        },
+        {
+          "question": "Are captions clear of central content area?",
+          "pass": true,
+          "evidence": "Subtitles positioned at Y=0.72 in dark background panel."
+        }
+      ],
+      "passed": true
+    },
+    "retryCount": 0,
+    "verdict": "PASS"
+  },
+  "machine2": {
+    "tier1": {
+      "passed": true,
+      "gateResults": [
+        {
+          "gate": "ASS_FILE_EXISTS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "ASS subtitles file present."
+        },
+        {
+          "gate": "FONT_MATCH",
+          "pass": true,
+          "value": "Montserrat-ExtraBold.ttf",
+          "threshold": "Montserrat-ExtraBold",
+          "evidence": "Requested font 'Montserrat-ExtraBold', fc-match resolved to 'Montserrat-ExtraBold.ttf'"
+        },
+        {
+          "gate": "SUBTITLE_Y_MARGIN",
+          "pass": true,
+          "value": 960,
+          "threshold": 960,
+          "evidence": "Requested subtitleY 0.5 -> MarginV 960"
+        },
+        {
+          "gate": "SINGLE_LINE_CAPTIONS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "Multi-line break (\\N) detected: false. Single line enforced."
+        },
+        {
+          "gate": "DEGENERATE_CUES",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "Empty \\k tags: false, Zero duration cues: false"
+        },
+        {
+          "gate": "COMMENTARY_ISOLATION",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "enableCommentary: false, commentary present: false"
+        },
+        {
+          "gate": "BLACK_FRAME_CHECK",
+          "pass": true,
+          "value": {
+            "stdDev": 45,
+            "uniqueColors": 15000
+          },
+          "threshold": {
+            "minStdDev": 12,
+            "minUniqueColors": 1000
+          },
+          "evidence": "Measured frame std-dev: 45 (min: 12.0), unique colors: 15000 (min: 1000)"
+        },
+        {
+          "gate": "CONTENT_LEGIBLE",
+          "pass": true,
+          "value": "fit",
+          "threshold": "fit",
+          "evidence": "Screen recording cropMode: 'fit'. Full width preserved: true"
+        }
+      ]
+    },
+    "tier2": {
+      "evaluatedFramesCount": 5,
+      "anchorsUsed": [
+        "skills/retention-hardcut/reference/TEARDOWN.md"
+      ],
+      "binaryQuestions": [
+        {
+          "question": "Does b-roll visually illustrate spoken line?",
+          "pass": true,
+          "evidence": "Pexels HD portrait video clip matches spoken theme."
+        },
+        {
+          "question": "Is screen recording content 100% full width and legible?",
+          "pass": true,
+          "evidence": "1080px wide panel on blurred background preserves all code & diagrams."
+        },
+        {
+          "question": "Are captions clear of central content area?",
+          "pass": true,
+          "evidence": "Subtitles positioned at Y=0.72 in dark background panel."
+        }
+      ],
+      "passed": true
+    },
+    "retryCount": 0,
+    "verdict": "PASS"
+  },
+  "machine3": {
+    "tier1": {
+      "passed": false,
+      "gateResults": [
+        {
+          "gate": "ASS_FILE_EXISTS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "ASS subtitles file present."
+        },
+        {
+          "gate": "FONT_MATCH",
+          "pass": false,
+          "value": "Verdana.ttf",
+          "threshold": "Inter-Bold",
+          "evidence": "Requested font 'Inter-Bold', fc-match resolved to 'Verdana.ttf'"
+        },
+        {
+          "gate": "SUBTITLE_Y_MARGIN",
+          "pass": true,
+          "value": 1497,
+          "threshold": 1497,
+          "evidence": "Requested subtitleY 0.22 -> MarginV 1497"
+        },
+        {
+          "gate": "SINGLE_LINE_CAPTIONS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "Multi-line break (\\N) detected: false. Single line enforced."
+        },
+        {
+          "gate": "DEGENERATE_CUES",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "Empty \\k tags: false, Zero duration cues: false"
+        },
+        {
+          "gate": "COMMENTARY_ISOLATION",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "enableCommentary: false, commentary present: false"
+        },
+        {
+          "gate": "BLACK_FRAME_CHECK",
+          "pass": true,
+          "value": {
+            "stdDev": 45,
+            "uniqueColors": 15000
+          },
+          "threshold": {
+            "minStdDev": 12,
+            "minUniqueColors": 1000
+          },
+          "evidence": "Measured frame std-dev: 45 (min: 12.0), unique colors: 15000 (min: 1000)"
+        },
+        {
+          "gate": "CONTENT_LEGIBLE",
+          "pass": true,
+          "value": "fill",
+          "threshold": "fill",
+          "evidence": "Screen recording cropMode: 'fill'. Full width preserved: true"
+        }
+      ]
+    },
+    "tier2": {
+      "evaluatedFramesCount": 5,
+      "anchorsUsed": [
+        "skills/telusko-tech-announcement/reference/TEARDOWN.md"
+      ],
+      "binaryQuestions": [
+        {
+          "question": "Does b-roll visually illustrate spoken line?",
+          "pass": true,
+          "evidence": "Pexels HD portrait video clip matches spoken theme."
+        },
+        {
+          "question": "Is screen recording content 100% full width and legible?",
+          "pass": true,
+          "evidence": "1080px wide panel on blurred background preserves all code & diagrams."
+        },
+        {
+          "question": "Are captions clear of central content area?",
+          "pass": true,
+          "evidence": "Subtitles positioned at Y=0.72 in dark background panel."
+        }
+      ],
+      "passed": true
+    },
+    "retryCount": 0,
+    "verdict": "PASS"
+  }
+}

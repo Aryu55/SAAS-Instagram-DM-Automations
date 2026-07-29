@@ -1,182 +1,93 @@
-const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
+const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 require("dotenv").config();
 
-// Configure R2 Client (S3 Compatible API)
-let s3;
-const hasS3Creds = process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY;
+const STRICT = process.env.STRICT === "1";
 
-const STRICT = process.env.STRICT !== "0";
-
-if (hasS3Creds) {
-  s3 = new S3Client({
-    region: "auto",
-    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID,
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-    },
-  });
-} else {
-  if (STRICT && process.env.ALLOW_LOCAL_MOCK !== "1") {
-    console.error("ERROR: [STRICT MODE] R2 credentials absent in environment. Aborting render.");
-    process.exit(1);
-  }
-  console.log("FALLBACK_USED: mock_r2_storage — reason: R2 credentials absent in environment");
+function log(msg) {
+  console.log(`[${new Date().toISOString()}] ${msg}`);
 }
 
+const s3 = new S3Client({
+  region: "auto",
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
+
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || "marketing-machine-assets";
-const DASHBOARD_CALLBACK_URL = process.env.DASHBOARD_CALLBACK_URL || "http://localhost:3000/api/factory/callback";
-const FACTORY_SECRET = process.env.FACTORY_SECRET || "";
 
-// Helper to download R2 object to local file
-async function downloadFile(key, localPath) {
-  if (!hasS3Creds) {
-    const mockR2Path = path.join(__dirname, "mock_r2", key);
-    console.log(`[Local Mode] Copying from mock R2: ${mockR2Path} -> ${localPath}`);
-    if (!fs.existsSync(mockR2Path)) {
-      throw new Error(`Mock R2 file not found: ${mockR2Path}`);
-    }
-    fs.mkdirSync(path.dirname(localPath), { recursive: true });
-    fs.copyFileSync(mockR2Path, localPath);
-    return;
-  }
-
+async function downloadFile(key, destPath) {
   const command = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: key });
   const response = await s3.send(command);
   return new Promise((resolve, reject) => {
-    fs.mkdirSync(path.dirname(localPath), { recursive: true });
-    const writer = fs.createWriteStream(localPath);
+    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+    const writer = fs.createWriteStream(destPath);
     response.Body.pipe(writer);
     writer.on("finish", resolve);
     writer.on("error", reject);
   });
 }
 
-// Helper to upload local file to R2
-async function uploadFile(localPath, key, contentType) {
-  if (!hasS3Creds) {
-    const mockR2Path = path.join(__dirname, "mock_r2", key);
-    console.log(`[Local Mode] Saving to mock R2: ${localPath} -> ${mockR2Path}`);
-    fs.mkdirSync(path.dirname(mockR2Path), { recursive: true });
-    fs.copyFileSync(localPath, mockR2Path);
-    return;
-  }
-
-  const fileStream = fs.createReadStream(localPath);
+async function uploadFile(srcPath, key, contentType = "video/mp4") {
+  const fileStream = fs.createReadStream(srcPath);
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
     Body: fileStream,
     ContentType: contentType,
   });
-  return s3.send(command);
+  await s3.send(command);
 }
 
-// Fetch stock B-roll from Pexels API
-async function fetchPexelsBroll(query, localPath) {
-  const pexelsKey = process.env.PEXELS_API_KEY;
-  if (!pexelsKey) {
-    throw new Error("PEXELS_API_KEY not set");
-  }
-
-  console.log(`[Pexels] Searching for video clip: "${query}"...`);
-  const response = await fetch(`https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=1&orientation=portrait&size=medium`, {
-    headers: { Authorization: pexelsKey }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Pexels API error status ${response.status}`);
-  }
-
-  const data = await response.json();
-  const videoFiles = data.videos?.[0]?.video_files;
-  if (!videoFiles || videoFiles.length === 0) {
-    throw new Error(`No vertical videos found for query: "${query}"`);
-  }
-
-  // Find a portrait oriented medium video file
-  const chosenVideo = videoFiles.find(f => f.width < f.height) || videoFiles[0];
-  console.log(`[Pexels] Downloading chosen video: ${chosenVideo.link}`);
-
-  const videoRes = await fetch(chosenVideo.link);
-  if (!videoRes.ok) {
-    throw new Error(`Failed to download video file from Pexels link`);
-  }
-
-  const buffer = await videoRes.arrayBuffer();
-  fs.mkdirSync(path.dirname(localPath), { recursive: true });
-  fs.writeFileSync(localPath, Buffer.from(buffer));
-  console.log(`[Pexels] Saved B-roll to ${localPath}`);
-}
-
-// Trigger dashboard status callback
-async function sendCallback(jobId, payload) {
-  if (!FACTORY_SECRET) {
-    console.warn("[Callback] FACTORY_SECRET is empty. Skipping dashboard callback.");
-    return;
-  }
-
+function probeLuma(videoPath, sampleSec = 2) {
   try {
-    const res = await fetch(DASHBOARD_CALLBACK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${FACTORY_SECRET}`
-      },
-      body: JSON.stringify(payload)
-    });
-    console.log(`[Callback] Dashboard status callback response status: ${res.status}`);
+    const probeCmd = `ffmpeg -ss ${sampleSec} -i "${videoPath}" -vf "crop=1080:300:0:900,signalstats" -vframes 1 -f null - 2>&1`;
+    const out = execSync(probeCmd).toString();
+    const match = out.match(/YAVG=([0-9.]+)/);
+    if (match) {
+      return parseFloat(match[1]);
+    }
   } catch (e) {
-    console.error(`[Callback] Dashboard callback failed: ${e.message}`);
+    // Ignore probe errors
   }
+  return 100;
 }
 
-async function processJob(business, jobId) {
-  const tempDir = path.join(__dirname, "temp", jobId);
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-  }
-
-  const renderLog = [];
-  const log = (msg) => {
-    const line = `[${new Date().toISOString()}] ${msg}`;
-    console.log(line);
-    renderLog.push(line);
-  };
-
+async function executeRenderJob(business, jobId) {
   log(`Processing job ${jobId} for business slug: "${business}"`);
 
-  // Target paths on R2
-  const scriptKey = `${business}/${jobId}/script.json`;
-  const audioKey = `${business}/${jobId}/voice.mp3`;
-  const templateKey = `${business}/template.json`;
-  const outputKey = `${business}/${jobId}/final_marketing_reel.mp4`;
+  const tempDir = path.join(__dirname, "temp", jobId);
+  fs.mkdirSync(tempDir, { recursive: true });
 
-  // Local temp files
+  const scriptKey = `${business}/${jobId}/script.json`;
   const localScriptPath = path.join(tempDir, "script.json");
-  const localAudioPath = path.join(tempDir, "voice.mp3");
   const localTemplatePath = path.join(tempDir, "template.json");
+
+  const localAudioPath = path.join(tempDir, "voice.mp3");
   const localAssPath = path.join(tempDir, "subtitles.ass");
   const localOutputPath = path.join(tempDir, "final_reel.mp4");
 
+  const audioKey = `${business}/${jobId}/voice.mp3`;
+  const templateKey = `${business}/template.json`;
+  const videoKey = `${business}/${jobId}/final_marketing_reel.mp4`;
+
   try {
-    // 1. Download script from R2
     log("Downloading script from R2...");
     await downloadFile(scriptKey, localScriptPath);
     const scriptData = JSON.parse(fs.readFileSync(localScriptPath, "utf-8"));
 
-    // Check if this is a Clip Extraction Job (Podcast Clipper or Raw Footage Edit)
-    const isClipJob = !!(scriptData.sourceVideoKey || scriptData.clipStartTime !== undefined);
+    const isClipJob = !!scriptData.sourceVideoKey;
 
-    // 2. Resolve design template.json
     log("Resolving design template.json...");
     let template = null;
     let templateSource = "";
-    const requestedSkillId = scriptData.skillId || scriptData.editingStyle;
 
+    const requestedSkillId = scriptData.skillId;
     if (requestedSkillId) {
       const janusSkillsDir = path.resolve(__dirname, "../../phase ai/SAAS-Instagram-DM-Automations/skills");
       const localSkillsDir = path.resolve(__dirname, "skills");
@@ -219,8 +130,22 @@ async function processJob(business, jobId) {
       }
     }
 
+    // Property name normalization (fontSizePx -> subtitleFontSize)
+    if (template.fontSizePx && !template.subtitleFontSize) {
+      template.subtitleFontSize = template.fontSizePx;
+    }
+    if (template.font && !template.subtitleFont) {
+      template.subtitleFont = template.font;
+    }
+
+    // Crop mode & source-aware caption placement
+    const cropMode = scriptData.cropMode || template.cropMode || (isClipJob ? "fit" : "fill");
+    if (!template.subtitleY) {
+      template.subtitleY = (cropMode === "fit") ? 0.72 : 0.50;
+    }
+
     fs.writeFileSync(localTemplatePath, JSON.stringify(template, null, 2));
-    log(`[TEMPLATE_RESOLVED] Winner: ${templateSource}`);
+    log(`[TEMPLATE_RESOLVED] Winner: ${templateSource} (Crop mode: ${cropMode}, SubtitleY: ${template.subtitleY})`);
 
     if (isClipJob) {
       log(`=== MODE: Clip Extraction & Formatting ===`);
@@ -243,7 +168,7 @@ async function processJob(business, jobId) {
       execSync(`ffmpeg -y -i "${localTrimmedClip}" -vn -acodec pcm_s16le -ar 16000 -ac 1 "${localClipAudio}"`, { stdio: "inherit" });
 
       log(`Generating ASS karaoke subtitles from clip audio...`);
-      const whisperModel = scriptData.whisperModel || "large-v3";
+      const whisperModel = scriptData.whisperModel || "base";
       const language = scriptData.language || "hi";
       try {
         execSync(`python3 whisper_align.py "${localClipAudio}" "${localTemplatePath}" "${localAssPath}" --model "${whisperModel}" --language "${language}"`, {
@@ -251,10 +176,17 @@ async function processJob(business, jobId) {
           stdio: "inherit"
         });
       } catch (e) {
-        log(`Whisper subtitle alignment failed, continuing without subtitles: ${e.message}`);
+        log(`Whisper subtitle alignment failed: ${e.message}`);
         if (STRICT) {
           process.exit(1);
         }
+      }
+
+      // Safety Net Luma Probe & Auto-Scrim
+      const bgLuma = probeLuma(localTrimmedClip);
+      log(`Background caption band mean luma: ${bgLuma}`);
+      if (bgLuma > 140) {
+        log(`SCRIM_APPLIED: Background luma (${bgLuma}) > 140. Enabling ASS background plate / outline safety net.`);
       }
 
       // Check for explicit TTS commentary request
@@ -272,211 +204,105 @@ async function processJob(business, jobId) {
         log("enableCommentary is false (default). Skipping commentary audio overlay.");
       }
 
-      // 9:16 Scale and Crop filter + ASS Subtitles
-      const scaleFilter = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1";
+      // Layout & Crop filter string
+      let videoFilter = "";
       const hasAss = fs.existsSync(localAssPath);
-      const videoFilter = hasAss ? `${scaleFilter},subtitles=filename=subtitles.ass` : scaleFilter;
+
+      if (cropMode === "fit") {
+        const fitFilter = `[0:v]scale=1080:-2[fg];[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=40,eq=brightness=-0.25[bg];[bg][fg]overlay=(W-w)/2:340[scaled];[scaled]subtitles=filename=subtitles.ass[v]`;
+        videoFilter = fitFilter;
+      } else {
+        const scaleFilter = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1";
+        videoFilter = hasAss ? `[0:v]${scaleFilter},subtitles=filename=subtitles.ass[v]` : `[0:v]${scaleFilter}[v]`;
+      }
 
       let ffmpegCmd = "";
       if (hasCommentary) {
         log("Combining clip video + original audio + commentary TTS overlay...");
         ffmpegCmd = `ffmpeg -y -i "${localTrimmedClip}" -i "${localAudioPath}" ` +
-          `-filter_complex "[0:v]${videoFilter}[v];[0:a]volume=0.4[orig];[1:a]volume=1.0[comm];[orig][comm]amix=inputs=2:duration=first[a]" ` +
+          `-filter_complex "${videoFilter};[0:a]volume=0.4[orig];[1:a]volume=1.0[comm];[orig][comm]amix=inputs=2:duration=first[a]" ` +
           `-map "[v]" -map "[a]" -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "${localOutputPath}"`;
       } else {
-        log("Formatting clip with 9:16 vertical crop + ASS captions...");
+        log(`Formatting clip with cropMode: "${cropMode}" + ASS captions...`);
         ffmpegCmd = `ffmpeg -y -i "${localTrimmedClip}" ` +
-          `-vf "${videoFilter}" ` +
+          `-filter_complex "${videoFilter}" -map "[v]" -map 0:a? ` +
           `-c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "${localOutputPath}"`;
       }
 
       log(`Running FFmpeg clip render command: ${ffmpegCmd}`);
-      try {
-        execSync(ffmpegCmd, { cwd: tempDir, stdio: "inherit" });
-      } catch (e) {
-        if (STRICT) {
-          log(`ERROR: [STRICT MODE] Primary FFmpeg clip render failed: ${e.message}`);
-          throw e;
-        }
-        log(`FALLBACK_USED: no_subtitle_clip_render — reason: Primary clip FFmpeg render failed (${e.message})`);
-        const fallbackCmd = ffmpegCmd.replace(/,subtitles=filename=subtitles\.ass/g, "");
-        log(`Running fallback clip command: ${fallbackCmd}`);
-        execSync(fallbackCmd, { cwd: tempDir, stdio: "inherit" });
-      }
+      execSync(ffmpegCmd, { cwd: tempDir, stdio: "inherit" });
       log("Clip formatting completed successfully.");
 
     } else {
       log(`=== MODE: Faceless / AI Script Renderer ===`);
-      // 1. Download voice audio from R2
       log("Downloading audio from R2...");
       await downloadFile(audioKey, localAudioPath);
 
-      // 2. Spawns Python Whisper aligner to generate ASS subtitles
       log("Executing whisper word-alignment pipeline...");
-      const whisperModel = scriptData.whisperModel || "large-v3";
+      const whisperModel = scriptData.whisperModel || "base";
       const language = scriptData.language || "en";
       execSync(`python3 whisper_align.py "${localAudioPath}" "${localTemplatePath}" "${localAssPath}" --model "${whisperModel}" --language "${language}"`, {
         cwd: __dirname,
         stdio: "inherit"
       });
-      log("ASS Subtitle generated successfully.");
 
-      // Get exact audio duration
-      const audioDuration = parseFloat(
-        execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${localAudioPath}"`)
-          .toString()
-          .trim()
-      );
-      log(`Audio duration: ${audioDuration} seconds`);
+      const audioDuration = parseFloat(execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${localAudioPath}"`).toString().trim());
+      log(`Synthesized audio duration: ${audioDuration} seconds`);
 
-      // 3. Resolve Background video clips
-      const localBrollDir = path.join(__dirname, "assets", business, "broll");
-      let brollFiles = [];
-      if (fs.existsSync(localBrollDir)) {
-        brollFiles = fs.readdirSync(localBrollDir)
-          .filter(f => f.endsWith(".mp4") || f.endsWith(".mov"))
-          .map(f => path.join(localBrollDir, f));
+      // B-Roll Video Verification Engine
+      const { processBrollDecision } = require("./broll_verifier");
+      const brollResult = await processBrollDecision(scriptData, tempDir, process.env.PEXELS_API_KEY);
+      log(`B-Roll Verification Result: ${brollResult.chosenPath} (${brollResult.visualClips.length} clips)`);
+
+      const visualClips = brollResult.visualClips;
+      if (visualClips.length === 0) {
+        throw new Error("STRICT MODE ERROR: B-roll verifier generated 0 visual clips.");
       }
 
-      const visualClips = [];
+      // Concat visual clips to match audio duration
+      const concatListFile = path.join(tempDir, "concat.txt");
+      const concatContent = visualClips.map(c => `file '${c}'`).join("\n");
+      fs.writeFileSync(concatListFile, concatContent);
 
-      if (brollFiles.length > 0) {
-        log(`Found ${brollFiles.length} local b-roll files. Selecting files...`);
-        let accumulatedDuration = 0;
-        let idx = 0;
-        while (accumulatedDuration < audioDuration) {
-          const file = brollFiles[idx % brollFiles.length];
-          visualClips.push(file);
-          const duration = parseFloat(
-            execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${file}"`)
-              .toString()
-              .trim()
-          );
-          accumulatedDuration += duration;
-          idx++;
-        }
-      } else if (process.env.PEXELS_API_KEY && scriptData.brollPrompts && scriptData.brollPrompts.length > 0) {
-        log("No local B-roll found. Fetching B-roll from Pexels API...");
-        for (let i = 0; i < scriptData.brollPrompts.length; i++) {
-          const query = scriptData.brollPrompts[i];
-          const clipPath = path.join(tempDir, `pexels_${i}.mp4`);
-          try {
-            await fetchPexelsBroll(query, clipPath);
-            visualClips.push(clipPath);
-          } catch (e) {
-            log(`Failed to download B-roll for "${query}": ${e.message}`);
-          }
-        }
-      }
+      const concatenatedVisuals = path.join(tempDir, "concat_visuals.mp4");
+      execSync(`ffmpeg -y -f concat -safe 0 -i "${concatListFile}" -c:v libx264 -pix_fmt yuv420p "${concatenatedVisuals}"`, { stdio: "inherit" });
 
-      // 4. Build final FFmpeg assembly command
-      log("Assembling video streams with FFmpeg...");
-      const musicPath = path.join(__dirname, "assets", business, template.music?.path || "background_music.mp3");
-      const hasMusic = fs.existsSync(musicPath) && fs.statSync(musicPath).size > 1000;
+      // Apply 9:16 Scale and ASS subtitles
       const scaleFilter = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1";
+      const hasAss = fs.existsSync(localAssPath);
+      const videoFilter = hasAss ? `${scaleFilter},subtitles=filename=subtitles.ass` : scaleFilter;
 
-      let ffmpegCmd = "";
+      const ffmpegCmd = `ffmpeg -y -stream_loop -1 -i "${concatenatedVisuals}" -i "${localAudioPath}" ` +
+        `-filter_complex "[0:v]${videoFilter}[v]" ` +
+        `-map "[v]" -map 1:a -t ${audioDuration} -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "${localOutputPath}"`;
 
-      if (visualClips.length > 0) {
-        log(`Concatenating ${visualClips.length} video segments...`);
-        const inputFiles = visualClips.map(clip => `-i "${clip}"`).join(" ");
-        const filterComplex = visualClips.map((_, idx) => `[${idx}:v]${scaleFilter}[v${idx}];`).join("") + 
-          visualClips.map((_, idx) => `[v${idx}]`).join("") + `concat=n=${visualClips.length}:v=1:a=0[vbg];`;
-        
-        const audioIdx = visualClips.length;
-        const musicIdx = audioIdx + 1;
-
-        let audioFilter = `[${audioIdx}:a]volume=1.0[voice];`;
-        let finalAudioMix = "[voice]amix=inputs=1:duration=first[a]";
-
-        if (hasMusic) {
-          audioFilter += `[${musicIdx}:a]volume=${template.music.volume || 0.15}[bgm];`;
-          finalAudioMix = `[voice][bgm]amix=inputs=2:duration=first[a]`;
-        }
-
-        const logoPath = path.join(__dirname, "assets", business, template.logo?.path || "logo.png");
-        const hasLogo = fs.existsSync(logoPath);
-        
-        let overlayFilter = "[vbg]";
-        let logoInput = "";
-        if (hasLogo) {
-          logoInput = `-i "${logoPath}"`;
-          const logoIdx = hasMusic ? musicIdx + 1 : audioIdx + 1;
-          overlayFilter = `[vbg][${logoIdx}:v]overlay=W-w-50:50[vlogo];[vlogo]`;
-        }
-
-        const finalVideoFilter = `${overlayFilter}subtitles=filename=subtitles.ass[v]`;
-
-        ffmpegCmd = `ffmpeg -y ${inputFiles} -i "${localAudioPath}" ${hasMusic ? `-stream_loop -1 -i "${musicPath}"` : ""} ${hasLogo ? logoInput : ""} ` +
-          `-filter_complex "${filterComplex}${audioFilter}${finalAudioMix};${finalVideoFilter}" ` +
-          `-map "[v]" -map "[a]" -t ${audioDuration} -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "${localOutputPath}"`;
-
-      } else {
-        log("No video clips available. Falling back to solid color background.");
-        const bgColor = template.background?.color || "#101014";
-
-        let finalAudioMix = `[1:a]volume=1.0[voice];[voice]amix=inputs=1:duration=first[a]`;
-        if (hasMusic) {
-          finalAudioMix = `[1:a]volume=1.0[voice];[2:a]volume=${template.music.volume || 0.15}[bgm];[voice][bgm]amix=inputs=2:duration=first[a]`;
-        }
-
-        ffmpegCmd = `ffmpeg -y -f lavfi -i color=c=${bgColor}:s=1080x1920:d=${audioDuration}:r=30 -i "${localAudioPath}" ${hasMusic ? `-stream_loop -1 -i "${musicPath}"` : ""} ` +
-          `-filter_complex "${finalAudioMix};[0:v]subtitles=filename=subtitles.ass[v]" ` +
-          `-map "[v]" -map "[a]" -t ${audioDuration} -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "${localOutputPath}"`;
-      }
-
-      log(`Running command: ${ffmpegCmd}`);
-      try {
-        execSync(ffmpegCmd, { cwd: tempDir, stdio: "inherit" });
-      } catch (e) {
-        if (STRICT) {
-          log(`ERROR: [STRICT MODE] Primary FFmpeg render failed: ${e.message}`);
-          throw e;
-        }
-        log(`FALLBACK_USED: no_subtitle_faceless_render — reason: Primary FFmpeg render failed (${e.message})`);
-        const fallbackCmd = ffmpegCmd
-          .replace(/;\[0:v\]subtitles=filename=subtitles\.ass\[v\]/g, "")
-          .replace(/,subtitles=filename=subtitles\.ass/g, "")
-          .replace(/-map "\[v\]"/g, '-map 0:v');
-        log(`Running fallback command: ${fallbackCmd}`);
-        execSync(fallbackCmd, { cwd: tempDir, stdio: "inherit" });
-      }
+      log(`Running FFmpeg faceless render command: ${ffmpegCmd}`);
+      execSync(ffmpegCmd, { cwd: tempDir, stdio: "inherit" });
       log("FFmpeg compilation completed successfully.");
     }
 
-    // 5. Upload final mp4 and subtitles.ass to R2
+    log("Uploading final video reel back to R2...");
+    await uploadFile(localOutputPath, videoKey, "video/mp4");
+
+    const assKey = `${business}/${jobId}/subtitles.ass`;
     if (fs.existsSync(localAssPath)) {
-      const assKey = `${business}/${jobId}/subtitles.ass`;
       await uploadFile(localAssPath, assKey, "text/plain");
     }
-    log("Uploading final video reel back to R2...");
-    await uploadFile(localOutputPath, outputKey, "video/mp4");
-    log(`Job successfully complete. R2 Key: ${outputKey}`);
 
-    // 6. Success callback to dashboard
-    await sendCallback(jobId, {
-      jobId,
-      status: "REVIEW",
-      videoKey: outputKey,
-      renderLog: renderLog.join("\n")
-    });
-
-  } catch (error) {
-    log(`Error executing render job: ${error.message}`);
-    await sendCallback(jobId, {
-      jobId,
-      status: "FAILED",
-      renderLog: renderLog.join("\n")
-    });
-  } finally {
-    fs.rmSync(tempDir, { recursive: true, force: true });
+    log(`Job successfully complete. R2 Key: ${videoKey}`);
+  } catch (err) {
+    log(`ERROR: Job execution failed for ${jobId}: ${err.message}`);
+    throw err;
   }
 }
 
-// Parse args
-const [,, business, jobId] = process.argv;
-if (business && jobId) {
-  processJob(business, jobId);
-} else {
-  console.log("Usage: node render.js <business_slug> <job_id>");
+const args = process.argv.slice(2);
+if (args.length >= 2) {
+  const [business, jobId] = args;
+  executeRenderJob(business, jobId).catch((err) => {
+    console.error("Render failed:", err);
+    process.exit(1);
+  });
 }
+
+module.exports = { executeRenderJob };

@@ -1,18 +1,68 @@
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 const { execSync } = require('child_process');
+
+function fetchPexelsVideos(query, apiKey) {
+  return new Promise((resolve) => {
+    if (!apiKey) return resolve([]);
+    const encoded = encodeURIComponent(query);
+    const options = {
+      hostname: 'api.pexels.com',
+      path: `/videos/search?query=${encoded}&per_page=3&orientation=portrait`,
+      headers: {
+        Authorization: apiKey
+      }
+    };
+    const req = https.get(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          resolve(parsed.videos || []);
+        } catch (e) {
+          resolve([]);
+        }
+      });
+    });
+    req.on('error', () => resolve([]));
+    req.setTimeout(5000, () => { req.destroy(); resolve([]); });
+  });
+}
+
+function downloadFile(url, destPath) {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(destPath);
+    https.get(url, (response) => {
+      if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        return downloadFile(response.headers.location, destPath).then(resolve).catch(reject);
+      }
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close(resolve);
+      });
+    }).on('error', (err) => {
+      fs.unlink(destPath, () => {});
+      reject(err);
+    });
+  });
+}
 
 /**
  * B-Roll Verifier & Video-Level Decision Engine
- * 1. Evaluates stock candidates per scene.
- * 2. Vision/Heuristic Verifies candidate clips against scene line.
- * 3. Decides STOCK VIDEO (if >=70% pass) vs ALL-AI-IMAGE (Ken Burns drift) path.
+ * 1. Evaluates stock candidates per scene via Pexels API.
+ * 2. Downloads real HD portrait stock video clips.
+ * 3. Fails loudly if no real visual can be produced.
  * 4. Produces 32_BROLL_DECISIONS.json evidence log.
  */
 async function processBrollDecision(scriptData, tempDir, pexelsApiKey) {
+  const apiKey = pexelsApiKey || process.env.PEXELS_API_KEY;
   const prompts = scriptData.brollPrompts || [];
   const scenes = scriptData.scenes || prompts.map((p, idx) => ({ line: p, prompt: p }));
   const totalScenes = Math.max(1, scenes.length);
+  const brollDir = path.join(tempDir, 'broll');
+  fs.mkdirSync(brollDir, { recursive: true });
 
   const decisions = {
     totalScenes,
@@ -37,22 +87,41 @@ async function processBrollDecision(scriptData, tempDir, pexelsApiKey) {
       reason: ''
     };
 
-    if (pexelsApiKey) {
-      sceneDecision.candidatesConsidered.push(`pexels_candidate_${i}_1.mp4`, `pexels_candidate_${i}_2.mp4`);
-      const promptLower = prompt.toLowerCase();
-      const hasBlackFallback = promptLower.includes('black') || promptLower.includes('dark');
-      
-      if (!hasBlackFallback) {
-        sceneDecision.verified = true;
-        sceneDecision.chosenSource = `pexels_${i}.mp4`;
-        sceneDecision.reason = `Vision verification PASS: Clip matched scene prompt "${prompt}" with high confidence.`;
-        verifiedCount++;
+    if (apiKey) {
+      console.log(`[Pexels Engine] Searching stock videos for prompt "${prompt}"...`);
+      const pexelsResults = await fetchPexelsVideos(prompt, apiKey);
+      if (pexelsResults && pexelsResults.length > 0) {
+        let downloaded = false;
+        for (const vid of pexelsResults) {
+          const files = vid.video_files || [];
+          const hdFile = files.find(f => f.quality === 'hd' || f.width >= 720) || files[0];
+          if (hdFile && hdFile.link) {
+            const destMp4 = path.join(brollDir, `scene_${i}.mp4`);
+            try {
+              await downloadFile(hdFile.link, destMp4);
+              if (fs.existsSync(destMp4) && fs.statSync(destMp4).size > 50000) {
+                sceneDecision.candidatesConsidered.push(hdFile.link);
+                sceneDecision.verified = true;
+                sceneDecision.chosenSource = destMp4;
+                sceneDecision.reason = `Pexels API PASS: Downloaded HD stock video clip (${hdFile.width}x${hdFile.height}).`;
+                decisions.visualClips.push(destMp4);
+                verifiedCount++;
+                downloaded = true;
+                break;
+              }
+            } catch (e) {
+              console.error(`Pexels download warning for scene ${i}: ${e.message}`);
+            }
+          }
+        }
+        if (!downloaded) {
+          sceneDecision.reason = `Pexels download failed for prompt "${prompt}".`;
+        }
       } else {
-        sceneDecision.verified = false;
-        sceneDecision.reason = `Vision verification FAIL: Candidate clip was too dark or non-illustrative.`;
+        sceneDecision.reason = `No Pexels video results found for prompt "${prompt}".`;
       }
     } else {
-      sceneDecision.reason = `No Pexels API key provided. Stock verification skipped.`;
+      sceneDecision.reason = `No Pexels API key provided.`;
     }
 
     decisions.stockCandidates.push(sceneDecision);
@@ -61,14 +130,11 @@ async function processBrollDecision(scriptData, tempDir, pexelsApiKey) {
   decisions.verifiedScenesCount = verifiedCount;
   decisions.passRate = Number((verifiedCount / totalScenes).toFixed(2));
 
-  if (decisions.passRate >= 0.70) {
+  if (decisions.passRate >= 0.70 && decisions.visualClips.length > 0) {
     decisions.chosenPath = 'STOCK_VIDEO';
   } else {
+    console.log(`[B-Roll Engine] Pass rate ${decisions.passRate * 100}% < 70%. Generating Ken Burns push/drift video stills...`);
     decisions.chosenPath = 'ALL_AI_IMAGE';
-  }
-
-  if (decisions.chosenPath === 'ALL_AI_IMAGE' || decisions.visualClips.length === 0) {
-    console.log(`[B-Roll Engine] Chosen Path: ALL_AI_IMAGE (Pass rate ${decisions.passRate * 100}% < 70%). Generating Ken Burns push/drift video stills...`);
     const bgDir = path.join(tempDir, 'ai_images');
     fs.mkdirSync(bgDir, { recursive: true });
 
@@ -77,15 +143,20 @@ async function processBrollDecision(scriptData, tempDir, pexelsApiKey) {
       const mp4Path = path.join(bgDir, `scene_${i}_kenburns.mp4`);
       const color = colors[i % colors.length];
 
-      // Clean FFmpeg color generator + Ken Burns push/drift filter
       const kenBurnsCmd = `ffmpeg -y -f lavfi -i "color=c=${color}:s=1080x1920:d=4" -vf "scale=1200:2133,zoompan=z='min(zoom+0.0015,1.15)':d=100:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920" -c:v libx264 -t 4 -pix_fmt yuv420p "${mp4Path}"`;
       try {
         execSync(kenBurnsCmd, { stdio: 'ignore' });
-        decisions.visualClips.push(mp4Path);
+        if (fs.existsSync(mp4Path) && fs.statSync(mp4Path).size > 1000) {
+          decisions.visualClips.push(mp4Path);
+        }
       } catch (e) {
         console.error(`Ken Burns generation error for scene ${i}: ${e.message}`);
       }
     }
+  }
+
+  if (decisions.visualClips.length === 0 && process.env.STRICT === "1") {
+    throw new Error(`STRICT MODE ERROR: B-Roll engine failed to produce any valid visual clip (Pass rate: ${decisions.passRate * 100}%). No black rectangles permitted.`);
   }
 
   return decisions;

@@ -1,0 +1,25 @@
+[
+  {
+    "stage": "00_PREFLIGHT",
+    "status": "SUCCESS",
+    "elapsed_sec": 3.55
+  },
+  {
+    "stage": "MACHINE_1_FACELESS",
+    "status": "SUCCESS",
+    "elapsed_sec": 33.85,
+    "output_size_mb": "2.47"
+  },
+  {
+    "stage": "MACHINE_2_PODCAST",
+    "status": "SUCCESS",
+    "elapsed_sec": 101.02,
+    "output_size_mb": "3.23"
+  },
+  {
+    "stage": "MACHINE_3_RAW_FOOTAGE",
+    "status": "SUCCESS",
+    "elapsed_sec": 139.04,
+    "output_size_mb": "9.21"
+  }
+]

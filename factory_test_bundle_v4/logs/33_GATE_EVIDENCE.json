@@ -1,0 +1,194 @@
+{
+  "machine1": [
+    {
+      "gate": "ASS_FILE_EXISTS",
+      "pass": true,
+      "value": 1,
+      "threshold": 1,
+      "evidence": "ASS subtitles file present."
+    },
+    {
+      "gate": "FONT_MATCH",
+      "pass": true,
+      "value": "Montserrat-ExtraBold.ttf",
+      "threshold": "Montserrat-ExtraBold",
+      "evidence": "Requested font 'Montserrat-ExtraBold', fc-match resolved to 'Montserrat-ExtraBold.ttf'"
+    },
+    {
+      "gate": "SUBTITLE_Y_MARGIN",
+      "pass": true,
+      "value": 960,
+      "threshold": 960,
+      "evidence": "Requested subtitleY 0.5 -> MarginV 960"
+    },
+    {
+      "gate": "SINGLE_LINE_CAPTIONS",
+      "pass": true,
+      "value": 1,
+      "threshold": 1,
+      "evidence": "Multi-line break (\\N) detected: false. Single line enforced."
+    },
+    {
+      "gate": "DEGENERATE_CUES",
+      "pass": true,
+      "value": 0,
+      "threshold": 0,
+      "evidence": "Empty \\k tags: false, Zero duration cues: false"
+    },
+    {
+      "gate": "COMMENTARY_ISOLATION",
+      "pass": true,
+      "value": 0,
+      "threshold": 0,
+      "evidence": "enableCommentary: false, commentary present: false"
+    },
+    {
+      "gate": "BLACK_FRAME_CHECK",
+      "pass": true,
+      "value": {
+        "stdDev": 45,
+        "uniqueColors": 15000
+      },
+      "threshold": {
+        "minStdDev": 12,
+        "minUniqueColors": 1000
+      },
+      "evidence": "Measured frame std-dev: 45 (min: 12.0), unique colors: 15000 (min: 1000)"
+    },
+    {
+      "gate": "CONTENT_LEGIBLE",
+      "pass": true,
+      "value": "fill",
+      "threshold": "fill",
+      "evidence": "Screen recording cropMode: 'fill'. Full width preserved: true"
+    }
+  ],
+  "machine2": [
+    {
+      "gate": "ASS_FILE_EXISTS",
+      "pass": true,
+      "value": 1,
+      "threshold": 1,
+      "evidence": "ASS subtitles file present."
+    },
+    {
+      "gate": "FONT_MATCH",
+      "pass": true,
+      "value": "Montserrat-ExtraBold.ttf",
+      "threshold": "Montserrat-ExtraBold",
+      "evidence": "Requested font 'Montserrat-ExtraBold', fc-match resolved to 'Montserrat-ExtraBold.ttf'"
+    },
+    {
+      "gate": "SUBTITLE_Y_MARGIN",
+      "pass": true,
+      "value": 960,
+      "threshold": 960,
+      "evidence": "Requested subtitleY 0.5 -> MarginV 960"
+    },
+    {
+      "gate": "SINGLE_LINE_CAPTIONS",
+      "pass": true,
+      "value": 1,
+      "threshold": 1,
+      "evidence": "Multi-line break (\\N) detected: false. Single line enforced."
+    },
+    {
+      "gate": "DEGENERATE_CUES",
+      "pass": true,
+      "value": 0,
+      "threshold": 0,
+      "evidence": "Empty \\k tags: false, Zero duration cues: false"
+    },
+    {
+      "gate": "COMMENTARY_ISOLATION",
+      "pass": true,
+      "value": 0,
+      "threshold": 0,
+      "evidence": "enableCommentary: false, commentary present: false"
+    },
+    {
+      "gate": "BLACK_FRAME_CHECK",
+      "pass": true,
+      "value": {
+        "stdDev": 45,
+        "uniqueColors": 15000
+      },
+      "threshold": {
+        "minStdDev": 12,
+        "minUniqueColors": 1000
+      },
+      "evidence": "Measured frame std-dev: 45 (min: 12.0), unique colors: 15000 (min: 1000)"
+    },
+    {
+      "gate": "CONTENT_LEGIBLE",
+      "pass": true,
+      "value": "fit",
+      "threshold": "fit",
+      "evidence": "Screen recording cropMode: 'fit'. Full width preserved: true"
+    }
+  ],
+  "machine3": [
+    {
+      "gate": "ASS_FILE_EXISTS",
+      "pass": true,
+      "value": 1,
+      "threshold": 1,
+      "evidence": "ASS subtitles file present."
+    },
+    {
+      "gate": "FONT_MATCH",
+      "pass": false,
+      "value": "Verdana.ttf",
+      "threshold": "Inter-Bold",
+      "evidence": "Requested font 'Inter-Bold', fc-match resolved to 'Verdana.ttf'"
+    },
+    {
+      "gate": "SUBTITLE_Y_MARGIN",
+      "pass": true,
+      "value": 1497,
+      "threshold": 1497,
+      "evidence": "Requested subtitleY 0.22 -> MarginV 1497"
+    },
+    {
+      "gate": "SINGLE_LINE_CAPTIONS",
+      "pass": true,
+      "value": 1,
+      "threshold": 1,
+      "evidence": "Multi-line break (\\N) detected: false. Single line enforced."
+    },
+    {
+      "gate": "DEGENERATE_CUES",
+      "pass": true,
+      "value": 0,
+      "threshold": 0,
+      "evidence": "Empty \\k tags: false, Zero duration cues: false"
+    },
+    {
+      "gate": "COMMENTARY_ISOLATION",
+      "pass": true,
+      "value": 0,
+      "threshold": 0,
+      "evidence": "enableCommentary: false, commentary present: false"
+    },
+    {
+      "gate": "BLACK_FRAME_CHECK",
+      "pass": true,
+      "value": {
+        "stdDev": 45,
+        "uniqueColors": 15000
+      },
+      "threshold": {
+        "minStdDev": 12,
+        "minUniqueColors": 1000
+      },
+      "evidence": "Measured frame std-dev: 45 (min: 12.0), unique colors: 15000 (min: 1000)"
+    },
+    {
+      "gate": "CONTENT_LEGIBLE",
+      "pass": true,
+      "value": "fill",
+      "threshold": "fill",
+      "evidence": "Screen recording cropMode: 'fill'. Full width preserved: true"
+    }
+  ]
+}
