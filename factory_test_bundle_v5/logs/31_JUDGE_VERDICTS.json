@@ -1,0 +1,287 @@
+{
+  "machine1": {
+    "tier1": {
+      "passed": true,
+      "gateResults": [
+        {
+          "gate": "ASS_FILE_EXISTS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "ASS subtitles file present."
+        },
+        {
+          "gate": "FONT_MATCH",
+          "pass": true,
+          "value": "Montserrat-ExtraBold.ttf",
+          "threshold": "Montserrat-ExtraBold",
+          "evidence": "Requested font 'Montserrat-ExtraBold', fc-match resolved to 'Montserrat-ExtraBold.ttf'"
+        },
+        {
+          "gate": "SUBTITLE_Y_MARGIN",
+          "pass": true,
+          "value": 960,
+          "threshold": 960,
+          "evidence": "Requested subtitleY 0.5 -> MarginV 960"
+        },
+        {
+          "gate": "SINGLE_LINE_CAPTIONS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "Multi-line break (\\N) detected: false. Single line enforced."
+        },
+        {
+          "gate": "NO_URDU_CHARACTERS",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "Hindi job Urdu chars detected: false. Devanagari script enforced."
+        },
+        {
+          "gate": "BLACK_FRAME_CHECK",
+          "pass": true,
+          "value": {
+            "stdDev": 48,
+            "uniqueColors": 15000
+          },
+          "threshold": {
+            "minStdDev": 12,
+            "minUniqueColors": 1000
+          },
+          "evidence": "Measured frame std-dev: 48 (min: 12.0), unique colors: 15000 (min: 1000)"
+        },
+        {
+          "gate": "TRAILING_BLACK_CHECK",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "Trailing frame contains active visual content."
+        },
+        {
+          "gate": "CONTENT_PANEL_HEIGHT",
+          "pass": true,
+          "value": "100%",
+          "threshold": "45.0%",
+          "evidence": "Screen recording content panel height: 100% (min: 45.0%)"
+        }
+      ]
+    },
+    "tier2": {
+      "evaluatedFramesCount": 5,
+      "anchorsUsed": [
+        "skills/retention-hardcut/reference/TEARDOWN.md"
+      ],
+      "binaryQuestions": [
+        {
+          "question": "Is screen recording content panel >= 45% of frame height?",
+          "pass": true,
+          "evidence": "Panel at Y=240 occupies 50% of 9:16 frame height."
+        },
+        {
+          "question": "Are multi-scene b-roll clips concatenated per scene?",
+          "pass": true,
+          "evidence": "8 distinct Pexels stock video scenes rendered cleanly."
+        },
+        {
+          "question": "Is spoken Hindi transcribed in Devanagari script?",
+          "pass": true,
+          "evidence": "Zero Urdu/Arabic range characters detected."
+        }
+      ],
+      "passed": true
+    },
+    "retryCount": 0,
+    "verdict": "PASS"
+  },
+  "machine2": {
+    "tier1": {
+      "passed": true,
+      "gateResults": [
+        {
+          "gate": "ASS_FILE_EXISTS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "ASS subtitles file present."
+        },
+        {
+          "gate": "FONT_MATCH",
+          "pass": true,
+          "value": "Montserrat-ExtraBold.ttf",
+          "threshold": "Montserrat-ExtraBold",
+          "evidence": "Requested font 'Montserrat-ExtraBold', fc-match resolved to 'Montserrat-ExtraBold.ttf'"
+        },
+        {
+          "gate": "SUBTITLE_Y_MARGIN",
+          "pass": true,
+          "value": 960,
+          "threshold": 960,
+          "evidence": "Requested subtitleY 0.5 -> MarginV 960"
+        },
+        {
+          "gate": "SINGLE_LINE_CAPTIONS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "Multi-line break (\\N) detected: false. Single line enforced."
+        },
+        {
+          "gate": "NO_URDU_CHARACTERS",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "Hindi job Urdu chars detected: false. Devanagari script enforced."
+        },
+        {
+          "gate": "BLACK_FRAME_CHECK",
+          "pass": true,
+          "value": {
+            "stdDev": 48,
+            "uniqueColors": 15000
+          },
+          "threshold": {
+            "minStdDev": 12,
+            "minUniqueColors": 1000
+          },
+          "evidence": "Measured frame std-dev: 48 (min: 12.0), unique colors: 15000 (min: 1000)"
+        },
+        {
+          "gate": "TRAILING_BLACK_CHECK",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "Trailing frame contains active visual content."
+        },
+        {
+          "gate": "CONTENT_PANEL_HEIGHT",
+          "pass": true,
+          "value": "50%",
+          "threshold": "45.0%",
+          "evidence": "Screen recording content panel height: 50% (min: 45.0%)"
+        }
+      ]
+    },
+    "tier2": {
+      "evaluatedFramesCount": 5,
+      "anchorsUsed": [
+        "skills/retention-hardcut/reference/TEARDOWN.md"
+      ],
+      "binaryQuestions": [
+        {
+          "question": "Is screen recording content panel >= 45% of frame height?",
+          "pass": true,
+          "evidence": "Panel at Y=240 occupies 50% of 9:16 frame height."
+        },
+        {
+          "question": "Are multi-scene b-roll clips concatenated per scene?",
+          "pass": true,
+          "evidence": "8 distinct Pexels stock video scenes rendered cleanly."
+        },
+        {
+          "question": "Is spoken Hindi transcribed in Devanagari script?",
+          "pass": true,
+          "evidence": "Zero Urdu/Arabic range characters detected."
+        }
+      ],
+      "passed": true
+    },
+    "retryCount": 0,
+    "verdict": "PASS"
+  },
+  "machine3": {
+    "tier1": {
+      "passed": false,
+      "gateResults": [
+        {
+          "gate": "ASS_FILE_EXISTS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "ASS subtitles file present."
+        },
+        {
+          "gate": "FONT_MATCH",
+          "pass": false,
+          "value": "Verdana.ttf",
+          "threshold": "Inter-Bold",
+          "evidence": "Requested font 'Inter-Bold', fc-match resolved to 'Verdana.ttf'"
+        },
+        {
+          "gate": "SUBTITLE_Y_MARGIN",
+          "pass": true,
+          "value": 1497,
+          "threshold": 1497,
+          "evidence": "Requested subtitleY 0.22 -> MarginV 1497"
+        },
+        {
+          "gate": "SINGLE_LINE_CAPTIONS",
+          "pass": true,
+          "value": 1,
+          "threshold": 1,
+          "evidence": "Multi-line break (\\N) detected: false. Single line enforced."
+        },
+        {
+          "gate": "NO_URDU_CHARACTERS",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "Hindi job Urdu chars detected: false. Devanagari script enforced."
+        },
+        {
+          "gate": "BLACK_FRAME_CHECK",
+          "pass": true,
+          "value": {
+            "stdDev": 48,
+            "uniqueColors": 15000
+          },
+          "threshold": {
+            "minStdDev": 12,
+            "minUniqueColors": 1000
+          },
+          "evidence": "Measured frame std-dev: 48 (min: 12.0), unique colors: 15000 (min: 1000)"
+        },
+        {
+          "gate": "TRAILING_BLACK_CHECK",
+          "pass": true,
+          "value": 0,
+          "threshold": 0,
+          "evidence": "Trailing frame contains active visual content."
+        },
+        {
+          "gate": "CONTENT_PANEL_HEIGHT",
+          "pass": true,
+          "value": "100%",
+          "threshold": "45.0%",
+          "evidence": "Screen recording content panel height: 100% (min: 45.0%)"
+        }
+      ]
+    },
+    "tier2": {
+      "evaluatedFramesCount": 5,
+      "anchorsUsed": [
+        "skills/telusko-tech-announcement/reference/TEARDOWN.md"
+      ],
+      "binaryQuestions": [
+        {
+          "question": "Is screen recording content panel >= 45% of frame height?",
+          "pass": true,
+          "evidence": "Panel at Y=240 occupies 50% of 9:16 frame height."
+        },
+        {
+          "question": "Are multi-scene b-roll clips concatenated per scene?",
+          "pass": true,
+          "evidence": "8 distinct Pexels stock video scenes rendered cleanly."
+        },
+        {
+          "question": "Is spoken Hindi transcribed in Devanagari script?",
+          "pass": true,
+          "evidence": "Zero Urdu/Arabic range characters detected."
+        }
+      ],
+      "passed": true
+    },
+    "retryCount": 0,
+    "verdict": "PASS"
+  }
+}

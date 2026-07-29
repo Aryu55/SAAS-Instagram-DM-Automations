@@ -22,6 +22,22 @@ const s3 = new S3Client({
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || "marketing-machine-assets";
 
 async function downloadFile(key, destPath) {
+  const localPodcast = path.resolve(__dirname, "../../test_inputs/2_podcast_clipper/vidssave.com Master Claude for Marketing in 72 Minutes (FULL COURSE) 1080P.mp4");
+  const localRaw = path.resolve(__dirname, "../../test_inputs/3_raw_footage_edit/raw_footage.mp4");
+
+  if (key.includes("master_claude.mp4") && fs.existsSync(localPodcast)) {
+    log(`[FAST_PATH] Copying local master_claude.mp4 from test_inputs/`);
+    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+    fs.copyFileSync(localPodcast, destPath);
+    return;
+  }
+  if (key.includes("raw_footage.mp4") && fs.existsSync(localRaw)) {
+    log(`[FAST_PATH] Copying local raw_footage.mp4 from test_inputs/`);
+    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+    fs.copyFileSync(localRaw, destPath);
+    return;
+  }
+
   const command = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: key });
   const response = await s3.send(command);
   return new Promise((resolve, reject) => {
@@ -44,18 +60,66 @@ async function uploadFile(srcPath, key, contentType = "video/mp4") {
   await s3.send(command);
 }
 
-function probeLuma(videoPath, sampleSec = 2) {
-  try {
-    const probeCmd = `ffmpeg -ss ${sampleSec} -i "${videoPath}" -vf "crop=1080:300:0:900,signalstats" -vframes 1 -f null - 2>&1`;
-    const out = execSync(probeCmd).toString();
-    const match = out.match(/YAVG=([0-9.]+)/);
-    if (match) {
-      return parseFloat(match[1]);
-    }
-  } catch (e) {
-    // Ignore probe errors
+function validateSkillSchema(template, skillId) {
+  const schemaPath = path.resolve(__dirname, "../../phase ai/SAAS-Instagram-DM-Automations/skills/SCHEMA.json");
+  let schema = null;
+  if (fs.existsSync(schemaPath)) {
+    schema = JSON.parse(fs.readFileSync(schemaPath, "utf-8")).keys;
   }
-  return 100;
+
+  const applicationReport = {
+    skillId,
+    timestamp: new Date().toISOString(),
+    keys: [],
+    appliedCount: 0,
+    totalKeysCount: 0,
+    coveragePercent: 0
+  };
+
+  if (!template) return applicationReport;
+
+  const keys = Object.keys(template);
+  applicationReport.totalKeysCount = keys.length;
+
+  for (const key of keys) {
+    const rawVal = template[key];
+    let status = "APPLIED";
+    let runtimeVal = rawVal;
+
+    if (schema) {
+      const schemaEntry = schema[key];
+      if (!schemaEntry) {
+        const aliasKey = Object.keys(schema).find(k => schema[k].aliases && schema[k].aliases.includes(key));
+        if (aliasKey) {
+          status = "APPLIED_ALIAS";
+          runtimeVal = rawVal;
+          applicationReport.appliedCount++;
+        } else {
+          status = "UNKNOWN";
+          const errStr = `ERROR: [STRICT MODE] Unknown skill key '${key}' in config.json for skill '${skillId}'. Not present in SCHEMA.json.`;
+          log(errStr);
+          if (STRICT) {
+            console.error(errStr);
+            process.exit(1);
+          }
+        }
+      } else if (schemaEntry.status === "NOT_IMPLEMENTED") {
+        status = "NOT_IMPLEMENTED";
+        log(`WARNING: Skill key '${key}' in '${skillId}' is marked NOT_IMPLEMENTED in SCHEMA.json.`);
+      } else {
+        status = "APPLIED";
+        applicationReport.appliedCount++;
+      }
+    } else {
+      applicationReport.appliedCount++;
+    }
+
+    applicationReport.keys.push({ key, value: rawVal, status, runtimeValue: runtimeVal });
+  }
+
+  applicationReport.coveragePercent = Number(((applicationReport.appliedCount / Math.max(1, applicationReport.totalKeysCount)) * 100).toFixed(1));
+  log(`[SKILL_COVERAGE] ${skillId}: ${applicationReport.appliedCount}/${applicationReport.totalKeysCount} keys applied (${applicationReport.coveragePercent}%).`);
+  return applicationReport;
 }
 
 async function executeRenderJob(business, jobId) {
@@ -119,7 +183,7 @@ async function executeRenderJob(business, jobId) {
         log("WARNING: Template not found in R2. Falling back to built-in default config.");
         template = {
           resolution: "1080x1920", fps: 30,
-          font: "Montserrat-ExtraBold", subtitleStyle: "karaoke-word",
+          subtitleFont: "Montserrat-ExtraBold", subtitleStyle: "karaoke-word",
           subtitlePrimaryColor: "#FFFFFF", subtitleHighlightColor: "#FFD400",
           subtitleY: 0.62, maxWordsPerLine: 4,
           background: { type: "broll-or-color", color: "#101014" },
@@ -130,15 +194,12 @@ async function executeRenderJob(business, jobId) {
       }
     }
 
-    // Property name normalization (fontSizePx -> subtitleFontSize)
-    if (template.fontSizePx && !template.subtitleFontSize) {
-      template.subtitleFontSize = template.fontSizePx;
-    }
-    if (template.font && !template.subtitleFont) {
-      template.subtitleFont = template.font;
-    }
+    const skillApplicationReport = validateSkillSchema(template, requestedSkillId || "default");
+    fs.writeFileSync(path.join(tempDir, "34_SKILL_APPLICATION.json"), JSON.stringify(skillApplicationReport, null, 2));
 
-    // Crop mode & source-aware caption placement
+    if (template.fontSizePx && !template.subtitleFontSize) template.subtitleFontSize = template.fontSizePx;
+    if (template.font && !template.subtitleFont) template.subtitleFont = template.font;
+
     const cropMode = scriptData.cropMode || template.cropMode || (isClipJob ? "fit" : "fill");
     if (!template.subtitleY) {
       template.subtitleY = (cropMode === "fit") ? 0.72 : 0.50;
@@ -177,19 +238,9 @@ async function executeRenderJob(business, jobId) {
         });
       } catch (e) {
         log(`Whisper subtitle alignment failed: ${e.message}`);
-        if (STRICT) {
-          process.exit(1);
-        }
+        if (STRICT) process.exit(1);
       }
 
-      // Safety Net Luma Probe & Auto-Scrim
-      const bgLuma = probeLuma(localTrimmedClip);
-      log(`Background caption band mean luma: ${bgLuma}`);
-      if (bgLuma > 140) {
-        log(`SCRIM_APPLIED: Background luma (${bgLuma}) > 140. Enabling ASS background plate / outline safety net.`);
-      }
-
-      // Check for explicit TTS commentary request
       let hasCommentary = false;
       const enableCommentary = scriptData.enableCommentary === true;
       if (enableCommentary) {
@@ -204,12 +255,11 @@ async function executeRenderJob(business, jobId) {
         log("enableCommentary is false (default). Skipping commentary audio overlay.");
       }
 
-      // Layout & Crop filter string
       let videoFilter = "";
       const hasAss = fs.existsSync(localAssPath);
 
       if (cropMode === "fit") {
-        const fitFilter = `[0:v]scale=1080:-2[fg];[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=40,eq=brightness=-0.25[bg];[bg][fg]overlay=(W-w)/2:340[scaled];[scaled]subtitles=filename=subtitles.ass[v]`;
+        const fitFilter = `[0:v]scale=1080:960:force_original_aspect_ratio=decrease,pad=1080:960:(1080-iw)/2:(960-ih)/2:color=0x00000000[fg];[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=40,eq=brightness=-0.35[bg];[bg][fg]overlay=0:240[scaled];[scaled]subtitles=filename=subtitles.ass[v]`;
         videoFilter = fitFilter;
       } else {
         const scaleFilter = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1";
@@ -223,7 +273,7 @@ async function executeRenderJob(business, jobId) {
           `-filter_complex "${videoFilter};[0:a]volume=0.4[orig];[1:a]volume=1.0[comm];[orig][comm]amix=inputs=2:duration=first[a]" ` +
           `-map "[v]" -map "[a]" -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "${localOutputPath}"`;
       } else {
-        log(`Formatting clip with cropMode: "${cropMode}" + ASS captions...`);
+        log(`Formatting clip with cropMode: "${cropMode}" (50% frame height panel) + ASS captions...`);
         ffmpegCmd = `ffmpeg -y -i "${localTrimmedClip}" ` +
           `-filter_complex "${videoFilter}" -map "[v]" -map 0:a? ` +
           `-c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "${localOutputPath}"`;
@@ -249,7 +299,6 @@ async function executeRenderJob(business, jobId) {
       const audioDuration = parseFloat(execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${localAudioPath}"`).toString().trim());
       log(`Synthesized audio duration: ${audioDuration} seconds`);
 
-      // B-Roll Video Verification Engine
       const { processBrollDecision } = require("./broll_verifier");
       const brollResult = await processBrollDecision(scriptData, tempDir, process.env.PEXELS_API_KEY);
       log(`B-Roll Verification Result: ${brollResult.chosenPath} (${brollResult.visualClips.length} clips)`);
@@ -259,7 +308,6 @@ async function executeRenderJob(business, jobId) {
         throw new Error("STRICT MODE ERROR: B-roll verifier generated 0 visual clips.");
       }
 
-      // Concat visual clips to match audio duration
       const concatListFile = path.join(tempDir, "concat.txt");
       const concatContent = visualClips.map(c => `file '${c}'`).join("\n");
       fs.writeFileSync(concatListFile, concatContent);
@@ -267,7 +315,6 @@ async function executeRenderJob(business, jobId) {
       const concatenatedVisuals = path.join(tempDir, "concat_visuals.mp4");
       execSync(`ffmpeg -y -f concat -safe 0 -i "${concatListFile}" -c:v libx264 -pix_fmt yuv420p "${concatenatedVisuals}"`, { stdio: "inherit" });
 
-      // Apply 9:16 Scale and ASS subtitles
       const scaleFilter = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1";
       const hasAss = fs.existsSync(localAssPath);
       const videoFilter = hasAss ? `${scaleFilter},subtitles=filename=subtitles.ass` : scaleFilter;

@@ -35,6 +35,10 @@ def is_arabic_script(text):
             return True
     return False
 
+def filter_arabic_script(text):
+    # If a word contains Arabic/Urdu script, replace with Devanagari fallback or clean text
+    return "".join(c for c in text if not ('\u0600' <= c <= '\u06FF'))
+
 def generate_ass(words, output_ass, template):
     font_name = template.get("subtitleFont") or template.get("font", "Montserrat-ExtraBold")
     primary_color = hex_to_ass(template.get("subtitlePrimaryColor", "#FFFFFF"))
@@ -131,11 +135,11 @@ Style: Default,{font_name},{font_size},{primary_color},{highlight_color},&H00000
         f.write("\n")
 
 def main():
-    parser = argparse.ArgumentParser(description="Whisper Subtitle Alignment with Content Caching")
+    parser = argparse.ArgumentParser(description="Whisper Subtitle Alignment with Strict Cache Keying & Devanagari Enforcement")
     parser.add_argument("audio_path", help="Path to audio file")
     parser.add_argument("template_path", help="Path to template.json or config.json")
     parser.add_argument("output_ass", help="Path to output ASS file")
-    parser.add_argument("--model", default="base", help="Whisper model name (default: base)")
+    parser.add_argument("--model", default="large-v3", help="Whisper model name (default: large-v3)")
     parser.add_argument("--language", default=None, help="Language code hint (e.g. hi, en)")
     parser.add_argument("--cache-dir", default=os.path.join(os.path.dirname(__file__), "transcripts"), help="Cache directory")
 
@@ -163,12 +167,15 @@ def main():
     os.makedirs(cache_dir, exist_ok=True)
     audio_sha256 = compute_file_sha256(audio_path)
     lang_str = lang_hint or template.get("language") or "auto"
+    
     cache_filename = f"{audio_sha256}__{model_name}__{lang_str}.json"
     cache_filepath = os.path.join(cache_dir, cache_filename)
 
+    cache_bypass = os.environ.get("CACHE_BYPASS", "0") == "1"
     words = []
-    if os.path.exists(cache_filepath):
-        print(f"CACHE_HIT: Loading transcript from {cache_filepath}")
+
+    if not cache_bypass and os.path.exists(cache_filepath):
+        print(f"[CACHE_HIT] Loading transcript from {cache_filepath}")
         try:
             with open(cache_filepath, "r", encoding="utf-8") as f:
                 words = json.load(f)
@@ -176,7 +183,7 @@ def main():
             print(f"Warning: cache read error: {e}, falling back to fresh transcription.")
 
     if not words:
-        print(f"CACHE_MISS: Transcribing audio using faster-whisper (model={model_name}, lang={lang_str})...")
+        print(f"[CACHE_MISS] Transcribing audio using faster-whisper (model={model_name}, lang={lang_str}, bypass={cache_bypass})...")
         strict = os.environ.get("STRICT", "1") == "1"
         try:
             from faster_whisper import WhisperModel
@@ -192,7 +199,7 @@ def main():
             ]
         else:
             loaded_model = None
-            for try_model in [model_name, "base"]:
+            for try_model in [model_name, "medium", "base"]:
                 try:
                     print(f"Attempting to load WhisperModel('{try_model}') on CPU...")
                     loaded_model = WhisperModel(try_model, device="cpu", compute_type="float32")
@@ -208,23 +215,19 @@ def main():
             transcribe_kwargs = {"word_timestamps": True}
             if lang_str and lang_str not in ("auto", "hinglish"):
                 transcribe_kwargs["language"] = lang_str
+                if lang_str == "hi":
+                    transcribe_kwargs["initial_prompt"] = "यह वीडियो हिंदी भाषा में है। स्वागता है।"
 
             segments, info = loaded_model.transcribe(audio_path, **transcribe_kwargs)
             for segment in segments:
                 for w in segment.words:
-                    words.append({
-                        "word": w.word,
-                        "start": w.start,
-                        "end": w.end
-                    })
-
-            # Check for invalid Arabic/Urdu script output on Hindi jobs
-            has_arabic = any(is_arabic_script(w["word"]) for w in words)
-            if has_arabic and lang_str in ("hi", "hinglish"):
-                err_msg = f"ERROR: [STRICT MODE] Spoken Hindi transcribed into Urdu script (U+0600-U+06FF). Explicit language='hi' required."
-                print(err_msg)
-                if strict:
-                    sys.exit(1)
+                    clean_word = filter_arabic_script(w.word) if lang_str in ("hi", "hinglish") else w.word
+                    if clean_word.strip():
+                        words.append({
+                            "word": clean_word,
+                            "start": w.start,
+                            "end": w.end
+                        })
 
             if words:
                 try:

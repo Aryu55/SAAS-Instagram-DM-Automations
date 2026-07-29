@@ -1,0 +1,12 @@
+{
+  "testRunId": "test_5.0_fix_pack_v5",
+  "timestamp": "2026-07-29T10:42:00.593Z",
+  "sha256": {
+    "machine1_mp4": "c700fa24bf74c2d4b1198e8779a24c228eeaddcf0d35b14ca44d0d91d29f1be9",
+    "machine2_mp4": "7f29b5d45307edf52212d7becd6ef14fcbc2f5f1b6595f0ba96af53de153d0b4",
+    "machine3_mp4": "68f98d307a86e5ea0494e775240674c86b2a849b062a8e9153b3bab55f661818",
+    "machine1_ass": "99d2ab91d6157c4d95249c7c2d81a74095b5430e0775e872254d6fe8dca616e5",
+    "machine2_ass": "a6dfcf1329b4c46f6a2059950e9ed834b633d8fa803dec2258a636d840829a91",
+    "machine3_ass": "501e5a68b9c1f0a7c6c8a116366d86c6ed52bdab15696e55f9f9c242d4331006"
+  }
+}

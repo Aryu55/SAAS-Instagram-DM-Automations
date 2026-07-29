@@ -1,0 +1,59 @@
+{
+  "_comment": "pov-process-reveal EDITING_STYLE — see SKILL.md §5. Counterpart to retention-hardcut, NOT a variant. Camera motion is the rhythm engine here; do NOT metronome-cut this footage. subtitleHighlightColor maps to ASS SecondaryColour (pre-spoken colour) — set equal to primary because one-word captions have no un-spoken state.",
+  "resolution": "1080x1920",
+  "fps": 60,
+  "font": "Komika-Axis",
+  "subtitleStyle": "one-word",
+  "subtitlePrimaryColor": "#FFFFFF",
+  "subtitleHighlightColor": "#FFFFFF",
+  "subtitleY": 0.50,
+  "subtitleFontSize": 120,
+  "subtitleOutline": 12,
+  "subtitleShadow": 0,
+  "subtitleUppercase": true,
+  "maxWordsPerLine": 1,
+  "background": {
+    "type": "source",
+    "color": "#000000"
+  },
+  "logo": {
+    "enabled": false
+  },
+  "music": {
+    "volume": 0.0
+  },
+  "hookCard": {
+    "enabled": false
+  },
+  "grade": {
+    "enabled": true,
+    "filter": "eq=brightness=0.02:contrast=1.06:saturation=0.92",
+    "note": "mild by design — payoff is texture (frost, chrome, rust). Do not crush."
+  },
+  "cutRhythm": {
+    "medianShotSec": 2.0,
+    "observedBandSec": [0.7, 5.06],
+    "cutsPerMin": 28.7,
+    "transition": "hard",
+    "cutOn": "action",
+    "metronomeCutting": false,
+    "note": "median is an OUTCOME not a target. Cuts land on gestures completing. Automated fixed-interval cutting breaks this style."
+  },
+  "audio": {
+    "removeSilence": true,
+    "preserveDynamics": true,
+    "targetRangeDb": 15,
+    "compressToWall": false,
+    "processSoundIsContent": true,
+    "transitionSfx": false,
+    "note": "kill dead air by CUTTING, not by compressing. Reference has 15.1dB range and zero silence below -32dB."
+  },
+  "openClose": {
+    "captionDelaySec": 0.0,
+    "openOnPresenter": true,
+    "hookPromisesVisiblePayoff": true,
+    "titleCard": false,
+    "outroCard": false,
+    "cta": false
+  }
+}

@@ -1,17 +1,14 @@
 {
-  "subtitleY": 0.22,
+  "subtitleFont": "Inter-Bold",
+  "subtitleFontSize": 42,
   "subtitlePrimaryColor": "#FFFFFF",
   "subtitleHighlightColor": "#FFFFFF",
+  "subtitleY": 0.22,
   "maxWordsPerLine": 4,
-  "font": "Inter-Bold",
-  "fontSizePx": 42,
-  "textTransform": "uppercase",
+  "subtitleUppercase": true,
   "overlayStyle": "dark-translucent-card",
+  "fps": 50,
   "cardBackgroundColor": "rgba(255, 255, 255, 0.12)",
   "cardBorderRadiusPx": 12,
-  "aspectRatio": "9:16",
-  "targetFps": 50,
-  "averageCutDurationSec": 6.46,
-  "medianCutDurationSec": 3.24,
   "desaturationLevel": "heavy-slate-teal"
 }

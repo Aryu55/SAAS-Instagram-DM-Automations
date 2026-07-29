@@ -1,0 +1,17 @@
+[Script Info]
+Title: Content Factory Karaoke Subtitles
+ScriptType: v4.00+
+WrapStyle: 2
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Inter-Bold,42,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,4,6,0,2,40,40,1497,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:04.36,Default,,0,0,0,,{\k274}कल्रात {\k8}में {\k82}वीडियो {\k72}है।
+Dialogue: 0,0:00:04.36,0:00:25.28,Default,,0,0,0,,{\k280}वीडियो {\k244}है। {\k214}वीडियो {\k1354}है।
+Dialogue: 0,0:00:25.28,0:00:27.92,Default,,0,0,0,,{\k36}पसल्टि {\k86}पसल्वागता {\k46}है। {\k96}नहीं
+Dialogue: 0,0:00:27.92,0:00:29.98,Default,,0,0,0,,{\k38}है। {\k16}यह {\k148}अजनक {\k5}सामापका

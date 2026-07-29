@@ -1,0 +1,30 @@
+[Script Info]
+Title: Content Factory Karaoke Subtitles
+ScriptType: v4.00+
+WrapStyle: 2
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Montserrat-ExtraBold,80,&H00FFFFFF,&H008A8A8A,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,6,0,2,40,40,960,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:02.82,Default,,0,0,0,,{\k48}92 {\k60}% {\k30}of {\k38}retail {\k78}investors {\k28}lose
+Dialogue: 0,0:00:02.82,0:00:04.78,Default,,0,0,0,,{\k42}money {\k24}by {\k40}ignoring {\k34}the {\k30}5 {\k26}.0,
+Dialogue: 0,0:00:05.08,0:00:07.22,Default,,0,0,0,,{\k22}3 {\k30}.0, {\k12}2 {\k18}.0 {\k56}allocation {\k52}rule.
+Dialogue: 0,0:00:08.06,0:00:10.70,Default,,0,0,0,,{\k40}When {\k18}you {\k40}receive {\k48}income, {\k32}50 {\k42}%
+Dialogue: 0,0:00:10.70,0:00:12.88,Default,,0,0,0,,{\k30}goes {\k24}to {\k36}fixed {\k48}overhead {\k36}like {\k44}housing
+Dialogue: 0,0:00:12.88,0:00:16.58,Default,,0,0,0,,{\k24}in {\k22}debt. {\k42}30 {\k42}% {\k44}funds {\k90}discretionary
+Dialogue: 0,0:00:16.58,0:00:19.60,Default,,0,0,0,,{\k38}lifestyle {\k98}choices, {\k16}while {\k44}20 {\k38}% {\k34}is
+Dialogue: 0,0:00:19.60,0:00:24.04,Default,,0,0,0,,{\k30}auto {\k68}-invested {\k70}immediately. {\k60}Automation {\k46}removes {\k52}human
+Dialogue: 0,0:00:24.04,0:00:27.80,Default,,0,0,0,,{\k50}emotion {\k32}from {\k66}financial {\k96}compounding. {\k116}Indexing {\k16}in
+Dialogue: 0,0:00:27.80,0:00:30.22,Default,,0,0,0,,{\k28}broad {\k46}market {\k52}equity {\k52}yields {\k22}an {\k42}average
+Dialogue: 0,0:00:30.22,0:00:33.32,Default,,0,0,0,,{\k44}10 {\k66}.4 {\k54}% {\k38}annual {\k52}compound {\k56}rate.
+Dialogue: 0,0:00:34.20,0:00:38.32,Default,,0,0,0,,{\k90}Consistently {\k58}investing {\k90}$500 {\k88}monthly {\k40}bills {\k46}$1
+Dialogue: 0,0:00:38.32,0:00:42.28,Default,,0,0,0,,{\k54}.1 {\k36}million {\k88}over {\k46}30 {\k56}years. {\k26}For
+Dialogue: 0,0:00:42.28,0:00:45.16,Default,,0,0,0,,{\k60}example, {\k52}investor {\k36}Sarah {\k48}scaled {\k26}her {\k24}net
+Dialogue: 0,0:00:45.16,0:00:48.68,Default,,0,0,0,,{\k22}worth {\k76}400 {\k44}% {\k52}using {\k66}automated {\k92}transfers.
+Dialogue: 0,0:00:49.62,0:00:52.68,Default,,0,0,0,,{\k60}Download {\k30}a {\k26}free {\k66}financial {\k74}allocation {\k50}matrix
+Dialogue: 0,0:00:52.68,0:00:54.44,Default,,0,0,0,,{\k50}today {\k24}and {\k24}take {\k30}full {\k48}control.
