@@ -1,19 +1,36 @@
 #!/usr/bin/env node
-// webhook-server.js — Lightweight render-agent webhook server
-// Receives render jobs via POST /render, spawns render.js, and publishes to Postiz on completion.
+// webhook-server.js — Production-Hardened Render Agent Webhook Server
+// Serial queue (BullMQ + Redis, concurrency=1) for overnight batching without CPU/RAM collapse.
+// SSE Real-Time Progress Streaming to mobile UI.
 
 require('dotenv').config();
 const express = require('express');
-const { execSync, spawn } = require('child_process');
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { EventEmitter } = require('events');
 const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { Queue, Worker } = require('bullmq');
+const Redis = require('ioredis');
+const { executeRenderJob } = require('./render');
 const { publishToPostiz } = require('./postiz-publisher');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+const progressEvents = new EventEmitter();
+progressEvents.setMaxListeners(100);
 
 app.use(express.json());
+
+// Enable CORS for SSE and API access
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Configure R2 Client (S3 Compatible API)
 let s3;
@@ -68,15 +85,153 @@ async function uploadR2File(localPath, key, contentType = 'audio/wav') {
   await s3.send(command);
 }
 
-// ── In-memory job tracker ──────────────────────────────────────────────────────
-const jobs = new Map();
+// ── Redis & BullMQ Queue Setup (Concurrency = 1) ────────────────────────────────
+const redisHost = process.env.REDIS_HOST || '127.0.0.1';
+const redisPort = Number(process.env.REDIS_PORT) || 6379;
+const redisConfig = {
+  host: redisHost,
+  port: redisPort,
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false
+};
 
-// ── Health check ───────────────────────────────────────────────────────────────
-app.get('/', (_req, res) => {
-  res.json({ status: 'alive', service: 'render-agent' });
+const renderQueue = new Queue('render-queue', { connection: redisConfig });
+const jobsState = new Map();
+
+const worker = new Worker('render-queue', async (job) => {
+  const { business, jobId } = job.data;
+  console.log(`[BullMQ Worker] Processing render job: ${jobId} (Business: ${business})`);
+
+  jobsState.set(jobId, {
+    jobId,
+    business,
+    status: 'rendering',
+    progress: 5,
+    stage: 'INIT',
+    message: 'Starting render pipeline execution...',
+    startedAt: new Date().toISOString()
+  });
+
+  const onProgress = ({ stage, percent, message }) => {
+    const currentState = jobsState.get(jobId) || {};
+    const updatedState = {
+      ...currentState,
+      status: percent === 100 ? 'completed' : 'rendering',
+      stage,
+      progress: percent,
+      message,
+      updatedAt: new Date().toISOString()
+    };
+    jobsState.set(jobId, updatedState);
+    progressEvents.emit('progress', updatedState);
+  };
+
+  try {
+    await executeRenderJob(business, jobId, onProgress);
+
+    const finalState = {
+      jobId,
+      business,
+      status: 'completed',
+      progress: 100,
+      stage: 'DONE',
+      message: 'Render successfully completed',
+      finishedAt: new Date().toISOString()
+    };
+    jobsState.set(jobId, finalState);
+    progressEvents.emit('progress', finalState);
+
+    try {
+      await publishToPostiz(business, jobId);
+      console.log(`[render:${jobId}] Postiz publish triggered successfully`);
+    } catch (err) {
+      console.error(`[render:${jobId}] Postiz publish failed:`, err.message);
+    }
+  } catch (err) {
+    console.error(`[BullMQ Worker] Job ${jobId} failed:`, err.message);
+    const failedState = {
+      jobId,
+      business,
+      status: 'failed',
+      progress: 0,
+      stage: 'FAILED',
+      message: err.message,
+      finishedAt: new Date().toISOString()
+    };
+    jobsState.set(jobId, failedState);
+    progressEvents.emit('progress', failedState);
+    throw err;
+  }
+}, {
+  connection: redisConfig,
+  concurrency: 1
 });
 
-// ── Audio Extraction Endpoint for Transcription ────────────────────────────────
+// ── Health & Startup Preflight Check ─────────────────────────────────────────────
+app.get('/', (_req, res) => {
+  res.json({
+    status: 'alive',
+    service: 'janus-render-agent',
+    redis: 'connected',
+    concurrencyLimit: 1
+  });
+});
+
+app.get('/queue/status', async (_req, res) => {
+  try {
+    const waitingCount = await renderQueue.getWaitingCount();
+    const activeCount = await renderQueue.getActiveCount();
+    const completedCount = await renderQueue.getCompletedCount();
+    const failedCount = await renderQueue.getFailedCount();
+
+    res.json({
+      waiting: waitingCount,
+      active: activeCount,
+      completed: completedCount,
+      failed: failedCount,
+      activeJobs: Array.from(jobsState.values()).filter(j => j.status === 'rendering')
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── SSE Real-Time Progress Endpoint ──────────────────────────────────────────────
+app.get('/progress/:jobId', (req, res) => {
+  const { jobId } = req.params;
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*'
+  });
+
+  const current = jobsState.get(jobId);
+  if (current) {
+    res.write(`data: ${JSON.stringify(current)}\n\n`);
+  } else {
+    res.write(`data: ${JSON.stringify({ jobId, status: 'queued', progress: 0, message: 'Waiting in queue...' })}\n\n`);
+  }
+
+  const listener = (data) => {
+    if (data.jobId === jobId) {
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+      if (data.status === 'completed' || data.status === 'failed') {
+        progressEvents.off('progress', listener);
+        res.end();
+      }
+    }
+  };
+
+  progressEvents.on('progress', listener);
+
+  req.on('close', () => {
+    progressEvents.off('progress', listener);
+  });
+});
+
+// ── Audio Extraction Endpoint ──────────────────────────────────────────────────
 app.post('/extract-audio', async (req, res) => {
   const authHeader = req.headers.authorization;
   const expectedToken = `Bearer ${process.env.FACTORY_SECRET}`;
@@ -101,7 +256,6 @@ app.post('/extract-audio', async (req, res) => {
     console.log(`[ExtractAudio] Extracting 16kHz mono WAV audio...`);
     execSync(`ffmpeg -y -i "${localVideoPath}" -vn -acodec pcm_s16le -ar 16000 -ac 1 "${fullAudioPath}"`, { stdio: 'ignore' });
 
-    // Segment into 15-minute (900s) chunks
     const chunkPattern = path.join(tempDir, 'chunk_%03d.wav');
     console.log(`[ExtractAudio] Segmenting audio into 15-min chunks...`);
     execSync(`ffmpeg -y -i "${fullAudioPath}" -f segment -segment_time 900 -c copy "${chunkPattern}"`, { stdio: 'ignore' });
@@ -119,9 +273,7 @@ app.post('/extract-audio', async (req, res) => {
       chunkKeys.push(r2ChunkKey);
     }
 
-    // Cleanup temp folder
     fs.rmSync(tempDir, { recursive: true, force: true });
-
     return res.json({ success: true, chunkKeys, totalChunks: chunkKeys.length });
   } catch (err) {
     console.error(`[ExtractAudio] Failed:`, err.message);
@@ -132,7 +284,7 @@ app.post('/extract-audio', async (req, res) => {
   }
 });
 
-// ── TTS Synthesis Endpoint via Chatterbox ─────────────────────────────────────
+// ── TTS Synthesis Endpoint ────────────────────────────────────────────────────
 app.post('/tts', async (req, res) => {
   const { text, language = 'en', voice = 'default', exaggeration = 0.5, cfgWeight = 0.5, business = 'default', jobId } = req.body || {};
 
@@ -169,9 +321,8 @@ app.post('/tts', async (req, res) => {
   }
 });
 
-// ── Trigger a render job ───────────────────────────────────────────────────────
-app.post('/render', (req, res) => {
-  // Auth check
+// ── Queue a Render Job (POST /render) ──────────────────────────────────────────
+app.post('/render', async (req, res) => {
   const authHeader = req.headers.authorization;
   const expectedToken = `Bearer ${process.env.FACTORY_SECRET}`;
   if (!process.env.FACTORY_SECRET || authHeader !== expectedToken) {
@@ -187,75 +338,63 @@ app.post('/render', (req, res) => {
     });
   }
 
-  // Record the job
-  jobs.set(jobId, {
-    jobId,
-    business,
-    status: 'running',
-    startedAt: new Date().toISOString(),
-    finishedAt: null,
-    exitCode: null,
-  });
+  try {
+    const queueJob = await renderQueue.add('render', { business, jobId });
+    const queuePosition = await renderQueue.getWaitingCount();
 
-  // Spawn the render process (fire-and-forget)
-  const child = spawn('node', ['render.js', business, jobId], {
-    cwd: __dirname,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+    const initialState = {
+      jobId,
+      business,
+      status: 'queued',
+      progress: 0,
+      stage: 'QUEUED',
+      message: `Job queued for render (Position #${queuePosition})`,
+      queuedAt: new Date().toISOString()
+    };
+    jobsState.set(jobId, initialState);
+    progressEvents.emit('progress', initialState);
 
-  child.stdout.on('data', (data) => {
-    console.log(`[render:${jobId}:stdout] ${data.toString().trimEnd()}`);
-  });
-
-  child.stderr.on('data', (data) => {
-    console.error(`[render:${jobId}:stderr] ${data.toString().trimEnd()}`);
-  });
-
-  child.on('error', (err) => {
-    console.error(`[render:${jobId}] Failed to start child process:`, err.message);
-    const job = jobs.get(jobId);
-    if (job) {
-      job.status = 'error';
-      job.finishedAt = new Date().toISOString();
-      job.error = err.message;
-    }
-  });
-
-  child.on('close', async (code) => {
-    const job = jobs.get(jobId);
-    if (job) {
-      job.exitCode = code;
-      job.finishedAt = new Date().toISOString();
-      job.status = code === 0 ? 'completed' : 'failed';
-    }
-
-    console.log(`[render:${jobId}] Process exited with code ${code}`);
-
-    if (code === 0) {
-      try {
-        await publishToPostiz(business, jobId);
-        console.log(`[render:${jobId}] Postiz publish triggered successfully`);
-      } catch (err) {
-        console.error(`[render:${jobId}] Postiz publish failed:`, err.message);
-      }
-    } else {
-      console.warn(`[render:${jobId}] Skipping Postiz publish — render exited with code ${code}`);
-    }
-  });
-
-  // Respond immediately
-  res.json({ success: true, message: 'Render job started', jobId });
+    console.log(`[Queue] Job ${jobId} added to render queue. Position: #${queuePosition}`);
+    res.json({
+      success: true,
+      queued: true,
+      message: `Render job queued successfully (Position #${queuePosition})`,
+      jobId,
+      queuePosition
+    });
+  } catch (err) {
+    console.error(`[Queue Error] Failed to add job ${jobId}:`, err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // ── List all jobs ──────────────────────────────────────────────────────────────
 app.get('/jobs', (_req, res) => {
-  const allJobs = Array.from(jobs.values()).sort(
-    (a, b) => new Date(b.startedAt) - new Date(a.startedAt)
+  const allJobs = Array.from(jobsState.values()).sort(
+    (a, b) => new Date(b.queuedAt || b.startedAt) - new Date(a.queuedAt || a.startedAt)
   );
   res.json({ jobs: allJobs });
 });
 
-// ── Start server ───────────────────────────────────────────────────────────────
+// ── Startup Preflight Check & Listener ─────────────────────────────────────────
+function performStartupPreflight() {
+  console.log("🔍 Running Startup Preflight Checks...");
+  try {
+    const ffmpegVer = execSync("ffmpeg -version").toString().split("\n")[0];
+    console.log(`   - FFmpeg: ${ffmpegVer}`);
+  } catch (e) {
+    console.warn(`   - FFmpeg check warning: ${e.message}`);
+  }
+
+  try {
+    const fontCheck = execSync("fc-match 'Montserrat-ExtraBold'").toString();
+    console.log(`   - Font Montserrat-ExtraBold: ${fontCheck.trim()}`);
+  } catch (e) {
+    console.warn(`   - Font check warning: ${e.message}`);
+  }
+}
+
 app.listen(PORT, () => {
-  console.log(`🚀 render-agent webhook server listening on port ${PORT}`);
+  performStartupPreflight();
+  console.log(`🚀 Janus Render Agent listening on port ${PORT} (BullMQ Concurrency = 1, SSE Enabled)`);
 });

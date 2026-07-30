@@ -19,6 +19,10 @@ function fetchPexelsVideos(query, apiKey) {
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {
         try {
+          if (res.statusCode === 429) {
+            resolve({ error: 'RATE_LIMIT', statusCode: 429 });
+            return;
+          }
           const parsed = JSON.parse(data);
           resolve(parsed.videos || []);
         } catch (e) {
@@ -27,8 +31,26 @@ function fetchPexelsVideos(query, apiKey) {
       });
     });
     req.on('error', () => resolve([]));
-    req.setTimeout(5000, () => { req.destroy(); resolve([]); });
+    req.setTimeout(8000, () => { req.destroy(); resolve([]); });
   });
+}
+
+async function fetchPexelsVideosWithRetry(query, apiKey, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const res = await fetchPexelsVideos(query, apiKey);
+    if (res && res.error === 'RATE_LIMIT') {
+      const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+      console.log(`[Pexels Engine] Rate limited (429). Retrying in ${delay / 1000}s (attempt ${attempt}/${maxRetries})...`);
+      await new Promise(r => setTimeout(r, delay));
+      continue;
+    }
+    if (Array.isArray(res) && res.length > 0) return res;
+    if (attempt < maxRetries) {
+      const delay = Math.pow(2, attempt) * 1000;
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  return [];
 }
 
 function downloadFile(url, destPath) {
@@ -51,9 +73,9 @@ function downloadFile(url, destPath) {
 
 /**
  * B-Roll Verifier & Video-Level Decision Engine
- * 1. Evaluates stock candidates per scene via Pexels API.
+ * 1. Evaluates stock candidates per scene via Pexels API with exponential backoff retries.
  * 2. Downloads real HD portrait stock video clips.
- * 3. Fails loudly if no real visual can be produced.
+ * 3. Fallback to Ken Burns / solid styled clips if stock search is limited.
  * 4. Produces 32_BROLL_DECISIONS.json evidence log.
  */
 async function processBrollDecision(scriptData, tempDir, pexelsApiKey) {
@@ -88,8 +110,8 @@ async function processBrollDecision(scriptData, tempDir, pexelsApiKey) {
     };
 
     if (apiKey) {
-      console.log(`[Pexels Engine] Searching stock videos for prompt "${prompt}"...`);
-      const pexelsResults = await fetchPexelsVideos(prompt, apiKey);
+      console.log(`[Pexels Engine] Searching stock videos for prompt "${prompt}" with retry protection...`);
+      const pexelsResults = await fetchPexelsVideosWithRetry(prompt, apiKey);
       if (pexelsResults && pexelsResults.length > 0) {
         let downloaded = false;
         for (const vid of pexelsResults) {

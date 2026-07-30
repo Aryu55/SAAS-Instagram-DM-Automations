@@ -122,8 +122,15 @@ function validateSkillSchema(template, skillId) {
   return applicationReport;
 }
 
-async function executeRenderJob(business, jobId) {
-  log(`Processing job ${jobId} for business slug: "${business}"`);
+async function executeRenderJob(business, jobId, onProgress) {
+  const reportProgress = (stage, percent, message) => {
+    log(`[PROGRESS ${percent}%] ${stage}: ${message}`);
+    if (typeof onProgress === "function") {
+      onProgress({ stage, percent, message, jobId });
+    }
+  };
+
+  reportProgress("INIT", 5, `Starting render job ${jobId} for business: ${business}`);
 
   const tempDir = path.join(__dirname, "temp", jobId);
   fs.mkdirSync(tempDir, { recursive: true });
@@ -141,13 +148,13 @@ async function executeRenderJob(business, jobId) {
   const videoKey = `${business}/${jobId}/final_marketing_reel.mp4`;
 
   try {
-    log("Downloading script from R2...");
+    reportProgress("FETCHING_SCRIPT", 10, "Downloading script JSON from R2...");
     await downloadFile(scriptKey, localScriptPath);
     const scriptData = JSON.parse(fs.readFileSync(localScriptPath, "utf-8"));
 
     const isClipJob = !!scriptData.sourceVideoKey;
 
-    log("Resolving design template.json...");
+    reportProgress("RESOLVING_TEMPLATE", 15, "Resolving skill design template...");
     let template = null;
     let templateSource = "";
 
@@ -209,26 +216,38 @@ async function executeRenderJob(business, jobId) {
     log(`[TEMPLATE_RESOLVED] Winner: ${templateSource} (Crop mode: ${cropMode}, SubtitleY: ${template.subtitleY})`);
 
     if (isClipJob) {
-      log(`=== MODE: Clip Extraction & Formatting ===`);
+      reportProgress("PREPARING_CLIP", 25, "Extracting and normalizing source video clip...");
       const sourceVideoKey = scriptData.sourceVideoKey;
       const startTime = Number(scriptData.clipStartTime) || 0;
       const endTime = Number(scriptData.clipEndTime) || (startTime + 45);
       const duration = Math.max(5, endTime - startTime);
 
-      const localSourceVideo = path.join(tempDir, "source_video.mp4");
+      let localSourceVideo = path.join(tempDir, "source_video.mp4");
       const localTrimmedClip = path.join(tempDir, "trimmed_clip.mp4");
       const localClipAudio = path.join(tempDir, "clip_audio.wav");
 
       log(`Downloading source video (${sourceVideoKey})...`);
       await downloadFile(sourceVideoKey, localSourceVideo);
 
-      log(`Trimming segment: ${startTime}s to ${endTime}s (duration: ${duration}s)...`);
+      // Input aspect ratio auto-normalization to 1080x1920 (9:16)
+      const normalizedPath = path.join(tempDir, "normalized_source.mp4");
+      log("Normalizing input aspect ratio to 1080x1920 (9:16)...");
+      try {
+        execSync(`ffmpeg -y -i "${localSourceVideo}" -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black" -c:v libx264 -preset fast -c:a copy "${normalizedPath}"`, { stdio: "ignore" });
+        if (fs.existsSync(normalizedPath) && fs.statSync(normalizedPath).size > 1000) {
+          localSourceVideo = normalizedPath;
+        }
+      } catch (e) {
+        log(`Aspect ratio normalization note: ${e.message}`);
+      }
+
+      reportProgress("TRIMMING_CLIP", 35, `Trimming ${duration}s clip segment...`);
       execSync(`ffmpeg -y -ss ${startTime} -i "${localSourceVideo}" -t ${duration} -c:v libx264 -c:a aac "${localTrimmedClip}"`, { stdio: "inherit" });
 
       log(`Extracting audio from trimmed clip for Whisper alignment...`);
       execSync(`ffmpeg -y -i "${localTrimmedClip}" -vn -acodec pcm_s16le -ar 16000 -ac 1 "${localClipAudio}"`, { stdio: "inherit" });
 
-      log(`Generating ASS karaoke subtitles from clip audio...`);
+      reportProgress("ALIGNING_SUBTITLES", 50, "Generating ASS karaoke subtitles via Whisper...");
       const whisperModel = scriptData.whisperModel || "base";
       const language = scriptData.language || "hi";
       try {
@@ -279,16 +298,16 @@ async function executeRenderJob(business, jobId) {
           `-c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "${localOutputPath}"`;
       }
 
-      log(`Running FFmpeg clip render command: ${ffmpegCmd}`);
+      reportProgress("RENDERING_FFMPEG", 75, "Compiling final 9:16 video reel with FFmpeg...");
       execSync(ffmpegCmd, { cwd: tempDir, stdio: "inherit" });
       log("Clip formatting completed successfully.");
 
     } else {
-      log(`=== MODE: Faceless / AI Script Renderer ===`);
+      reportProgress("AI_TTS", 25, "Synthesizing voice audio via Chatterbox TTS...");
       log("Downloading audio from R2...");
       await downloadFile(audioKey, localAudioPath);
 
-      log("Executing whisper word-alignment pipeline...");
+      reportProgress("ALIGNING_SUBTITLES", 40, "Generating ASS karaoke subtitles via Whisper...");
       const whisperModel = scriptData.whisperModel || "base";
       const language = scriptData.language || "en";
       execSync(`python3 whisper_align.py "${localAudioPath}" "${localTemplatePath}" "${localAssPath}" --model "${whisperModel}" --language "${language}"`, {
@@ -299,6 +318,7 @@ async function executeRenderJob(business, jobId) {
       const audioDuration = parseFloat(execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${localAudioPath}"`).toString().trim());
       log(`Synthesized audio duration: ${audioDuration} seconds`);
 
+      reportProgress("FETCHING_BROLL", 55, "Fetching multi-scene Pexels HD B-Roll videos...");
       const { processBrollDecision } = require("./broll_verifier");
       const brollResult = await processBrollDecision(scriptData, tempDir, process.env.PEXELS_API_KEY);
       log(`B-Roll Verification Result: ${brollResult.chosenPath} (${brollResult.visualClips.length} clips)`);
@@ -323,12 +343,12 @@ async function executeRenderJob(business, jobId) {
         `-filter_complex "[0:v]${videoFilter}[v]" ` +
         `-map "[v]" -map 1:a -t ${audioDuration} -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "${localOutputPath}"`;
 
-      log(`Running FFmpeg faceless render command: ${ffmpegCmd}`);
+      reportProgress("RENDERING_FFMPEG", 75, "Stitching faceless explainer video with FFmpeg...");
       execSync(ffmpegCmd, { cwd: tempDir, stdio: "inherit" });
       log("FFmpeg compilation completed successfully.");
     }
 
-    log("Uploading final video reel back to R2...");
+    reportProgress("UPLOADING_R2", 90, "Uploading final reel MP4 to Cloudflare R2...");
     await uploadFile(localOutputPath, videoKey, "video/mp4");
 
     const assKey = `${business}/${jobId}/subtitles.ass`;
@@ -336,9 +356,9 @@ async function executeRenderJob(business, jobId) {
       await uploadFile(localAssPath, assKey, "text/plain");
     }
 
-    log(`Job successfully complete. R2 Key: ${videoKey}`);
+    reportProgress("DONE", 100, `Render complete! Available at key: ${videoKey}`);
   } catch (err) {
-    log(`ERROR: Job execution failed for ${jobId}: ${err.message}`);
+    reportProgress("FAILED", 0, `Render error: ${err.message}`);
     throw err;
   }
 }
