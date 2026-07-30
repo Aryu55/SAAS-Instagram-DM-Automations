@@ -1,0 +1,16 @@
+{
+  "skillId": "retention-hardcut",
+  "hook": "Aap expense tracking mein kitna time waste kar rahe ho?",
+  "body": [
+    "Har mahine receipts collect karna aur Excel mein copy karna sabse bada pain point hai.",
+    "Hisaab app aapke saare expenses ko auto-categorize karta hai bina kisi hassle ke.",
+    "Quarterly tax calculations aur receipt scanning 10 seconds mein complete hoti hai."
+  ],
+  "cta": "Link in bio par click karo aur aaj hi try karo.",
+  "scriptText": "Aap expense tracking mein kitna time waste kar rahe ho? Har mahine receipts collect karna aur Excel mein copy karna sabse bada pain point hai. Hisaab app aapke saare expenses ko auto-categorize karta hai bina kisi hassle ke. Quarterly tax calculations aur receipt scanning 10 seconds mein complete hoti hai. Link in bio par click karo aur aaj hi try karo.",
+  "brollPrompts": [
+    "Person looking frustrated at computer spreadsheet",
+    "Digital receipt scanner app interface animation",
+    "Financial growth chart rising arrow green"
+  ]
+}

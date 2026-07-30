@@ -22,6 +22,14 @@ const s3 = new S3Client({
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || "marketing-machine-assets";
 
 async function downloadFile(key, destPath) {
+  const mockPath = path.join(__dirname, "mock_r2", key);
+  if (fs.existsSync(mockPath)) {
+    log(`[FAST_PATH] Copying local mock R2 file from ${mockPath}`);
+    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+    fs.copyFileSync(mockPath, destPath);
+    return;
+  }
+
   const localPodcast = path.resolve(__dirname, "../../test_inputs/2_podcast_clipper/vidssave.com Master Claude for Marketing in 72 Minutes (FULL COURSE) 1080P.mp4");
   const localRaw = path.resolve(__dirname, "../../test_inputs/3_raw_footage_edit/raw_footage.mp4");
 
