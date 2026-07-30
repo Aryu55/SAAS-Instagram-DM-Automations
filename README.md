@@ -38,10 +38,11 @@ Janus AI bridges the gap between **organic content creation** and **direct-respo
    - Support multiple brand workspaces (e.g. `Course Business`, `Dev Tool SaaS`, `Growth Agency`) under one account.
    - Manage Discord-style public organization discovery (`/discover`) allowing team members to submit join requests and assign role-based access control (`OWNER`, `ADMIN`, `MEMBER`).
 
-5. **Hardened Production Security**
+5. **Hardened Production Security & Serial Queue Rendering**
    - Cryptographically signed HMAC-SHA256 session cookies (`lib/auth.ts`) preventing session forgery.
    - `bcrypt` password hashing (12 salt rounds) with automatic legacy SHA-256 hash upgrade.
    - Strict organization-level database query scoping (`orgId` filtering) preventing cross-tenant data leakage.
+   - BullMQ + Redis serial job queue on host rendering VPS preventing CPU/RAM OOM collapses during overnight 10+ video batches.
 
 ---
 
@@ -106,6 +107,12 @@ flowchart TD
         
         L --> M[Send POST to Graph Send API]
         M --> N[Increment Automation Metrics in DB]
+    end
+
+    subgraph Hostinger VPS Render Box (KVM 2)
+        P[BullMQ Serial Queue / Redis] --> Q[Chatterbox TTS / Whisper Devanagari]
+        Q --> R[FFmpeg 9:16 Normalizer + ASS Captions]
+        R --> S[Cloudflare R2 Storage]
     end
     
     subgraph Follower Device
@@ -184,6 +191,16 @@ The codebase is organized as follows:
 │   └── ui/                  # Raw Shadcn components
 ├── hooks/                    # Reusable React hooks (automations, queries, navigation)
 ├── lib/                      # Base configurations (auth HMAC signing, prisma, stripe, AI helper functions)
+├── marketing-machine/        # GPU Render Box & Cloudflare Workers Broker
+│   ├── cloudflare-worker/   # Cloudflare Worker orchestrator & API gateway
+│   └── gpu-render-box/      # Node.js + Python + FFmpeg VPS render agent
+│       ├── assets/fonts/    # Bundled TTF fonts (Montserrat, Inter, Komika)
+│       ├── broll_verifier.js# Pexels stock video search with exponential retry
+│       ├── render.js        # Multi-mode render engine with 9:16 normalization
+│       ├── setup-vps.sh     # One-click Ubuntu VPS setup script
+│       ├── tts_chatterbox.py# Chatterbox neural TTS synthesis engine
+│       ├── webhook-server.js# Express + BullMQ serial queue + SSE progress
+│       └── whisper_align.py # Whisper transcript alignment with Urdu rejection
 ├── providers/                # Client state, Theme (Next-Themes) & Query Client wrappers
 ├── prisma/                   # Schema specification & DB Migration files
 └── tailwind.config.ts        # Tailwind Design System customization file
@@ -213,13 +230,6 @@ When a follower comments on a post or DMs the connected profile:
      - **Smart AI (`SMARTAI`)**: Janus builds a context window utilizing the user's defined system prompts (configured inside the automation details card). Janus calls OpenAI's GPT models to draft a responsive Hinglish/English answer tailored to the question, then dispatches the text response.
 4. The system logs the contact details under `Contact` to ensure the lead is saved in the dashboard directory.
 
-### Meta API Limits & Broadcast Compliance (Inviting Followers)
-
-Unlike WhatsApp, Meta's Instagram Platform Policy enforces strict restrictions on message initiation:
-- **No Unsolicited DMs**: Janus cannot initiate a cold DM to a follower who has not messaged the business profile first.
-- **24-Hour Message Window**: Standard API messages can only be sent within 24 hours of the follower's last interaction (DM, story mention, or comment).
-- **Organic Keyword Broadcast Pattern**: To broadcast an invitation to all followers (e.g., inviting them to an event), creators should publish a Post/Reel asking followers to comment a specific keyword (e.g., `"INVITE"`). The user's comment triggers the webhook loop, allowing Janus to send a compliant automated DM response containing the link.
-
 ### AI Content Pipeline (4-Agent System)
 
 Accessible via `/dashboard/[slug]/content-engine`, the engine coordinates four separate LLM sub-routines (agents) processing information sequentially:
@@ -227,12 +237,6 @@ Accessible via `/dashboard/[slug]/content-engine`, the engine coordinates four s
 2. **Agent 02 (Validator)**: Computes a relevance check, filtering out noise and grouping validation indicators into thematic semantic clusters.
 3. **Agent 03 (Writer)**: Drafts voice scripts tailored to defined Hinglish ratios, sentence lengths, and energy profiles.
 4. **Agent 04 (Hooks)**: Designs 5 retention-optimized hooks, assigning confidence scores based on engagement metrics.
-
-### Stripe Checkout & Billing Lifecycle
-
-- Free-tier users are restricted to standard automations and limited keyword matches.
-- Upgrading to `PRO` redirects the user to Stripe Checkout using `actions/user/index.ts`.
-- Upon successful payment, Stripe sends a webhook request updating the `Subscription` model plan status to `PRO`.
 
 ---
 
@@ -262,112 +266,41 @@ Janus implements a responsive, highly premium **Neo-Glassmorphic Tech Sanctuary*
 }
 ```
 
-### Font Pairing System
-- **Display Headings / Count Metrics**: Space Grotesk (`font-family: var(--font-space-grotesk)`).
-- **Body & Copy Elements**: Instrument Sans (`font-family: var(--font-instrument)`).
-
-### Card Styling
-Cards use the `.glass-card` selector. They feature flat surfaces, thin borders, and transition smoothly on hover:
-- **Hover Micro-Animation**: Translates `translate-y-[-2px]` with a scale factor of `scale-[1.01]`.
-- **Glow Effect**: Generates a soft violet outer shadow: `box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.12)`.
-
 ---
 
 ## 6. Detailed Changelog & Styling Revision History
 
-### [Base State]
-The initial setup contained a dark mesh-gradient layout containing high-contrast blur elements, rounded-full panels, and hardcoded dark blue backgrounds.
+### [Revision 08] — Content Factory 3.0 & Fix Pack v3
+- **Dynamic Skill Precedence Resolution**: Implemented dynamic skill template resolution: `job.skillId` -> `<janus>/skills/<skillId>/config.json` -> `<business>/template.json` -> built-in default.
+- **Chatterbox TTS Architecture**: Replaced legacy Bark with Chatterbox TTS engine (`tts_chatterbox.py`).
+- **3-Tier Visual Judge Layer**: Implemented deterministic metric gates, vision judge, and 10-clip calibration matrix in `run_judge.js`.
 
-### [Revision 01] — Warm-Paper Editorial Sanctuary (pbakaus/impeccable)
-To align with editorial-style guidelines, the entire interface was reworked:
-- Headings were set to italic display serif **Cormorant Garamond**.
-- Backgrounds were stripped of all gradients and replaced with a flat warm cream layout (`--warm-ash-cream`).
-- All corner borders were set to sharp square boundaries (`rounded-none`).
-- Accent colors were changed to **Editorial Magenta** (`#ee1c6c`).
-- Borders were styled as distinct grey lines (`--paper-mist`).
-
-### [Revision 02] — Neo-Glassmorphic Tech Sanctuary (Latest Revamp)
-To modernize the product and align it with state-of-the-art tech platforms, the UI was refactored:
-- **Globals & Font Configuration**:
-  - Replaced display serif Cormorant font family declarations with the geometric display sans **Space Grotesk**.
-  - All occurrences of `font-light italic` on headers changed to geometric `font-bold` headings.
-  - Set default body copy font family to **Instrument Sans**.
-- **Card & Border Upgrades**:
-  - Replaced all instances of `rounded-none` borders with clean modern scales: cards and panels use `rounded-xl` or `rounded-2xl`, while buttons and input fields use `rounded-lg` or `rounded-md`.
-- **Color Variable Migration**:
-  - **Accent Colors**: Editorial Magenta (`#ee1c6c`) migrated to oklch Violet/Indigo (`#7c3aed` / `#8b5cf6`).
-  - **Dividers**: Mapped `var(--paper-mist)` to adaptive border colors (`var(--border-color)`).
-  - **Backgrounds**: Mapped `var(--warm-charcoal)` to adaptive page backgrounds (`var(--page-bg)`).
-- **Recharts Integration**:
-  - Refactored SVG path properties, area fills, and gradients inside `analytics/page.tsx` to utilize adaptive theme variables instead of hardcoded hex values.
-- **Component Polish**:
-  - Refactored `DoubleGradientCard`, `MetricsCard`, `Sidebar`, mobile navigation sheets, search bars, settings blocks, and voice script profiles to use rounded edges and theme-aware variables.
-
-### [Revision 03] — Content Factory Integration (Phases 0-4)
-To implement a complete, autonomous, multi-business Content Factory:
-- **7-Tab Dashboard UI**: Created a highly polished, interactive dashboard page for the Content Engine containing:
-  - *Ideas Calendar*: Grid of concepts with staggered fade-in animations, manual idea submission sidebar, and batch generate triggers.
-  - *Review Queue*: 9:16 interactive video player mockup, editable captions, script text parser, hook variations, and approval/rejection modals.
-  - *Render Pipeline*: Status tracker with expandable accordion logs showing detailed execution outputs.
-  - *Trends*: Engagement-scoring competitor analysis and semantic topic clustering views.
-  - *Analytics*: Performance tracking cards, winning patterns output, and weekly reports.
-  - *Documentary Log*: Automated timeline tracking onboarding, publishes, rejections, and milestone achievements with markdown copy export.
-  - *Settings*: Automated brand configuration details, language/voice presets, toggle controls, and asset checklists.
-- **Server Actions & Database Controllers**: Built dedicated server actions for scraping integrations (`scraper.ts`), metrics aggregation (`metrics.ts`), timeline export (`documentary.ts`), and pipeline triggers.
-- **Vercel Cron & Webhooks**: Configured automated daily creation pipeline cron (`/api/factory/cron`) and weekly feedback analysis cron (`/api/factory/weekly`).
-
-### [Revision 04] — Premium UX & Intelligence Suite Expansion
-- **Premium UX / Skeleton Loading**: Implemented true skeleton loading states to replace generic spinners across the dashboard, reducing perceived wait times and stopping layout shifts.
-- **Interactive Live Previews**: Added a real-time `iPhone Mockup` component inside the automation builder (`ThenActions`), allowing users to live-preview their DM responses exactly as they will appear on Instagram while typing.
-- **Advanced Skills Engine & AI Auto-Categorization**: 
-  - Added a **Bulk AI Import** feature that allows users to paste raw text of skills and uses Gemini 2.0 to auto-categorize them (e.g., `EDITING_STYLE`, `CAPTION_STYLE`, `BROLL_GENERATION`, `VOICE`).
-  - Added **Style Reference Links**: Users can attach `/watch` video links specifically for editing style skills.
-  - **Dynamic Specimen Caching**: The system permanently generates and caches visual UI specimens (e.g., dynamic subtitles, fake waveforms) in the DB for non-editing skills to save LLM tokens.
-- **Viral Analyzer Intelligence Feature (`/analyze`)**: 
-  - Expanded `ScrapedPost` schema to support structural deep dives.
-  - Built a batch-analysis dashboard where users can paste video links to automatically extract transcripts and have the LLM reverse-engineer the exact **Hook**, **Format**, and **Storytelling Structure** that made the video go viral.
-
-### [Revision 07] — Dynamic Pipeline Step Execution, Hybrid Real Transcription & Multi-Mode VPS Renderer
-- **Dynamic Step Execution Engine (`actions/factory/index.ts`)**:
-  - Factory server actions (`runPipelineForIdea` and `confirmAndDispatchClips`) now dynamically inspect pipeline step definitions in Prisma DB.
-  - Pipelines without TTS steps (e.g. **Podcast Clipper** and **Raw Footage Edit**) completely skip TTS voice synthesis without forcing artificial commentary.
-- **Hybrid Real Transcription Engine**:
-  - Added `POST /extract-audio` endpoint to the VPS render agent (`webhook-server.js`) to extract 16kHz audio chunks using FFmpeg and upload them to R2.
-  - Cloudflare Worker `/clip-long-video` transcribes each chunk buffer via **Cloudflare Workers AI Whisper** (`@cf/openai/whisper`).
-  - Verbatim timestamped transcript is passed to Llama 3.1 8B to derive exact viral clip timestamps and topics from real audio content.
-- **Multi-Mode VPS Render Agent (`render.js`)**:
-  - Enhanced `render.js` with **Clip Extraction Mode**: timestamp trimming, 9:16 vertical 1080x1920 cropping, Whisper karaoke ASS captions, and optional commentary overlay.
-  - Retained **Faceless Explainer Mode**: script + TTS + B-roll/Pexels + logo + background music mix.
-  - Added graceful fallback rendering for hosts missing `faster-whisper` or `libass` FFmpeg filters.
-- **Unified Test Inputs Hub (`test_inputs/`)**:
-  - Created standardized input directories (`1_faceless_explainer/`, `2_podcast_clipper/`, `3_raw_footage_edit/`) with README instructions for user-driven stress testing.
-
-### [Revision 08] — Content Factory 3.0 & Fix Pack (Chatterbox TTS, B-Roll Engine & 3-Tier Visual Judge)
-- **Dynamic Skill Precedence Resolution (`render.js`)**:
-  - Implemented dynamic skill template resolution: `job.skillId` -> `<janus>/skills/<skillId>/config.json` -> `<business>/template.json` -> built-in default.
-  - Enforced strict failure exit under `STRICT=1` if `skillId` is configured on a job object but fails to load.
-- **Commentary Audio Isolation (`enableCommentary: false`)**:
-  - Made commentary audio overlay strictly opt-in via explicit `enableCommentary: true` on the job object.
-  - Resolved the phantom commentary audio mixing bug on podcast clips and raw footage edits.
-- **Chatterbox TTS Architecture & Proxy Gateway**:
-  - Replaced legacy Bark/silent fallbacks with a high-fidelity **Chatterbox TTS Engine** (`tts_chatterbox.py`).
-  - Integrated device auto-detection (`cuda` -> `mps` for Apple Silicon Metal -> `cpu`).
-  - Configured language routing (`hi`/`hinglish` -> `ChatterboxMultilingualTTS`, `en` -> `ChatterboxTurboTTS`).
-  - Cloudflare Worker proxies `POST /tts` requests directly to the VPS Render Box `/tts` endpoint.
-  - Enforced Resemble AI Perth neural watermark disclosure.
-- **Video-Level B-Roll Decision Engine & Ken Burns Filters (`broll_verifier.js`)**:
-  - Implemented video-level B-roll verification gating.
-  - Evaluates stock video candidate pass rates per scene: if $\ge 70\%$ pass $\rightarrow$ Stock Video; if $< 70\%$ pass $\rightarrow$ `ALL_AI_IMAGE` path with Ken Burns push/drift filter.
-- **3-Tier Visual & Gate Judge Layer (`run_judge.js`)**:
-  - **Tier 1**: Deterministic metric gates (`font-match`, `y-margin`, `ass-colors`, `dead-air-check`, `black-frame-detection`).
-  - **Tier 2**: Vision judge evaluating frame stills against `reference/TEARDOWN.md` visual anchors.
-  - **Tier 3**: Bounded retry execution loop (max 2 retries with modified parameters).
-  - **Judge Calibration Matrix**: Verified 10-clip calibration matrix achieving 100% separation accuracy across 5 good and 5 bad reference clips.
-- **Content-Addressed Transcript Cache**:
-  - Added persistent transcript caching under `transcripts/<sha256(audio)>__<model>__<language>.json` to speed up re-renders.
-- **Master Test 3.0 Audit Bundle (`factory_test_bundle_v3/`)**:
-  - Verified all 3 machines (Faceless Explainer, Podcast Clipper, Raw Footage Edit) under `STRICT=1` mode.
-  - Exported complete evidence bundle containing MP4 outputs, ASS subtitles, 15 frame stills, real SHA-256 digests (`11_PROVENANCE.json`), and self-audit reports (`20_SELF_AUDIT.md`, `21_SUMMARY.md`).
+### [Revision 09] — Content Factory Fix Pack v5 & Production Hardening Suite
+- **Quantitative Skill Schema Contract (`skills/SCHEMA.json`)**:
+  - Implemented strict quantitative validation mapping all skill config keys to `IMPLEMENTED`, `NOT_IMPLEMENTED`, or `UNKNOWN`.
+  - Hard failure under `STRICT=1` on unknown key typos. Normalized property names (`subtitleFontSize`, `subtitleUppercase`, `fps`, `overlayStyle`).
+- **Multi-Scene Pexels B-Roll Concatenation & ~60s Anti-Slop Screenplay**:
+  - Machine 1 downloads, trims, and concatenates **8 distinct Pexels HD stock video MP4s** matching spoken scene boundaries.
+  - ~60s screenplay engine (~150 words, 8 scenes) with concrete numbers/mechanisms per body line and zero generic stock openers.
+- **Screen Recording Auto-Content Crop ($\ge 45\%$ Panel Height)**:
+  - Machine 2 scales active content panel to **50% of frame height** ($1080 \times 960$ panel at Y=240 on blurred background).
+  - Captions positioned at `subtitleY: 0.72` in the dark background panel below content.
+- **Whisper Devanagari Enforcement & Urdu Script Rejection**:
+  - Enforced `language="hi"` with Devanagari initial prompt hint (`"यह वीडियो हिंदी भाषा में है।"`) and filtered Urdu range characters (`U+0600..U+06FF`).
+  - Cache keying format: `sha256(audio)__model__language.json` with `CACHE_BYPASS=1` support.
+- **Serial Render Queue (BullMQ + Redis, Concurrency = 1)**:
+  - Refactored `webhook-server.js` with Redis-backed BullMQ serial job queue. Supports overnight batching of 10+ video jobs without CPU/RAM OOM crashes.
+- **Real-Time SSE Progress Streaming**:
+  - Added `GET /progress/:jobId` Server-Sent Events endpoint streaming live stage updates (`QUEUED` → `FETCHING_SCRIPT` → `ALIGNING_SUBTITLES` → `RENDERING_FFMPEG` → `DONE`) directly to mobile UI.
+- **TTF Font Bundling & Auto-Installer**:
+  - Bundled `Montserrat-ExtraBold.ttf`, `Inter-Bold.ttf`, and `Komika-Axis.ttf` inside `marketing-machine/gpu-render-box/assets/fonts/`.
+  - `setup-vps.sh` automatically installs fonts to `/usr/share/fonts/truetype/janus/` and refreshes fontconfig.
+- **Input Aspect Ratio Auto-Normalization**:
+  - Auto-normalizes any non-standard video upload (16:9 landscape, square 1:1, or screen recordings) to consistent 1080x1920 (9:16) vertical format before processing.
+- **Pexels API Retry Protection**:
+  - `broll_verifier.js` uses exponential backoff retry (3 attempts with 2s, 4s, 8s delays) on 429 rate limits, with solid color background fallbacks.
+- **Audit Evidence Bundle (`factory_test_bundle_v5/`)**:
+  - Complete evidence bundle containing rendered MP4 outputs, ASS subtitles, 15 frame stills, real SHA-256 digests (`11_PROVENANCE.json`), and self-audit reports (`20_SELF_AUDIT.md`, `21_SUMMARY.md`).
 
 ---
 
@@ -382,7 +315,7 @@ To implement a complete, autonomous, multi-business Content Factory:
    ```
 
 2. **Configure Environment Settings**:
-   Copy `.env.example` into `.env` and fill out the Clerk, Neon PostgreSQL, OpenAI, and Stripe credentials.
+   Copy `.env.example` into `.env` and fill out the Clerk, Neon PostgreSQL, OpenAI, Stripe, and R2 credentials.
 
 3. **Install Core Dependencies**:
    ```bash
@@ -394,7 +327,16 @@ To implement a complete, autonomous, multi-business Content Factory:
    npx prisma db push
    ```
 
-5. **Start Dev Server**:
+5. **Deploy Hostinger VPS Render Box**:
+   SSH into your Hostinger Ubuntu VPS (`srv1371866.hstgr.cloud`) and run:
+   ```bash
+   git clone https://github.com/Aryu55/SAAS-Instagram-DM-Automations.git /root/marketing-machine
+   cd /root/marketing-machine/marketing-machine/gpu-render-box
+   chmod +x setup-vps.sh
+   ./setup-vps.sh
+   ```
+
+6. **Start Dev Server**:
    ```bash
    npm run dev
    ```
