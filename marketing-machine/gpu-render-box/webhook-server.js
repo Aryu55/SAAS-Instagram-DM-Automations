@@ -286,7 +286,7 @@ app.post('/extract-audio', async (req, res) => {
 
 // ── TTS Synthesis Endpoint ────────────────────────────────────────────────────
 app.post('/tts', async (req, res) => {
-  const { text, language = 'en', voice = 'default', exaggeration = 0.5, cfgWeight = 0.5, business = 'default', jobId } = req.body || {};
+  const { text, language = 'en', voice = 'default', provider = 'auto', exaggeration = 0.5, cfgWeight = 0.5, business = 'default', jobId } = req.body || {};
 
   if (!text) {
     return res.status(400).json({ success: false, error: 'Missing text parameter' });
@@ -298,12 +298,21 @@ app.post('/tts', async (req, res) => {
   const localWavPath = path.join(tempDir, 'voice.wav');
 
   try {
-    console.log(`[TTS] Synthesizing audio for text: "${text.substring(0, 40)}..." (lang=${language})`);
-    const cmd = `python3 tts_chatterbox.py --text "${text.replace(/"/g, '\\"')}" --language "${language}" --voice "${voice}" --exaggeration ${exaggeration} --cfg_weight ${cfgWeight} --out "${localWavPath}"`;
-    execSync(cmd, { cwd: __dirname, stdio: 'inherit' });
+    const fishKey = process.env.FISH_AUDIO_API_KEY;
+    const useFishAudio = provider === 'fishaudio' || (provider === 'auto' && fishKey);
+
+    if (useFishAudio) {
+      console.log(`[TTS] Synthesizing audio via Fish Audio S2 Pro for text: "${text.substring(0, 40)}..."`);
+      const fishCmd = `python3 tts_fishaudio.py --text "${text.replace(/"/g, '\\"')}" --voice "${voice}" --out "${localWavPath}"`;
+      execSync(fishCmd, { cwd: __dirname, stdio: 'inherit' });
+    } else {
+      console.log(`[TTS] Synthesizing audio via Chatterbox TTS for text: "${text.substring(0, 40)}..." (lang=${language})`);
+      const cmd = `python3 tts_chatterbox.py --text "${text.replace(/"/g, '\\"')}" --language "${language}" --voice "${voice}" --exaggeration ${exaggeration} --cfg_weight ${cfgWeight} --out "${localWavPath}"`;
+      execSync(cmd, { cwd: __dirname, stdio: 'inherit' });
+    }
 
     if (!fs.existsSync(localWavPath) || fs.statSync(localWavPath).size < 1000) {
-      throw new Error("Chatterbox synthesis failed to produce audio");
+      throw new Error("TTS synthesis failed to produce audio output file");
     }
 
     const audioKey = `${jobFolder}/voice.wav`;

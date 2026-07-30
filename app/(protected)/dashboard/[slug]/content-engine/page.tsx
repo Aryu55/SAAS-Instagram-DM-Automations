@@ -1396,8 +1396,10 @@ export default function ContentEnginePage({ params }: Props) {
                     <select value={settingsForm.ttsProvider}
                       onChange={e => setSettingsForm(prev => ({ ...prev, ttsProvider: e.target.value }))}
                       className="form-input">
-                      <option value="auto">Auto (Aura/Bark)</option>
-                      <option value="aura">Workers AI Aura</option>
+                      <option value="auto">Auto (Fish Audio / Chatterbox)</option>
+                      <option value="fishaudio">Fish Audio S2 Pro (80+ Languages, SOTA)</option>
+                      <option value="chatterbox">Chatterbox Neural TTS (Local VPS)</option>
+                      <option value="aura">Workers AI Aura (English)</option>
                       <option value="bark">Bark via Replicate</option>
                     </select>
                   </FormField>
