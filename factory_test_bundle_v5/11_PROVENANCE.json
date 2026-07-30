@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-07-30T10:54:56.342Z",
+  "testBundleVersion": "5.0",
+  "strictMode": "1",
+  "cacheBypass": "1",
+  "outputs": [
+    {
+      "machine": "Machine 1: Faceless Explainer",
+      "file": "1_faceless_explainer/final_marketing_reel.mp4",
+      "sizeBytes": 6287630,
+      "sha256": "6bb68c4d2a0e752066d1a82b9e98f66aadaae38759e4c39223e667b6108e45f4",
+      "stillsExtracted": 2
+    },
+    {
+      "machine": "Machine 2: Podcast Clipper",
+      "file": "2_podcast_clipper/final_marketing_reel.mp4",
+      "sizeBytes": 1870558,
+      "sha256": "193ecfb3d0292b6d2a47950185681c981c64168240a89cd39b659bca6e23b15b",
+      "stillsExtracted": 5
+    },
+    {
+      "machine": "Machine 3: Raw Footage Edit",
+      "file": "3_raw_footage_edit/final_marketing_reel.mp4",
+      "sizeBytes": 5130606,
+      "sha256": "44485991899fb7a3f1d9c062d1d7c42f1a06edb77d8ecaef9ac360716dec3abf",
+      "stillsExtracted": 5
+    }
+  ]
+}

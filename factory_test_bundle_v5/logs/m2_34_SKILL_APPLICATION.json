@@ -1,0 +1,81 @@
+{
+  "skillId": "telusko-tech-announcement",
+  "timestamp": "2026-07-30T10:42:49.459Z",
+  "keys": [
+    {
+      "key": "subtitleFont",
+      "value": "Inter-Bold",
+      "status": "APPLIED",
+      "runtimeValue": "Inter-Bold"
+    },
+    {
+      "key": "subtitleFontSize",
+      "value": 42,
+      "status": "APPLIED",
+      "runtimeValue": 42
+    },
+    {
+      "key": "subtitlePrimaryColor",
+      "value": "#FFFFFF",
+      "status": "APPLIED",
+      "runtimeValue": "#FFFFFF"
+    },
+    {
+      "key": "subtitleHighlightColor",
+      "value": "#FFFFFF",
+      "status": "APPLIED",
+      "runtimeValue": "#FFFFFF"
+    },
+    {
+      "key": "subtitleY",
+      "value": 0.22,
+      "status": "APPLIED",
+      "runtimeValue": 0.22
+    },
+    {
+      "key": "maxWordsPerLine",
+      "value": 4,
+      "status": "APPLIED",
+      "runtimeValue": 4
+    },
+    {
+      "key": "subtitleUppercase",
+      "value": true,
+      "status": "APPLIED",
+      "runtimeValue": true
+    },
+    {
+      "key": "overlayStyle",
+      "value": "dark-translucent-card",
+      "status": "APPLIED",
+      "runtimeValue": "dark-translucent-card"
+    },
+    {
+      "key": "fps",
+      "value": 50,
+      "status": "APPLIED",
+      "runtimeValue": 50
+    },
+    {
+      "key": "cardBackgroundColor",
+      "value": "rgba(255, 255, 255, 0.12)",
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": "rgba(255, 255, 255, 0.12)"
+    },
+    {
+      "key": "cardBorderRadiusPx",
+      "value": 12,
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": 12
+    },
+    {
+      "key": "desaturationLevel",
+      "value": "heavy-slate-teal",
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": "heavy-slate-teal"
+    }
+  ],
+  "appliedCount": 9,
+  "totalKeysCount": 12,
+  "coveragePercent": 75
+}

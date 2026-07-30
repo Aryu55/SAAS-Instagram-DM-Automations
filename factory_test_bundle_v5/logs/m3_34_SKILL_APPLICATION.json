@@ -1,0 +1,213 @@
+{
+  "skillId": "pov-process-reveal",
+  "timestamp": "2026-07-30T10:52:30.119Z",
+  "keys": [
+    {
+      "key": "_comment",
+      "value": "pov-process-reveal EDITING_STYLE — see SKILL.md §5. Counterpart to retention-hardcut, NOT a variant. Camera motion is the rhythm engine here; do NOT metronome-cut this footage. subtitleHighlightColor maps to ASS SecondaryColour (pre-spoken colour) — set equal to primary because one-word captions have no un-spoken state.",
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": "pov-process-reveal EDITING_STYLE — see SKILL.md §5. Counterpart to retention-hardcut, NOT a variant. Camera motion is the rhythm engine here; do NOT metronome-cut this footage. subtitleHighlightColor maps to ASS SecondaryColour (pre-spoken colour) — set equal to primary because one-word captions have no un-spoken state."
+    },
+    {
+      "key": "resolution",
+      "value": "1080x1920",
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": "1080x1920"
+    },
+    {
+      "key": "fps",
+      "value": 60,
+      "status": "APPLIED",
+      "runtimeValue": 60
+    },
+    {
+      "key": "font",
+      "value": "Komika-Axis",
+      "status": "APPLIED",
+      "runtimeValue": "Komika-Axis"
+    },
+    {
+      "key": "subtitleStyle",
+      "value": "one-word",
+      "status": "APPLIED",
+      "runtimeValue": "one-word"
+    },
+    {
+      "key": "subtitlePrimaryColor",
+      "value": "#FFFFFF",
+      "status": "APPLIED",
+      "runtimeValue": "#FFFFFF"
+    },
+    {
+      "key": "subtitleHighlightColor",
+      "value": "#FFFFFF",
+      "status": "APPLIED",
+      "runtimeValue": "#FFFFFF"
+    },
+    {
+      "key": "subtitleY",
+      "value": 0.5,
+      "status": "APPLIED",
+      "runtimeValue": 0.5
+    },
+    {
+      "key": "subtitleFontSize",
+      "value": 120,
+      "status": "APPLIED",
+      "runtimeValue": 120
+    },
+    {
+      "key": "subtitleOutline",
+      "value": 12,
+      "status": "APPLIED",
+      "runtimeValue": 12
+    },
+    {
+      "key": "subtitleShadow",
+      "value": 0,
+      "status": "APPLIED",
+      "runtimeValue": 0
+    },
+    {
+      "key": "subtitleUppercase",
+      "value": true,
+      "status": "APPLIED",
+      "runtimeValue": true
+    },
+    {
+      "key": "maxWordsPerLine",
+      "value": 1,
+      "status": "APPLIED",
+      "runtimeValue": 1
+    },
+    {
+      "key": "background",
+      "value": {
+        "type": "source",
+        "color": "#000000"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": {
+        "type": "source",
+        "color": "#000000"
+      }
+    },
+    {
+      "key": "logo",
+      "value": {
+        "enabled": false
+      },
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": {
+        "enabled": false
+      }
+    },
+    {
+      "key": "music",
+      "value": {
+        "volume": 0
+      },
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": {
+        "volume": 0
+      }
+    },
+    {
+      "key": "hookCard",
+      "value": {
+        "enabled": false
+      },
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": {
+        "enabled": false
+      }
+    },
+    {
+      "key": "grade",
+      "value": {
+        "enabled": true,
+        "filter": "eq=brightness=0.02:contrast=1.06:saturation=0.92",
+        "note": "mild by design — payoff is texture (frost, chrome, rust). Do not crush."
+      },
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": {
+        "enabled": true,
+        "filter": "eq=brightness=0.02:contrast=1.06:saturation=0.92",
+        "note": "mild by design — payoff is texture (frost, chrome, rust). Do not crush."
+      }
+    },
+    {
+      "key": "cutRhythm",
+      "value": {
+        "medianShotSec": 2,
+        "observedBandSec": [
+          0.7,
+          5.06
+        ],
+        "cutsPerMin": 28.7,
+        "transition": "hard",
+        "cutOn": "action",
+        "metronomeCutting": false,
+        "note": "median is an OUTCOME not a target. Cuts land on gestures completing. Automated fixed-interval cutting breaks this style."
+      },
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": {
+        "medianShotSec": 2,
+        "observedBandSec": [
+          0.7,
+          5.06
+        ],
+        "cutsPerMin": 28.7,
+        "transition": "hard",
+        "cutOn": "action",
+        "metronomeCutting": false,
+        "note": "median is an OUTCOME not a target. Cuts land on gestures completing. Automated fixed-interval cutting breaks this style."
+      }
+    },
+    {
+      "key": "audio",
+      "value": {
+        "removeSilence": true,
+        "preserveDynamics": true,
+        "targetRangeDb": 15,
+        "compressToWall": false,
+        "processSoundIsContent": true,
+        "transitionSfx": false,
+        "note": "kill dead air by CUTTING, not by compressing. Reference has 15.1dB range and zero silence below -32dB."
+      },
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": {
+        "removeSilence": true,
+        "preserveDynamics": true,
+        "targetRangeDb": 15,
+        "compressToWall": false,
+        "processSoundIsContent": true,
+        "transitionSfx": false,
+        "note": "kill dead air by CUTTING, not by compressing. Reference has 15.1dB range and zero silence below -32dB."
+      }
+    },
+    {
+      "key": "openClose",
+      "value": {
+        "captionDelaySec": 0,
+        "openOnPresenter": true,
+        "hookPromisesVisiblePayoff": true,
+        "titleCard": false,
+        "outroCard": false,
+        "cta": false
+      },
+      "status": "NOT_IMPLEMENTED",
+      "runtimeValue": {
+        "captionDelaySec": 0,
+        "openOnPresenter": true,
+        "hookPromisesVisiblePayoff": true,
+        "titleCard": false,
+        "outroCard": false,
+        "cta": false
+      }
+    }
+  ],
+  "appliedCount": 11,
+  "totalKeysCount": 21,
+  "coveragePercent": 52.4
+}
