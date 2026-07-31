@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getPipelines } from "@/actions/pipelines";
 import { getSkills } from "@/actions/skills";
 import PipelineSelector from "./_components/pipeline-selector";
+import { OnboardingTour, TourStep } from "@/components/ui/OnboardingTour";
 import {
   getOrganizationConfig,
   updateOrganizationConfig,
@@ -716,7 +717,7 @@ export default function ContentEnginePage({ params }: Props) {
     <div className="flex flex-col gap-6 text-[#fafafa] min-h-screen pb-10 animate-fade-in-up">
 
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/[0.06] pb-5">
+      <div data-tour="header-brand" className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/[0.06] pb-5">
         <div>
           <span className="text-[11px] font-medium text-[#3b82f6] uppercase tracking-wider">Content Factory</span>
           <h2 className="text-2xl font-semibold tracking-tight flex items-center gap-2.5 mt-0.5">
@@ -730,14 +731,14 @@ export default function ContentEnginePage({ params }: Props) {
 
         <div className="flex items-center gap-3 mt-3 md:mt-0">
           {/* Quick stats */}
-          <div className="flex items-center gap-4 text-[11px] text-[#71717a] mr-2">
+          <div data-tour="quick-stats" className="flex items-center gap-4 text-[11px] text-[#71717a] mr-2">
             <span className="flex items-center gap-1"><Grid className="w-3 h-3" /> {unusedIdeas.length} ideas</span>
             <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {pendingCount} pending</span>
             <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> {publishedCount} published</span>
           </div>
 
           {activeTab === "ideas" && (
-            <button onClick={triggerBatchGenerate} disabled={actionLoading === "generate_ideas"}
+            <button data-tour="generate-ideas-btn" onClick={triggerBatchGenerate} disabled={actionLoading === "generate_ideas"}
               className="px-4 py-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-[13px] font-medium rounded-md transition-all duration-150 hover:-translate-y-px hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-50 flex items-center gap-2">
               {actionLoading === "generate_ideas" ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
               Generate Ideas
@@ -747,7 +748,7 @@ export default function ContentEnginePage({ params }: Props) {
       </div>
 
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-2">
-        <div className="flex-1">
+        <div data-tour="pipeline-selector" className="flex-1">
           <PipelineSelector
             pipelines={pipelines}
             selectedId={selectedPipelineId}
@@ -756,6 +757,7 @@ export default function ContentEnginePage({ params }: Props) {
         </div>
         <div className="flex items-center gap-3 mb-6 md:mb-0">
           <button
+            data-tour="quick-upload-btn"
             onClick={() => {
               if (!selectedPipelineId) {
                 toast.error("Select a pipeline first!");
@@ -774,7 +776,7 @@ export default function ContentEnginePage({ params }: Props) {
       {/* ── Tab Navigation ── */}
       <div className="flex gap-1 border-b border-white/[0.06] overflow-x-auto pb-px -mb-px">
         {tabs.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+          <button key={tab.id} data-tour={`tab-${tab.id}`} onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-medium border-b-2 transition-all duration-150 whitespace-nowrap ${
               activeTab === tab.id
                 ? "border-[#3b82f6] text-[#fafafa]"
@@ -1751,9 +1753,78 @@ export default function ContentEnginePage({ params }: Props) {
           </div>
         </div>
       )}
+
+      {/* ── Interactive Onboarding Product Tour ── */}
+      <OnboardingTour
+        steps={TOUR_STEPS}
+        activeTab={activeTab}
+        onTabChange={id => setActiveTab(id as TabId)}
+      />
     </div>
   );
 }
+
+const TOUR_STEPS: TourStep[] = [
+  {
+    target: "header-brand",
+    title: "Welcome to Content Factory",
+    description: "This is your AI-powered content engine. It automatically scripts, generates neural audio, and renders high-retention short-form video reels on autopilot.",
+    position: "bottom"
+  },
+  {
+    target: "quick-stats",
+    title: "Live Machine Stats",
+    description: "Track your available video ideas, pending approval queue, and published reels at a glance.",
+    position: "bottom"
+  },
+  {
+    target: "pipeline-selector",
+    title: "Choose Your Pipeline",
+    description: "Switch between Machine 1 (Faceless Explainer), Machine 2 (Podcast Clipper), and Machine 3 (Raw Footage Edit).",
+    position: "bottom"
+  },
+  {
+    target: "quick-upload-btn",
+    title: "Quick Upload & Clip",
+    description: "Upload any long video or podcast, and AI will analyze transcripts, extract viral clips, and fit editing skills automatically.",
+    position: "bottom"
+  },
+  {
+    target: "generate-ideas-btn",
+    title: "Generate AI Ideas",
+    description: "Click here anytime to generate fresh high-retention video concepts aligned with your brand pillars.",
+    tabId: "ideas",
+    position: "bottom"
+  },
+  {
+    target: "tab-ideas",
+    title: "Video Concepts Grid",
+    description: "Browse AI-generated video concepts. Click 'Render Video' on any card to kick off neural video rendering on your VPS.",
+    tabId: "ideas",
+    position: "bottom"
+  },
+  {
+    target: "tab-review",
+    title: "Approval Queue",
+    description: "Review rendered videos, preview karaoke captions, approve for social publishing, or reject with feedback.",
+    tabId: "review",
+    position: "bottom"
+  },
+  {
+    target: "tab-jobs",
+    title: "Render Pipeline Logs",
+    description: "Watch real-time rendering progress, inspect BullMQ queue status, and view raw VPS render logs.",
+    tabId: "jobs",
+    position: "bottom"
+  },
+  {
+    target: "tab-settings",
+    title: "Brand & Voice Settings",
+    description: "Customize your brand voice, select TTS providers (Fish Audio / Chatterbox), set target languages, and manage automation.",
+    tabId: "settings",
+    position: "bottom"
+  }
+];
 
 // ─────────────────────────────────────────
 // Sub-components
