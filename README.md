@@ -302,6 +302,18 @@ Janus implements a responsive, highly premium **Neo-Glassmorphic Tech Sanctuary*
 - **Audit Evidence Bundle (`factory_test_bundle_v5/`)**:
   - Complete evidence bundle containing rendered MP4 outputs, ASS subtitles, 15 frame stills, real SHA-256 digests (`11_PROVENANCE.json`), and self-audit reports (`20_SELF_AUDIT.md`, `21_SUMMARY.md`).
 
+### [Revision 10] — Open-Source Fish-Speech Integration, Interactive Product Tour & Master Admin Suite
+- **Open-Source Fish-Speech Engine Integration (`tts_fishaudio.py` & `setup_fish_speech_local.sh`)**:
+  - Dual-mode support for self-hosted open-source Fish-Speech server (`python -m tools.api_server --listen 0.0.0.0:8080`, 100% free, zero API key) and Fish Audio Cloud API (`https://api.fish.audio/v1/tts`).
+  - Automated fallback to Chatterbox TTS engine when local server or cloud key is not present.
+- **Interactive Onboarding Product Tour Component (`OnboardingTour.tsx`)**:
+  - 9-step guided spotlight product tour with non-overlapping focus cutout around target elements.
+  - Features step navigation (Next/Back/Skip), auto tab-switching, step progress bar, and `Don't show again` preference saved in `localStorage`.
+  - Permanent floating "Product Tour" pill button to restart the tour anytime.
+- **Master Admin Auth & Session Handling**:
+  - Configured middleware session check (`user_session` cookie) for strict dashboard route protection (`/dashboard/*`).
+  - Master Admin account configured for `mindmaxxxing@gmail.com` with bcrypt password security.
+
 ---
 
 ## 7. Installation & Local Setup
