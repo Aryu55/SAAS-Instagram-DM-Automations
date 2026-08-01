@@ -204,6 +204,79 @@ export default function LandingPage() {
         </div>
       </Reveal>
 
+      {/* ═══ Meet the Founder ═══ */}
+      <section className="relative z-10 px-4 sm:px-8 md:px-12 lg:px-20 py-16 sm:py-24">
+        <div className="max-w-4xl mx-auto rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-6 sm:p-10 md:p-12 relative overflow-hidden backdrop-blur-sm">
+          {/* Subtle accent orb */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/[0.05] rounded-full blur-3xl pointer-events-none" />
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative z-10">
+            {/* Photo Column */}
+            <Reveal className="md:col-span-5 flex flex-col items-center sm:items-start text-center sm:text-left">
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-500 to-blue-500 rounded-2xl opacity-40 blur transition-all duration-300 group-hover:opacity-70" />
+                <div className="relative w-48 sm:w-56 h-60 sm:h-64 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#18181b]">
+                  <img
+                    src="/aryu.jpg"
+                    alt="Aryu Panchal — Founder & Lead Architect"
+                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 px-3 py-1.5 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 text-center">
+                  <span className="text-[10px] font-mono font-medium text-emerald-400 uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Founder & Lead Architect
+                  </span>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Bio Column */}
+            <Reveal delay={0.1} className="md:col-span-7 flex flex-col items-center md:items-start text-center md:text-left">
+              <span className="text-[10px] sm:text-[11px] font-medium text-violet-400/80 uppercase tracking-[0.15em] mb-1.5">
+                Behind The Engine
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+                Aryu Panchal
+              </h3>
+              <p className="text-xs sm:text-[13px] font-medium text-[#a1a1aa] mb-4">
+                Founder & Chief Architect at Mindmaxing
+              </p>
+              
+              <p className="text-xs sm:text-[13px] text-[#71717a] leading-relaxed mb-6">
+                Engineered Janus AI from the ground up to redefine automated media production. Combining SOTA neural TTS, custom FFmpeg rendering pipelines, and serial BullMQ queue architectures into an autonomous content machine.
+              </p>
+
+              {/* Stats highlights */}
+              <div className="grid grid-cols-3 gap-3 w-full border-t border-white/[0.06] pt-5 mb-6 text-center">
+                <div>
+                  <div className="text-base sm:text-lg font-bold text-white" style={{ fontFamily: "var(--font-space-grotesk)" }}>3</div>
+                  <div className="text-[10px] text-[#52525b] uppercase tracking-wider mt-0.5">Machines</div>
+                </div>
+                <div className="border-x border-white/[0.06] px-2">
+                  <div className="text-base sm:text-lg font-bold text-violet-400" style={{ fontFamily: "var(--font-space-grotesk)" }}>100%</div>
+                  <div className="text-[10px] text-[#52525b] uppercase tracking-wider mt-0.5">Automated</div>
+                </div>
+                <div>
+                  <div className="text-base sm:text-lg font-bold text-emerald-400" style={{ fontFamily: "var(--font-space-grotesk)" }}>SOTA</div>
+                  <div className="text-[10px] text-[#52525b] uppercase tracking-wider mt-0.5">Neural TTS</div>
+                </div>
+              </div>
+
+              <a
+                href="https://mindmaxing.org/lp01"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-xs font-medium text-violet-400 hover:text-violet-300 transition-colors group"
+              >
+                <span>Learn more at mindmaxing.org</span>
+                <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+              </a>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
       {/* ═══ How It Works ═══ */}
       <section className="relative z-10 px-4 sm:px-8 md:px-12 lg:px-20 py-16 sm:py-24">
         <Reveal>
